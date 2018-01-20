@@ -20,7 +20,7 @@ class Bulk:
 
     def __init__(self, bulk_type, config_folder):
         # Create the config
-        self.config = self._read_config(os.path.join(config_folder, 'bulks.ini'))
+        self.config = self._read_config(os.path.join(config_folder, 'bulk.yaml'))
         # Read the credentials
         self.credentials = configparser.ConfigParser()
         self.credentials.read(os.path.join(config_folder, 'credentials.ini'))
@@ -51,8 +51,7 @@ class Bulk:
         df.columns = cols
         # Handle null values
         df = df.replace("\\N", np.nan)
-        print(df.head(5))
-        # Filter movies on type
+        # Apply the filters specified in the config
         filter = self.config.get(self.bulk_type).get('filter')
         if filter:
             for col in filter.keys():
@@ -92,11 +91,3 @@ class Bulk:
             except yaml.YAMLError as exc:
                 sys.exit(exc)
         return config
-
-
-if __name__ == '__main__':
-
-    bulk = Bulk('titles', 'config')
-    file = bulk.extract()
-    df = bulk.transform(file)
-    bulk.load(df)
