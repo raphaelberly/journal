@@ -1,16 +1,14 @@
 
 import os
-import sys
-import yaml
+import logging
 import requests
-import configparser
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from datetime import datetime
 from sqlalchemy import create_engine
+from lib.utils import read_config, read_credentials
 
-import logging
 
 logging.basicConfig(level='INFO')
 LOGGER = logging.getLogger()
@@ -19,11 +17,9 @@ LOGGER = logging.getLogger()
 class Bulk:
 
     def __init__(self, bulk_type, config_folder):
-        # Create the config
-        self.config = self._read_config(os.path.join(config_folder, 'bulk.yaml'))
-        # Read the credentials
-        self.credentials = configparser.ConfigParser()
-        self.credentials.read(os.path.join(config_folder, 'credentials.ini'))
+        # Load credentials and config
+        self.config = read_config(os.path.join(config_folder, 'bulk.yaml'))
+        self.credentials = read_credentials(os.path.join(config_folder, 'credentials.ini'))
         # Create other attributes
         self.bulk_type = bulk_type
         self.date = datetime.now().strftime('%Y%m%d')
@@ -82,12 +78,3 @@ class Bulk:
     @staticmethod
     def _chunker(seq, size):
         return (seq[pos:pos + size] for pos in range(0, len(seq), size))
-
-    @staticmethod
-    def _read_config(path):
-        with open(path, 'r') as stream:
-            try:
-                config = yaml.load(stream)
-            except yaml.YAMLError as exc:
-                sys.exit(exc)
-        return config
