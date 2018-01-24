@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import os
 import logging
@@ -7,19 +8,18 @@ import pandas as pd
 from tqdm import tqdm
 from datetime import datetime
 from sqlalchemy import create_engine
-from lib.utils import read_config, read_credentials
+from lib.base import Base
 
 
 logging.basicConfig(level='INFO')
 LOGGER = logging.getLogger()
 
 
-class Bulk:
+class Bulk(Base):
 
-    def __init__(self, bulk_type, config_folder):
-        # Load credentials and config
-        self.config = read_config(os.path.join(config_folder, 'bulk.yaml'))
-        self.credentials = read_credentials(os.path.join(config_folder, 'credentials.ini'))
+    def __init__(self, bulk_type, config_folder='config'):
+        # Instantiate base
+        Base.__init__(self, 'bulk', config_folder)
         # Create other attributes
         self.bulk_type = bulk_type
         self.date = datetime.now().strftime('%Y%m%d')
