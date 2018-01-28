@@ -14,7 +14,7 @@ class View(Base):
         Base.__init__(self, 'view', config_folder)
         # Get attributes
         self.input = self._clean_string(input)
-        self.id = self._get_movie_id()
+        self.ids = self._get_ids()
 
     @staticmethod
     def _clean_string(input):
@@ -26,11 +26,12 @@ class View(Base):
     def _get_movie_id(self):
         # Get the page link
         link = self.config.get('url_search').format("+".join(self.input.split(" ")))
-        result = self.get_detail(link, 'first_result')
-        return re.search(r'/(t{2}\d{7})/', result).group(1)
+        result = self.get_detail(link, 'first_results')
+        return re.search(r"/(t{2}\d{7})/", result).group(1)
 
-
-if __name__ == '__main__':
-
-    test = View('total recall', 'config')
-    print(test.id)
+    def _get_ids(self):
+        link = self.config.get('url_search').format("+".join(self.input.split(" ")))
+        print(link)
+        result = self.get_detail(link, 'first_results')
+        pattern = re.compile(r'/(t{2}\d{7})/')
+        return [pattern.search(item).group(1) for item in result]

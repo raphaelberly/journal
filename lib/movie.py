@@ -8,15 +8,14 @@ from lib.base import Base
 
 class Movie(Base):
 
-    def __init__(self, link, config_folder='config'):
+    def __init__(self, id, config_folder='config'):
         # Instantiate base
         Base.__init__(self, 'movie', config_folder)
         # Store the link parameter
-        self.link = link
-        # Compute the movie ID
-        self.id = re.search(r'/(t{2}\d{7})/', link).group(1)
+        self.id = id
+        self.link = self.config.get('url_title').format(self.id)
         # Get the movie details
-        self.title = self.get_detail(link, 'title')
-        self.year = self.get_detail(link, 'year')
-        self.poster = self.get_detail(link, 'poster')
-        self.director = self.get_detail(link, 'director')
+        self.title = self.get_detail(self.link, 'title')
+        self.year = self.get_detail(self.link, 'year')
+        self.poster = self.get_detail(self.link, 'poster')
+        self.director = self.get_detail(self.link, 'director')
