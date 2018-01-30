@@ -3,8 +3,8 @@
 import re
 import string
 import requests
-from bs4 import BeautifulSoup
 from lib.base import Base
+from bs4 import BeautifulSoup
 
 
 class View(Base):
@@ -14,6 +14,9 @@ class View(Base):
         Base.__init__(self, 'view', config_folder)
         # Get attributes
         self.input = self._clean_string(input)
+        self.link = self._get_link()
+        self.soup = BeautifulSoup(requests.get(self.link).content, "html.parser") \
+            .find(**self._format_params(self.config.get('content')))
         self.ids = self._get_ids()
 
     @staticmethod
@@ -23,15 +26,20 @@ class View(Base):
         aux = re.sub("\s\s+", " ", aux)
         return aux.lower().strip(' ')
 
-    def _get_movie_id(self):
-        # Get the page link
-        link = self.config.get('url_search').format("+".join(self.input.split(" ")))
-        result = self.get_detail(link, 'first_results')
-        return re.search(r"/(t{2}\d{7})/", result).group(1)
+    def _get_link(self):
+        return self.config.get('url_search').format("+".join(self.input.split(" ")))
 
     def _get_ids(self):
-        link = self.config.get('url_search').format("+".join(self.input.split(" ")))
-        print(link)
-        result = self.get_detail(link, 'first_results')
+        result = self.get_from_soup(self.soup, 'first_results')
         pattern = re.compile(r'/(t{2}\d{7})/')
         return [pattern.search(item).group(1) for item in result]
+
+
+if __name__ == '__main__':
+
+    test = View("star wars", 'config')
+
+    from lib.movie import Movie
+    for id in test.ids[:3]:
+        movie = Movie(id)
+        print('{0} ({1}), by {2}'.format(movie.get('title'), movie.get('year'), movie.get('director')))

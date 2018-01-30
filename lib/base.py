@@ -3,9 +3,8 @@
 import os
 import sys
 import yaml
-import requests
 import configparser
-from bs4 import BeautifulSoup
+from bs4 import Tag, NavigableString
 
 
 class Base:
@@ -16,8 +15,11 @@ class Base:
         self.config = self.read_config(os.path.join(config_folder, '{}.yaml'.format(base_type)))
         self.credentials = self.read_credentials(os.path.join(config_folder, 'credentials.ini'))
 
-    def get_detail(self, link, detail):
-        soup = BeautifulSoup(requests.get(link).content, "html.parser")
+    def get(self, item):
+        return self.__getattribute__(item)
+
+    def get_from_soup(self, base_soup, detail):
+        soup = self.clone(base_soup)
         detail = self.config['find'][detail]
         soup = self._remove(soup, detail.get('remove'))
         soup = self._find(soup, detail.get('params'))
@@ -25,7 +27,7 @@ class Base:
         soup = self._strip(soup, detail.get('strip'))
         return soup
 
-    def format_params(self, params):
+    def _format_params(self, params):
         assert 'tag' in params, "'tag' key must be in {}".format(params)
         if params.get('type') and params.get('key'):
             return {'name': params.get('tag'), 'attrs': {params.get('type'): params.get('key')}}
@@ -37,11 +39,11 @@ class Base:
             if type(remove) == str:
                 soup.find(remove).extract()
             if type(remove) == dict:
-                soup.find(**self.format_params(remove)).extract()
+                soup.find(**self._format_params(remove)).extract()
             if type(remove) == list:
                 # Remove each of the items of the to_remove list
                 for item in remove:
-                    soup.find(**self.format_params(item)).extract()
+                    soup.find(**self._format_params(item)).extract()
         return soup
 
     def _find(self, soup, params):
@@ -50,13 +52,13 @@ class Base:
                 output = []
                 for broth in soup:
                     if params.get('multiple'):
-                        [output.append(item) for item in broth.findAll(**self.format_params(params))]
-                    output.append(broth.find(**self.format_params(params)))
+                        [output.append(item) for item in broth.findAll(**self._format_params(params))]
+                    output.append(broth.find(**self._format_params(params)))
                 return output
             else:
                 if params.get('multiple'):
-                    return soup.findAll(**self.format_params(params))
-                return soup.find(**self.format_params(params))
+                    return soup.findAll(**self._format_params(params))
+                return soup.find(**self._format_params(params))
         if type(params) == list:
             if isinstance(soup, list):
                 output = []
@@ -113,3 +115,16 @@ class Base:
         credentials = configparser.ConfigParser()
         credentials.read(path)
         return credentials
+
+    def clone(self, el):
+        if isinstance(el, NavigableString):
+            return type(el)(el)
+        copy = Tag(None, el.builder, el.name, el.namespace, el.nsprefix)
+        # work around bug where there is no builder set
+        # https://bugs.launchpad.net/beautifulsoup/+bug/1307471
+        copy.attrs = dict(el.attrs)
+        for attr in ('can_be_empty_element', 'hidden'):
+            setattr(copy, attr, getattr(el, attr))
+        for child in el.contents:
+            copy.append(self.clone(child))
+        return copy
