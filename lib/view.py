@@ -37,9 +37,10 @@ class View(Base):
 
 if __name__ == '__main__':
 
-    test = View("star wars", 'config')
+    test = View("sing !", 'config')
 
     from lib.movie import Movie
     for id in test.ids[:3]:
         movie = Movie(id)
-        print('{0} ({1}), by {2}'.format(movie.get('title'), movie.get('year'), movie.get('director')))
+        print('{0} ({1}), by {2}, with {3}'.format(
+            movie.get('title'), movie.get('year'), ' and '.join(movie.get('director')), ', '.join(movie.get('actors'))))

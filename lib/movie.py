@@ -28,4 +28,5 @@ if __name__ == '__main__':
     print(test.get('year'))
     print(test.get('director'))
     print(test.get('poster'))
+    print(test.get('actors'))
 
