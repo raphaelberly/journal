@@ -42,5 +42,5 @@ if __name__ == '__main__':
     from lib.movie import Movie
     for id in test.ids[:3]:
         movie = Movie(id)
-        print('{0} ({1}), by {2}, with {3}'.format(
-            movie.get('title'), movie.get('year'), ' and '.join(movie.get('director')), ', '.join(movie.get('actors'))))
+        print('{0} ({1}), id "{2}", by {3}, with {4}'.format(
+            movie.get('title'), movie.get('year'), movie.get('id'), ' and '.join(movie.get('director')), ', '.join(movie.get('actors'))))
