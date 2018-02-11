@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Search for a movie</h1>
+    <form action="" method="post" class="form-search">
+        {{ form.hidden_tag() }}
+        {{ form.input(placeholder="I am looking for..") }}
+        <button type="submit">Search</button>
+        <i class="fa fa-search"></i>
+    </form>
+
+    {% if results %}
+        <h2>Which movie do you mean?</h2>
+        {% for result in results %}
+            <p>
+                {{ result.get('title') }} ({{ result.get('year') }})
+                by {{ ' and '.join(result.get('director')) }},
+                with {{ ', '.join(result.get('actors')) }}.
+            </p>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
