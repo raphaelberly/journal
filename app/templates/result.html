@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    {% if movie %}
+        <h2>STEP 1</h2>
+        <p>
+            {{ result.get('title') }} ({{ result.get('year') }})
+            by {{ ' and '.join(result.get('director')) }},
+            with {{ ', '.join(result.get('actors')) }}.
+        </p>
+        <form action="" method="post" class="form-single-result">
+            {{ singleResultForm.hidden_tag() }}
+            {{ singleResultForm.addButton(class_="form-single-result-add") }}
+            {{ singleResultForm.moreButton(class_="form-single-result-more") }}
+        </form>
+    {% endif %}
+
+{% endblock %}

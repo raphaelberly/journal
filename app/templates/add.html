@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h2>Your movie was successfully added</h2>
+    <p>
+        ID: {{movie_id}}
+    </p>
+    <form action="" method="post" class="form-single-result">
+        {{ resultsForm.hidden_tag() }}
+        {{ resultsForm.cancelButton(class_="form-single-result-more") }}
+        {{ resultsForm.backButton(class_="form-single-result-more") }}
+    </form>
+
+{% endblock %}
