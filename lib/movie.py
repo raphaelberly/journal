@@ -19,14 +19,21 @@ class Movie(Base):
         for item in self.config['find']:
             self.__setattr__(item, self.get_from_soup(self.soup, item))
 
+    def to_dict(self):
+        keys = list(self.config['find'].keys()) + self.config['to_dict']
+        output = {}
+        for key in keys:
+            output[key] = self.get(key)
+        return output
+
 
 if __name__ == '__main__':
 
-    test = Movie('tt3470600')
+    test = Movie('tt0449975')
 
     print(test.get('title'))
     print(test.get('year'))
     print(test.get('director'))
-    print(test.get('poster'))
     print(test.get('actors'))
+    print(test.get('poster'))
 
