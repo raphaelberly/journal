@@ -35,11 +35,19 @@ class Base:
             return {'name': params.get('tag')}
 
     def _remove(self, soup, remove):
+        if not soup:
+            return None
         if remove:
             if type(remove) == str:
-                soup.find(remove).extract()
+                try:
+                    soup.find(remove).extract()
+                except AttributeError:
+                    print('Warning: could not remove element: {}'.format(remove['key']))
             if type(remove) == dict:
-                soup.find(**self._format_params(remove)).extract()
+                try:
+                    soup.find(**self._format_params(remove)).extract()
+                except AttributeError:
+                    print('Warning: could not remove element: {}'.format(remove['key']))
             if type(remove) == list:
                 # Remove each of the items of the to_remove list
                 for item in remove:
@@ -47,6 +55,8 @@ class Base:
         return soup
 
     def _find(self, soup, params):
+        if not soup:
+            return None
         if type(params) == dict:
             if isinstance(soup, list):
                 output = []
@@ -76,6 +86,8 @@ class Base:
 
     @staticmethod
     def _format(input, format):
+        if not input:
+            return None
         if format:
             if format == 'text':
                 if isinstance(input, list):
@@ -95,6 +107,8 @@ class Base:
 
     @staticmethod
     def _strip(input, strip):
+        if not input:
+            return None
         if strip:
             if isinstance(input, list):
                 return [item.strip(strip) for item in input]
