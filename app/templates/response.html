@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    {% if response == 'existed' %}
+        <h2>Movie could not be added: already exists</h2>
+        <p>
+            ID: {{movie_id}}, grade: {{grade}}
+        </p>
+    {% endif %}
+
+    {% if response == 'added' %}
+        <h2>Your movie was successfully added</h2>
+        <p>
+            ID: {{movie_id}}
+        </p>
+        <form action="{{ url_for('respond', movie_id=movie_id) }}" method="post">
+            {{ resultsForm.hidden_tag() }}
+            {{ resultsForm.cancelButton() }}
+        </form>
+    {% endif %}
+
+    {% if response == 'cancelled' %}
+        <h2>Wops. Movie was removed.</h2>
+        <p>
+            ID: {{movie_id}}
+        </p>
+    {% endif %}
+
+{% endblock %}

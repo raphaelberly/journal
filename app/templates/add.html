@@ -2,14 +2,27 @@
 
 {% block content %}
 
-    <h2>Your movie was successfully added</h2>
+    <h2>You want to add that movie?</h2>
     <p>
         ID: {{movie_id}}
     </p>
-    <form action="" method="post" class="form-single-result">
-        {{ resultsForm.hidden_tag() }}
-        {{ resultsForm.cancelButton(class_="form-single-result-more") }}
-        {{ resultsForm.backButton(class_="form-single-result-more") }}
+    <form action="{{ url_for('respond', movie_id=movie_id) }}" method="post">
+        {{ addForm.hidden_tag() }}
+        <div class="slidecontainer">
+            <h2><span id="gradeValue"></span> / 10</h2>
+            <input id="gradeRange" name="gradeRange" type="range" min="0" max="10" value="6.5" step="0.5" class="slider">
+        </div>
+        {{ addForm.addButton() }}
     </form>
+
+    <script type = "text/javascript">
+            var slider = document.getElementById("gradeRange");
+            var output = document.getElementById("gradeValue");
+            output.innerHTML = slider.value;
+
+            slider.oninput = function() {
+                output.innerHTML = this.value;
+            }
+    </script>
 
 {% endblock %}

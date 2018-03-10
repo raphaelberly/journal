@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
-import yaml
-import configparser
+from lib.tools import *
 from bs4 import Tag, NavigableString
 
 
@@ -12,8 +10,8 @@ class Base:
     def __init__(self, base_type, config_folder):
 
         self._base_type = base_type
-        self.config = self.read_config(os.path.join(config_folder, '{}.yaml'.format(base_type)))
-        self.credentials = self.read_credentials(os.path.join(config_folder, 'credentials.ini'))
+        self.config = read_config(os.path.join(config_folder, '{}.yaml'.format(base_type)))
+        self.credentials = read_credentials(os.path.join(config_folder, 'credentials.ini'))
 
     def get(self, item):
         return self.__getattribute__(item)
@@ -114,21 +112,6 @@ class Base:
                 return [item.strip(strip) for item in input]
             return input.strip(strip)
         return input
-
-    @staticmethod
-    def read_config(path):
-        with open(path, 'r') as stream:
-            try:
-                config = yaml.load(stream)
-            except yaml.YAMLError as exc:
-                sys.exit(exc)
-        return config
-
-    @staticmethod
-    def read_credentials(path):
-        credentials = configparser.ConfigParser()
-        credentials.read(path)
-        return credentials
 
     def clone(self, el):
         if isinstance(el, NavigableString):

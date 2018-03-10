@@ -2,6 +2,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
+from wtforms.fields.html5 import DecimalRangeField
 
 
 class SearchForm(FlaskForm):
@@ -15,7 +16,13 @@ class MoreResultForm(FlaskForm):
     moreButton = SubmitField('More movies...')
 
 
+class AddForm(FlaskForm):
+
+    gradeRange = DecimalRangeField()
+    addButton = SubmitField('Add Movie')
+
+
 class ResultsForm(FlaskForm):
+
     cancelButton = SubmitField('Cancel')
-    backButton = SubmitField('Back to search')
 
