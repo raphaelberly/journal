@@ -4,7 +4,7 @@ import re
 import string
 import requests
 from lib.base import Base
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 
 
 class View(Base):
@@ -15,8 +15,8 @@ class View(Base):
         # Get attributes
         self.input = self._clean_string(input)
         self.link = self._get_link()
-        self.soup = BeautifulSoup(requests.get(self.link).content, "html.parser") \
-            .find(**self._format_params(self.config.get('content')))
+        strainer = SoupStrainer(**self._format_params(self.config.get('content')))
+        self.soup = BeautifulSoup(requests.get(self.link).content, 'html.parser', parse_only=strainer)
         self.ids = self._get_ids()
 
     @staticmethod
@@ -37,10 +37,14 @@ class View(Base):
 
 if __name__ == '__main__':
 
+    from time import time
+    start = time()
     test = View("sing !", 'config')
 
     from lib.movie import Movie
-    for id in test.ids[:3]:
+    for id in test.ids[:10]:
         movie = Movie(id)
         print('{0} ({1}), id "{2}", by {3}, with {4}'.format(
             movie.get('title'), movie.get('year'), movie.get('id'), ' and '.join(movie.get('director')), ', '.join(movie.get('actors'))))
+
+    print('TOOK: {} s'.format(time()-start))

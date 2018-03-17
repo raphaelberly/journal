@@ -2,7 +2,7 @@
 
 import requests
 from lib.base import Base
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 
 
 class Movie(Base):
@@ -13,8 +13,8 @@ class Movie(Base):
         # Store the link parameter
         self.id = id
         self.link = self.config.get('url_title').format(self.id)
-        self.soup = BeautifulSoup(requests.get(self.link).content, "html.parser") \
-            .find(**self._format_params(self.config.get('content')))
+        strainer = SoupStrainer(**self._format_params(self.config.get('content')))
+        self.soup = BeautifulSoup(requests.get(self.link).content, "html.parser", parse_only=strainer)
         # Get the movie details
         for item in self.config['find']:
             self.__setattr__(item, self.get_from_soup(self.soup, item))
@@ -29,7 +29,11 @@ class Movie(Base):
 
 if __name__ == '__main__':
 
+    from time import time
+    start = time()
+
     test = Movie('tt0449975')
+    print('TOOK: {} s'.format(time()-start))
 
     print(test.get('title'))
     print(test.get('year'))
