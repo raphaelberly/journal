@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+# PATCH FOR PANDAS TO BULK INSERT
+# Source: https://stackoverflow.com/questions/40119805/pandas-to-sql-with-sqlalchemy-and-psql-never-finishes
+from pandas.io.sql import SQLTable
+def _execute_insert(self, conn, keys, data_iter):
+    data = [dict((k, v) for k, v in zip(keys, row)) for row in data_iter]
+    conn.execute(self.insert_statement().values(data))
+SQLTable._execute_insert = _execute_insert
+
 import os
 import logging
 import requests
