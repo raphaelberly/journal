@@ -5,6 +5,7 @@
 .slider {
     -webkit-appearance: none;
     width: 100%;
+    max-width: 325px;
     height: 5px;
     border-radius: 5px;
     background: #d3d3d3;

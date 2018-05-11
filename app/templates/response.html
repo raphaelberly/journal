@@ -16,7 +16,7 @@
         </p>
         <form action="{{ url_for('respond', movie_id=movie_id) }}" method="post">
             {{ resultsForm.hidden_tag() }}
-            {{ resultsForm.cancelButton() }}
+            {{ resultsForm.cancelButton(class="styled-button") }}
         </form>
     {% endif %}
 

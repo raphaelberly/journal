@@ -13,7 +13,7 @@ class SearchForm(FlaskForm):
 
 class MoreResultForm(FlaskForm):
 
-    moreButton = SubmitField('More movies...')
+    moreButton = SubmitField('More results...')
 
 
 class AddForm(FlaskForm):

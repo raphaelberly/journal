@@ -4,7 +4,7 @@
 
     {% if mode %}
         <h2>Best result{{ "s" if mode == "multiple" else "" }} for "{{ session['input'] }}":</h2>
-        <table>
+        <table class="styled-table" align="center">
         {% for movie in session['movies'] %}
             {% if None not in movie.values() %}
                 <tr>
@@ -17,16 +17,16 @@
                         With {{ ', '.join(movie.get('actors')) }}
                     </td>
                     <td>
-                        <a href="{{ url_for('add', movie_id=movie.get('id')) }}">Add movie</a>
+                        <input type="button" class="styled-button" onclick="location.href='{{ url_for('add', movie_id=movie.get('id')) }}';" value="Add movie" />
                     </td>
                 </tr>
             {% endif %}
         {% endfor %}
         </table>
         {% if mode == 'single' %}
-            <form action="" method="post" class="form-single-result">
+            <form action="" method="post">
                 {{ singleResultForm.hidden_tag() }}
-                {{ singleResultForm.moreButton(class_="form-single-result-more") }}
+                {{ singleResultForm.moreButton(class="styled-button") }}
             </form>
         {% endif %}
     {% endif %}
