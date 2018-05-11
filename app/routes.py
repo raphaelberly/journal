@@ -1,5 +1,6 @@
 
 from app import app
+from app import db
 from flask import render_template, redirect, url_for, session, request
 from app.forms import *
 from app.models import Record
@@ -66,13 +67,21 @@ def respond(movie_id):
                                        movie_id=movie_id, grade=record.grade, response='existed')
             # Else, add movie to db and return 'added' response page
             grade = float(dict(request.form)['gradeRange'][0])
-            print('ADDING MOVIE {0} HERE. GRADE: {1}'.format(movie_id, grade))
+            # Add the movie to the database
+            record = Record(movie=movie_id, grade=grade)
+            db.session.add(record)
+            db.session.commit()
+            # Render response template
             return render_template('response.html', resultsForm=resultsForm, searchForm=searchForm, movie_id=movie_id,
                                    grade=grade, response='added')
         # If cancel button was clicked
         if 'cancelButton' in request.form:
-            # Remove movie from db and return 'cancelled' response page
-            print('CANCELLING')
+            # Remove movie from db
+            to_delete = Record.query.filter_by(movie=movie_id).all()
+            for record in to_delete:
+                db.session.delete(record)
+            db.session.commit()
+            # Render 'cancelled' response page
             return render_template('response.html', searchForm=searchForm, movie_id=movie_id, response='cancelled')
     # Else, redirect to search page
     return redirect(url_for('search'))
