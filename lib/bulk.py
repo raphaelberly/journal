@@ -86,13 +86,3 @@ class Bulk(Base):
     @staticmethod
     def _chunker(seq, size):
         return (seq[pos:pos + size] for pos in range(0, len(seq), size))
-
-
-if __name__ == '__main__':
-
-    for type in ['ratings', 'titles', 'names']:
-
-        bulk = Bulk(type)
-        file = bulk.extract()
-        df = bulk.transform(file)
-        bulk.load(df)
