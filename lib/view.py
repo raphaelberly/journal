@@ -3,7 +3,7 @@
 import re
 import string
 import requests
-from lib.base import Base
+from .base import Base
 from bs4 import BeautifulSoup, SoupStrainer
 
 
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     start = time()
     test = View("sing !", 'config')
 
-    from lib.movie import Movie
+    from .movie import Movie
     for id in test.ids[:10]:
         movie = Movie(id)
         print('{0} ({1}), id "{2}", by {3}, with {4}'.format(

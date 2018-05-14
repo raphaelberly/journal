@@ -16,7 +16,7 @@ import pandas as pd
 from tqdm import tqdm
 from datetime import datetime
 from sqlalchemy import create_engine
-from lib.base import Base
+from .base import Base
 
 
 logging.basicConfig(level='INFO')

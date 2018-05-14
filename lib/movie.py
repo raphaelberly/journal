@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import requests
-from lib.base import Base
+from .base import Base
 from bs4 import BeautifulSoup, SoupStrainer
 
 

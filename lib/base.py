@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from lib.tools import *
+from .tools import *
 from bs4 import Tag, NavigableString
 
 
