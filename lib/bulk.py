@@ -43,25 +43,28 @@ class Bulk(Base):
         # Return file path
         return file
 
-    def transform(self, file):
-        LOGGER.info('Transforming {}...'.format(self.bulk_type))
-        # Create a pandas data frame
-        df = pd.read_csv(file, compression='gzip', sep='\t')
+    def _transform_chunk(self, chunk):
         # Keep only useful columns
         cols = list(self.config.get(self.bulk_type).get('columns').keys())
-        df = df[cols]
+        chunk = chunk[cols]
         # Rename columns
         cols = [self.config.get(self.bulk_type).get('columns').get(item) for item in cols]
-        df.columns = cols
+        chunk.columns = cols
         # Handle null values
-        df = df.replace("\\N", np.nan)
+        chunk = chunk.replace("\\N", np.nan)
         # Apply the filters specified in the config
         filter = self.config.get(self.bulk_type).get('filter')
         if filter:
             for col in filter.keys():
-                df = df.loc[df[col].isin(filter.get(col))]
+                chunk = chunk.loc[chunk[col].isin(filter.get(col))]
         # Return resulting dataset
-        return df
+        return chunk
+
+    def transform(self, file):
+        LOGGER.info('Transforming {}...'.format(self.bulk_type))
+        # Create a pandas data frame by chunks
+        reader = pd.read_csv(file, compression='gzip', sep='\t', chunksize=10**5)
+        return pd.concat(self._transform_chunk(chunk) for chunk in reader)
 
     def load(self, df):
         LOGGER.info('Loading {} to PiDB...'.format(self.bulk_type))
