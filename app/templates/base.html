@@ -2,6 +2,8 @@
     <head>
         <title>My Movie Journal</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="apple-touch-icon" href="/static/images/custom_icon.png">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/form-search.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
@@ -15,9 +17,7 @@
             <button type="submit">Search</button>
             <i class="fa fa-search"></i>
         </form>
-
         {% block content %}
         {% endblock %}
-
     </body>
 </html>
