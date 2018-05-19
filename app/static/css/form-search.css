@@ -9,13 +9,15 @@
     width: 100%;
     max-width: 220px;
     box-sizing: border-box;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
     border-bottom-left-radius: 2px;
     border-top-left-radius: 2px;
     background-color:  #ffffff;
     box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
     padding: 14px 15px 14px 20px;
     border: 1px solid #b6c3cd;;
-    border-right: 0;
+
     color:#4E565C;
     outline: none;
     -webkit-appearance: none;
@@ -24,6 +26,8 @@
 }
 
 .form-search button{
+    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0px;
     border-bottom-right-radius: 2px;
     border-top-right-radius: 2px;
     background-color:  #6caee0;
