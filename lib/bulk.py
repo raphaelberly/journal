@@ -8,13 +8,11 @@ def _execute_insert(self, conn, keys, data_iter):
     conn.execute(self.insert_statement().values(data))
 SQLTable._execute_insert = _execute_insert
 
-import os
 import logging
 import requests
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from datetime import datetime
 from sqlalchemy import create_engine
 from .base import Base
 
@@ -30,12 +28,11 @@ class Bulk(Base):
         Base.__init__(self, 'bulk', config_folder)
         # Create other attributes
         self.bulk_type = bulk_type
-        self.date = datetime.now().strftime('%Y%m%d')
 
     def extract(self):
         LOGGER.info('Downloading {}...'.format(self.bulk_type))
         # Get file name
-        file = self.config.get('file_path').format(self.bulk_type, self.date)
+        file = self.config.get('file_path').format(self.bulk_type)
         # Execute the request and store result on disk
         data = requests.get(self.config.get(self.bulk_type).get('url'))
         with open(file, 'wb') as f:
