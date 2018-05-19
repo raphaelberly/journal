@@ -13,6 +13,8 @@ body{
 
 .styled-button {
 
+    -webkit-appearance: none;
+
     font: bold 15px Trebuchet MS;
     text-align: center;
 
