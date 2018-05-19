@@ -14,7 +14,7 @@ class Movie(Base):
         self.id = id
         self.link = self.config.get('url_title').format(self.id)
         strainer = SoupStrainer(**self._format_params(self.config.get('content')))
-        self.soup = BeautifulSoup(requests.get(self.link).content, "html.parser", parse_only=strainer)
+        self.soup = BeautifulSoup(requests.get(self.link).content, "lxml", parse_only=strainer)
         # Get the movie details
         for item in self.config['find']:
             self.__setattr__(item, self.get_from_soup(self.soup, item))
