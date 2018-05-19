@@ -25,19 +25,3 @@ class Movie(Base):
         for key in keys:
             output[key] = self.get(key)
         return output
-
-
-if __name__ == '__main__':
-
-    from time import time
-    start = time()
-
-    test = Movie('tt0449975')
-    print('TOOK: {} s'.format(time()-start))
-
-    print(test.get('title'))
-    print(test.get('year'))
-    print(test.get('director'))
-    print(test.get('actors'))
-    print(test.get('poster'))
-
