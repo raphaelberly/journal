@@ -4,22 +4,24 @@
 
     {% if mode %}
         <h2>Best result{{ "s" if mode == "multiple" else "" }} for "{{ session['input'] }}":</h2>
-        <table class="styled-table" align="center">
+        <table align="center" width="100%">
         {% for movie in session['movies'] %}
             {% if None not in movie.values() %}
-                <tr>
-                    <td>
-                        <img src="{{ movie.get('poster') }}" width="40px">
-                    </td>
-                    <td>
-                        {{ movie.get('title') }} ({{ movie.get('year') }})<br/>
-                        By {{ ' and '.join(movie.get('director')) }}<br/>
-                        With {{ ', '.join(movie.get('actors')) }}
-                    </td>
-                    <td>
-                        <input type="button" class="styled-button" onclick="location.href='{{ url_for('add', movie_id=movie.get('id')) }}';" value="Add movie" />
-                    </td>
-                </tr>
+            <tr><td>
+                    <table class="styled-table">
+                        <tr><td>
+                            <img src="{{ movie.get('poster') }}" class="styled-poster">
+                        </td></tr>
+                        <tr><td>
+                            {{ movie.get('title') }} ({{ movie.get('year') }})<br/>
+                            By {{ ' and '.join(movie.get('director')) }}<br/>
+                            With {{ ', '.join(movie.get('actors')) }}
+                        </td></tr>
+                        <tr><td>
+                            <input type="button" class="styled-button" onclick="location.href='{{ url_for('add', movie_id=movie.get('id')) }}';" value="Add movie" />
+                        </td></tr>
+                    </table>
+            </td></tr>
             {% endif %}
         {% endfor %}
         </table>
