@@ -3,7 +3,6 @@
 {% block content %}
 
     {% if mode %}
-        <h2>Best result{{ "s" if mode == "multiple" else "" }} for "{{ session['input'] }}":</h2>
         <table align="center" width="100%">
         {% for movie in session['movies'] %}
             {% if None not in movie.values() %}
