@@ -16,16 +16,15 @@ body{
     -webkit-appearance: none;
 
     font: bold 15px Trebuchet MS;
-    text-align: center;
 
     border-radius: 2px;
-
     background-color:  #6caee0;
     color: #ffffff;
-    padding: 15px 22px;
+    padding: 13px 20px;
     cursor: pointer;
     border: none;
     outline: none;
+    border: 1px solid #6caee0;
 }
 
 .styled-button-2 {
@@ -33,13 +32,11 @@ body{
     -webkit-appearance: none;
 
     font: 15px Trebuchet MS;
-    text-align: center;
 
     border-radius: 2px;
-
     background-color:  #ffffff;
     color: #6caee0;
-    padding: 15px 22px;
+    padding: 13px 20px;
     cursor: pointer;
     outline: none;
     border: 1px solid #6caee0;
@@ -47,7 +44,7 @@ body{
 
 .styled-poster {
 
-    width: 65%;
+    width: 70%;
     max-width: 200px;
 
 }

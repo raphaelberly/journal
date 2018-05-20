@@ -13,14 +13,13 @@ class SearchForm(FlaskForm):
 
 class MoreResultForm(FlaskForm):
 
-    moreButton = SubmitField('More results...')
+    moreButton = SubmitField('Find more')
 
 
 class AddForm(FlaskForm):
 
     gradeRange = DecimalRangeField()
-    addButton = SubmitField('Add Movie')
-
+    addButton = SubmitField('Add movie')
 
 class ResultsForm(FlaskForm):
 

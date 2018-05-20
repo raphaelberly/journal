@@ -17,19 +17,25 @@
                             With {{ ', '.join(movie.get('actors')) }}
                         </td></tr>
                         <tr><td>
-                            <input type="button" class="styled-button-2" onclick="location.href='{{ url_for('add', movie_id=movie.get('id')) }}';" value="Add movie" />
+                            <table width="100%"><tr>
+                                <td align="{{'right' if mode == 'single' else 'center'}}" valign="top">
+                                    <input type="button" class="styled-button-2" onclick="location.href='{{ url_for('add', movie_id=movie.get('id')) }}';" value="Add movie" />
+                                </td>
+                                {% if mode == 'single' %}
+                                    <td align="left" valign="top">
+                                        <form action="" method="post">
+                                            {{ singleResultForm.hidden_tag() }}
+                                            {{ singleResultForm.moreButton(class="styled-button") }}
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr></table>
                         </td></tr>
                     </table>
             </td></tr>
             {% endif %}
         {% endfor %}
         </table>
-        {% if mode == 'single' %}
-            <form action="" method="post">
-                {{ singleResultForm.hidden_tag() }}
-                {{ singleResultForm.moreButton(class="styled-button") }}
-            </form>
-        {% endif %}
     {% endif %}
 
 {% endblock %}
