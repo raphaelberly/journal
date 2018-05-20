@@ -1,7 +1,7 @@
 
 body{
     text-align: center;
-    margin-top: 40px;
+    margin-top: 35px;
     margin-bottom: 50px;
     margin-left: 5px;
     margin-right: 5px;
@@ -18,18 +18,31 @@ body{
     font: bold 15px Trebuchet MS;
     text-align: center;
 
-    border-bottom-right-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-left-radius: 2px;
-    border-top-left-radius: 2px;
+    border-radius: 2px;
 
     background-color:  #6caee0;
-    box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
     color: #ffffff;
     padding: 15px 22px;
     cursor: pointer;
     border: none;
     outline: none;
+}
+
+.styled-button-2 {
+
+    -webkit-appearance: none;
+
+    font: 15px Trebuchet MS;
+    text-align: center;
+
+    border-radius: 2px;
+
+    background-color:  #ffffff;
+    color: #6caee0;
+    padding: 15px 22px;
+    cursor: pointer;
+    outline: none;
+    border: 1px solid #6caee0;
 }
 
 .styled-poster {
@@ -44,8 +57,8 @@ body{
     text-align: center;
     width: 100%;
 
-    margin-top: 10px;
-    margin-bottom: 15px;
+    margin-top: 5px;
+    margin-bottom: 10px;
 
     padding-left: 30px;
     padding-right: 30px;
@@ -54,6 +67,6 @@ body{
 
 .styled-table td{
 
-    padding-bottom: 10px;
+    padding-bottom: 8px;
 
 }
