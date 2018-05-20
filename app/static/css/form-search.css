@@ -8,15 +8,10 @@
 .form-search input{
     width: 100%;
     max-width: 220px;
-    box-sizing: border-box;
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-    border-bottom-left-radius: 2px;
-    border-top-left-radius: 2px;
+    border-radius: 2px;
     background-color:  #ffffff;
     padding: 14px 15px 14px 20px;
     border: 1px solid #6caee0;
-    border-right: none;
 
     color:#4E565C;
     outline: none;
@@ -26,14 +21,14 @@
 }
 
 .form-search button{
-    border-bottom-left-radius: 0px;
-    border-top-left-radius: 0px;
+    border-bottom-left-radius: 1px;
+    border-top-left-radius: 1px;
     border-bottom-right-radius: 2px;
     border-top-right-radius: 2px;
     background-color:  #6caee0;
     color: #ffffff;
     padding: 15px 22px;
-    margin-left: -5px;
+    margin-left: -6px;
     cursor: pointer;
     border: none;
     outline: none;
