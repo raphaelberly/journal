@@ -1,0 +1,73 @@
+
+nb_results: 5
+
+url:
+  root: https://www.imdb.com/search/title?title={search_string}&title_type={types_string}&num_votes={min_votes},&count=50
+  types:
+    - feature
+    - tv_movie
+    - tv_special
+    - documentary
+    - short
+    - video
+    - tv_short
+  min_votes: 1000
+
+images:
+  smaller: '._V1_UX67_CR0,0,67,98_AL_.jpg'
+  bigger: '._V1_UX182_CR0,0,182,268_AL_.jpg'
+
+
+content:
+  tag: div
+  type: id
+  key: main
+
+find:
+  rows:
+    params:
+      - tag: div
+        type: class
+        key: mode-advanced
+        multiple: True
+
+  title:
+    params:
+      - tag: h3
+      - tag: a
+    format: text
+
+  id:
+    params:
+      - tag: h3
+      - tag: a
+    format: href
+
+  genre:
+    params:
+      - tag: span
+        type: class
+        key: genre
+    format: text
+    strip: " ,\t\n\r\xa0"
+
+  year:
+    params:
+      - tag: span
+        type: class
+        key: lister-item-year
+    format: text
+
+  staff:
+    params:
+      - tag: div
+        type: class
+        key: lister-item-content
+
+  image:
+    params:
+      - tag: div
+        type: class
+        key: lister-item-image
+      - tag: img
+    format: loadlate

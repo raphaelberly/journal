@@ -1,0 +1,60 @@
+
+url_title: http://www.imdb.com/title/{}/
+
+content:
+  tag: div
+  type: id
+  key: main_top
+
+find:
+  title:
+    params:
+      tag: h1
+      type: itemprop
+      key: name
+      href:
+
+    remove:
+      tag: span
+      type: id
+      key: titleYear
+    format: text
+    strip: " ,\t\n\r\xa0"
+  year:
+    params:
+      - tag: span
+        type: id
+        key: titleYear
+      - tag: a
+    format: text
+  poster:
+    params:
+      - tag: div
+        type: class
+        key: poster
+      - tag: img
+    format: image
+  director:
+    params:
+      - tag: span
+        type: itemprop
+        key: director
+        multiple: True
+      - tag: a
+    format: text
+    strip: " ,\t\n\r\xa0"
+  actors:
+    params:
+      - tag: div
+        type: class
+        key: plot_summary_wrapper
+      - tag: span
+        type: itemprop
+        key: actors
+        multiple: True
+    format: text
+    strip: " ,\t\n\r\xa0"
+
+to_dict:
+  # Inherits what is in "find" and adds
+  - id

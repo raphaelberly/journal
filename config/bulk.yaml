@@ -1,0 +1,35 @@
+
+file_path: tmp/{0}.tsv.gz
+
+titles:
+  url: https://datasets.imdbws.com/title.basics.tsv.gz
+  columns:
+    tconst: movie
+    titleType: type
+    primaryTitle: title
+    startYear: year
+    runtimeMinutes: duration
+    genres: genres
+  filter:
+    type:
+      - short
+      - movie
+      - tvMovie
+      - tvShort
+      - tvSpecial
+      - video
+
+ratings:
+  url: https://datasets.imdbws.com/title.ratings.tsv.gz
+  columns:
+    tconst: movie
+    averageRating: rating
+    numVotes: votes
+
+names:
+  url: https://datasets.imdbws.com/name.basics.tsv.gz
+  columns:
+    nconst: actor
+    primaryName: name
+    knownForTitles: major_titles
+
