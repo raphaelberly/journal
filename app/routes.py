@@ -4,8 +4,7 @@ from app import db
 from flask import render_template, redirect, url_for, session, request
 from app.forms import *
 from app.models import Record
-from lib.movie import Movie
-from lib.view import View
+from lib.search import Search
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -17,19 +16,23 @@ def search():
     # If searchForm is submitted
     if searchForm.validate_on_submit():
         # Get first movie result based on search input
-        view = View(searchForm.input.data, 'config')
-        session['input'] = searchForm.input.data
-        session['ids'] = view.ids
-        movie = Movie(view.ids[0])
-        session['movies'] = [movie.to_dict()]
-        # Render page
-        return render_template('search.html', mode='single', searchForm=searchForm, singleResultForm=moreResultForm)
+        results = Search(searchForm.input.data, 'config').get_results()
+        if results:
+            session['results'] = results
+            session['ids'] = [result['id'] for result in session['results']]
+            session['movies'] = [session['results'][0]]
+            # Render page
+            return render_template('search.html', mode='single', searchForm=searchForm, singleResultForm=moreResultForm)
+        else:
+            session['results'] = None
+            session['ids'] = None
+            session['movies'] = None
+            return render_template('search.html', mode='none', searchForm=searchForm)
     if moreResultForm.validate_on_submit():
         # If moreButton was clicked
         if moreResultForm.moreButton.data:
-            # Add the 4 next movie results based on search input
-            for id in session.get('ids')[1:5]:
-                session['movies'].append(Movie(id).to_dict())
+            # Add the next movie results based on search input
+            session['movies'] = session['results']
             # Render page
             return render_template('search.html', mode='multiple', searchForm=searchForm)
     # Else, render a page with only the searchForm

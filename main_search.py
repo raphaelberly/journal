@@ -1,7 +1,7 @@
 
 import argparse
 from time import time
-from lib.movie import Movie
+from lib.search import Search
 
 
 # Create argument parser
@@ -12,11 +12,6 @@ parser.add_argument('--movie', '-m', required=True, help='IMDb identifier of the
 args = parser.parse_args()
 
 start = time()
-test = Movie(args.movie)
-print('TOOK: {} s'.format(time()-start))
-
-print(test.get('title'))
-print(test.get('year'))
-print(test.get('director'))
-print(test.get('actors'))
-print(test.get('poster'))
+search = Search(args.movie).get_results()
+print(search)
+print('CRAWLING TOOK: {} SECONDS'.format(time() - start))

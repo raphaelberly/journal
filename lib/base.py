@@ -91,16 +91,10 @@ class Base:
                 if isinstance(input, list):
                     return [item.text for item in input]
                 return input.text
-            elif format == 'image':
-                if isinstance(input, list):
-                    return [item['src'] for item in input]
-                return input['src']
-            elif format == 'link':
-                if isinstance(input, list):
-                    return [item['href'] for item in input]
-                return input['href']
             else:
-                raise Exception('Unknown output type: {}'.format(format))
+                if isinstance(input, list):
+                    return [item[format] for item in input]
+                return input[format]
         return input
 
     @staticmethod

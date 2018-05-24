@@ -3,18 +3,34 @@
 {% block content %}
 
     {% if mode %}
+
+        {% if mode == 'none' %}
+        <h3>Wops... No results were found.</h3>
+        {% endif %}
+
+        {% if mode != 'none' %}
         <table align="center" width="100%">
         {% for movie in session['movies'] %}
-            {% if None not in movie.values() %}
+            {% if movie.get('image') and movie.get('title') and movie.get('year') %}
             <tr><td>
                     <table class="styled-table">
                         <tr><td>
-                            <img src="{{ movie.get('poster') }}" class="styled-poster">
+                            <img src="{{ movie.get('image') }}" class="styled-poster">
                         </td></tr>
                         <tr><td>
-                            {{ movie.get('title') }} ({{ movie.get('year') }})<br/>
-                            By {{ ' and '.join(movie.get('director')) }}<br/>
-                            With {{ ', '.join(movie.get('actors')) }}
+                            {{ movie.get('title') }} ({{ movie.get('year') }})
+                            {% if movie.get('genre') %}
+                                <br/>
+                                {{ movie.get('genre') }}
+                            {% endif %}
+                            {% if movie.get('directors') %}
+                                <br/>
+                                By {{ ' and '.join(movie.get('directors')) }}
+                            {% endif %}
+                            {% if movie.get('cast') %}
+                                <br/>
+                                With {{ ', '.join(movie.get('cast')) }}
+                            {% endif %}
                         </td></tr>
                         <tr><td>
                             <table width="100%"><tr>
@@ -36,6 +52,6 @@
             {% endif %}
         {% endfor %}
         </table>
+        {% endif %}
     {% endif %}
-
 {% endblock %}
