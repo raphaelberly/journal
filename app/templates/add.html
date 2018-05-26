@@ -21,7 +21,7 @@
             output.innerHTML = slider.value;
 
             slider.oninput = function() {
-                output.innerHTML = this.value;
+                output.innerHTML = parseFloat(this.value).toFixed(1);
             }
     </script>
 
