@@ -18,7 +18,9 @@
                             <img src="{{ movie.get('image') }}" class="styled-poster">
                         </td></tr>
                         <tr><td>
+                            <b>
                             {{ movie.get('title') }} ({{ movie.get('year') }})
+                            </b>
                             {% if movie.get('genre') %}
                                 <br/>
                                 {{ movie.get('genre') }}
