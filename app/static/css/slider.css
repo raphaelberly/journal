@@ -1,22 +1,20 @@
+
 .slidecontainer {
     width: 100%;
+    padding-bottom: 25px;
 }
 
 .slider {
     -webkit-appearance: none;
     width: 100%;
     max-width: 325px;
-    height: 5px;
-    border-radius: 5px;
-    background: #d3d3d3;
+    height: 14px;
+    border-radius: 20px;
+    background: #efefef;
     outline: none;
-    opacity: 0.7;
+    border: none;
     -webkit-transition: .2s;
     transition: opacity .2s;
-}
-
-.slider:hover {
-    opacity: 1;
 }
 
 .slider::-webkit-slider-thumb {
@@ -26,13 +24,7 @@
     height: 25px;
     border-radius: 50%;
     background: #6caee0;
-    cursor: pointer;
-}
-
-.slider::-moz-range-thumb {
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: #6caee0;
+    outline: none;
+    border: none;
     cursor: pointer;
 }
