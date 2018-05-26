@@ -1,6 +1,5 @@
 import re
 import string
-from collections import OrderedDict
 
 import requests
 from bs4 import BeautifulSoup, SoupStrainer
@@ -56,7 +55,7 @@ class Search(Base):
             sub_output.update({'cast': [item.text for item in staff.find_all('a', href=cast_pattern)]})
 
             img = self.get_from_soup(row, 'image')
-            sub_output.update({'image': img.replace(self.config['images']['smaller'], self.config['images']['bigger'])})
+            sub_output.update({'image': self._magnify_image(img)})
 
             output.append(sub_output)
 
@@ -71,4 +70,14 @@ class Search(Base):
 
     @staticmethod
     def _regexp_extract(pattern, string):
-        return pattern.search(string).group(1)
+        result = pattern.search(string)
+        if result:
+            return pattern.search(string).group(1)
+        else:
+            return None
+
+    def _magnify_image(self, image):
+        output = image
+        for change in self.config['images']:
+            output = output.replace(change['smaller'], change['bigger'])
+        return output
