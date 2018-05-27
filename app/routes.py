@@ -44,11 +44,12 @@ def add(movie_id):
     # Check movie was found through search
     if movie_id not in session['ids']:
         return redirect(url_for('search'))
+    movie = [item for item in session['movies'] if item['id'] == movie_id][0]
     # Instantiate page forms
     searchForm = SearchForm()
     addForm = AddForm()
     # Render page
-    return render_template('add.html', addForm=addForm, searchForm=searchForm, movie_id=movie_id)
+    return render_template('add.html', addForm=addForm, searchForm=searchForm, movie=movie)
 
 
 @app.route('/<movie_id>/response', methods=['GET', 'POST'])
