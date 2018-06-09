@@ -12,7 +12,7 @@ target.add_argument('--types', '-t', nargs='*')
 args = parser.parse_args()
 
 # Generate target type list
-type_list = ['ratings', 'titles', 'names']
+type_list = ['ratings', 'titles']
 target_types = type_list if args.all else args.types
 
 # For each target type, run the ETL process
