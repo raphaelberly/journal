@@ -29,7 +29,20 @@ ratings:
 names:
   url: https://datasets.imdbws.com/name.basics.tsv.gz
   columns:
-    nconst: actor
+    nconst: person
     primaryName: name
     knownForTitles: major_titles
 
+crew:
+  url: https://datasets.imdbws.com/title.crew.tsv.gz
+  columns:
+    tconst: movie
+    directors: directors
+    writers: writers
+
+principals:
+  url: https://datasets.imdbws.com/title.principals.tsv.gz
+  columns:
+    tconst: movie
+    nconst: personn
+    category: role
