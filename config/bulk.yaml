@@ -1,48 +1,51 @@
 
-file_path: tmp/{0}.tsv.gz
+parameters:
+  file_path: tmp/{0}.tsv.gz
 
-titles:
-  url: https://datasets.imdbws.com/title.basics.tsv.gz
-  columns:
-    tconst: movie
-    titleType: type
-    primaryTitle: title
-    startYear: year
-    runtimeMinutes: duration
-    genres: genres
-  filter:
-    type:
-      - short
-      - movie
-      - tvMovie
-      - tvShort
-      - tvSpecial
-      - video
+definitions:
 
-ratings:
-  url: https://datasets.imdbws.com/title.ratings.tsv.gz
-  columns:
-    tconst: movie
-    averageRating: rating
-    numVotes: votes
+  titles:
+    url: https://datasets.imdbws.com/title.basics.tsv.gz
+    columns:
+      tconst: movie
+      titleType: type
+      primaryTitle: title
+      startYear: year
+      runtimeMinutes: duration
+      genres: genres
+    filter:
+      type:
+        - short
+        - movie
+        - tvMovie
+        - tvShort
+        - tvSpecial
+        - video
 
-names:
-  url: https://datasets.imdbws.com/name.basics.tsv.gz
-  columns:
-    nconst: person
-    primaryName: name
-    knownForTitles: major_titles
+  ratings:
+    url: https://datasets.imdbws.com/title.ratings.tsv.gz
+    columns:
+      tconst: movie
+      averageRating: rating
+      numVotes: votes
 
-crew:
-  url: https://datasets.imdbws.com/title.crew.tsv.gz
-  columns:
-    tconst: movie
-    directors: directors
-    writers: writers
+  names:
+    url: https://datasets.imdbws.com/name.basics.tsv.gz
+    columns:
+      nconst: person
+      primaryName: name
+      knownForTitles: major_titles
 
-principals:
-  url: https://datasets.imdbws.com/title.principals.tsv.gz
-  columns:
-    tconst: movie
-    nconst: personn
-    category: role
+  crew:
+    url: https://datasets.imdbws.com/title.crew.tsv.gz
+    columns:
+      tconst: movie
+      directors: directors
+      writers: writers
+
+  principals:
+    url: https://datasets.imdbws.com/title.principals.tsv.gz
+    columns:
+      tconst: movie
+      nconst: personn
+      category: role

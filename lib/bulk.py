@@ -28,13 +28,14 @@ class Bulk(Base):
         Base.__init__(self, 'bulk', config_folder)
         # Create other attributes
         self.bulk_type = bulk_type
+        self.bulk_config = self.config['definitions'][bulk_type]
 
     def extract(self):
         LOGGER.info('Downloading {}...'.format(self.bulk_type))
         # Get file name
-        file = self.config.get('file_path').format(self.bulk_type)
+        file = self.config['parameters']['file_path'].format(self.bulk_type)
         # Execute the request and store result on disk
-        data = requests.get(self.config.get(self.bulk_type).get('url'))
+        data = requests.get(self.bulk_config['url'])
         with open(file, 'wb') as f:
             f.write(data.content)
         # Return file path
@@ -42,18 +43,18 @@ class Bulk(Base):
 
     def _transform_chunk(self, chunk):
         # Keep only useful columns
-        cols = list(self.config.get(self.bulk_type).get('columns').keys())
+        cols = list(self.bulk_config['columns'].keys())
         chunk = chunk[cols]
         # Rename columns
-        cols = [self.config.get(self.bulk_type).get('columns').get(item) for item in cols]
+        cols = [self.bulk_config['columns'][item] for item in cols]
         chunk.columns = cols
         # Handle null values
         chunk = chunk.replace("\\N", np.nan)
         # Apply the filters specified in the config
-        filter = self.config.get(self.bulk_type).get('filter')
+        filter = self.bulk_config.get('filter')
         if filter:
             for col in filter.keys():
-                chunk = chunk.loc[chunk[col].isin(filter.get(col))]
+                chunk = chunk.loc[chunk[col].isin(filter[col])]
         # Return resulting dataset
         return chunk
 
