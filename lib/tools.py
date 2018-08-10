@@ -1,7 +1,9 @@
-
-import sys
-import yaml
 import configparser
+import os
+import shutil
+import sys
+
+import yaml
 
 
 def read_credentials(path):
@@ -27,3 +29,42 @@ def read_config(path):
         except yaml.YAMLError as exc:
             sys.exit(exc)
     return config
+
+
+def empty_folder(folder):
+    if os.path.exists(folder):
+        shutil.rmtree(folder)
+        os.makedirs(folder)
+    else:
+        os.makedirs(folder)
+
+
+def chunk_file(file_path, chunk_size=10**6, header=True):
+
+    folder = os.path.splitext(file_path)[0]
+    output_template = os.path.join(folder, '{0}_{2}{1}'.format(*os.path.splitext(os.path.basename(file_path)), '{0}'))
+
+    empty_folder(folder)
+
+    stream = open(file_path)
+
+    if header:
+        header_row = stream.readline()
+
+    writers = {}
+
+    i = 0
+    for row in stream:
+
+        j = i // chunk_size + 1
+        try:
+            writer = writers[j]
+        except KeyError:
+            new_file_path = output_template.format(j)
+            writer = open(new_file_path, 'w+')
+            writers[j] = writer
+            if header:
+                writer.write(header_row)
+
+        writer.write(row)
+        i += 1
