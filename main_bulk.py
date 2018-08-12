@@ -21,6 +21,4 @@ target_types = type_list if args.all else args.types
 for type in target_types:
     assert type in type_list, 'Provided types must be in {}'.format(type_list)
     bulk = Bulk(type)
-    file = bulk.extract()
-    df = bulk.transform(file)
-    bulk.load(df)
+    bulk.etl_by_chunks()

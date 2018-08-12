@@ -68,3 +68,5 @@ def chunk_file(file_path, chunk_size=10**6, header=True):
 
         writer.write(row)
         i += 1
+
+    return folder
