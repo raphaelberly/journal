@@ -46,7 +46,7 @@ def chunk_file(file_path, chunk_size=10**6, header=True):
 
     empty_folder(folder)
 
-    stream = open(file_path)
+    stream = open(file_path, encoding='utf-8')
 
     if header:
         header_row = stream.readline()
@@ -61,7 +61,7 @@ def chunk_file(file_path, chunk_size=10**6, header=True):
             writer = writers[j]
         except KeyError:
             new_file_path = output_template.format(j)
-            writer = open(new_file_path, 'w+')
+            writer = open(new_file_path, 'w+', encoding='utf-8')
             writers[j] = writer
             if header:
                 writer.write(header_row)
