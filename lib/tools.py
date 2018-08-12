@@ -42,7 +42,7 @@ def empty_folder(folder):
 def chunk_file(file_path, chunk_size=10**6, header=True):
 
     folder = os.path.splitext(file_path)[0]
-    output_template = os.path.join(folder, '{0}_{2}{1}'.format(*os.path.splitext(os.path.basename(file_path)), '{0}'))
+    output_template = os.path.join(folder, '{1}_{0}{2}'.format('{0}', *os.path.splitext(os.path.basename(file_path))))
 
     empty_folder(folder)
 
