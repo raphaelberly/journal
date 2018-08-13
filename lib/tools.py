@@ -1,4 +1,3 @@
-import configparser
 import os
 import shutil
 import sys
@@ -6,20 +5,8 @@ import sys
 import yaml
 
 
-def read_credentials(path):
-    credentials = configparser.ConfigParser()
-    credentials.read(path)
-    return credentials
-
-
-def get_database_uri(credentials):
-    return 'postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}'.format(
-        credentials.get('PI', 'user'),
-        credentials.get('PI', 'password'),
-        credentials.get('PI', 'host'),
-        credentials.get('PI', 'port'),
-        credentials.get('PI', 'db')
-    )
+def get_database_uri(**params):
+    return '{type}://{user}:{password}@{host}:{port}/{db}'.format(**params)
 
 
 def read_config(path):

@@ -11,7 +11,7 @@ class Base:
 
         self._base_type = base_type
         self.config = read_config(os.path.join(config_folder, '{}.yaml'.format(base_type)))
-        self.credentials = read_credentials(os.path.join(config_folder, 'credentials.ini'))
+        self.credentials = read_config(os.path.join(config_folder, 'credentials.yaml'))
 
     def get(self, item):
         return self.__getattribute__(item)
