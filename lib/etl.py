@@ -16,7 +16,6 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from sqlalchemy import create_engine
-from .base import Base
 from .tools import chunk_file, get_database_uri, read_config
 from sh import gunzip
 
@@ -36,9 +35,9 @@ class ETL:
     def run(self):
         # Extract data (as chunks)
         chunk_files = self.extract()
-        # Transform each chunk and load it to the database
         i = 1
         for file in chunk_files:
+            # Transform each chunk and load it to the database
             LOGGER.info('Processing chunk {0} of {1} data'.format(i, self.target_type))
             df = self.transform(file)
             replace = (i == 1)
