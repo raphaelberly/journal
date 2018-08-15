@@ -27,7 +27,8 @@ class Search(Base):
     def get_results(self):
 
         strainer = SoupStrainer(**self._format_params(self.config.get('content')))
-        soup = BeautifulSoup(requests.get(self.link).content, 'lxml', parse_only=strainer)
+        headers = {"Accept-Language": "en-US,en;q=0.5"}
+        soup = BeautifulSoup(requests.get(self.link, headers=headers).content, 'lxml', parse_only=strainer)
 
         rows = self.get_from_soup(soup, 'rows')
         if not rows:
