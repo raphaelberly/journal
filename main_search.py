@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import argparse
 from time import time
@@ -13,5 +14,5 @@ args = parser.parse_args()
 
 start = time()
 search = Search(args.movie).get_results()
+print('Collecting results took: {:.2f} seconds'.format(time() - start))
 print(search)
-print('CRAWLING TOOK: {} SECONDS'.format(time() - start))

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import re
 import string
 
@@ -44,7 +46,6 @@ class Search(Base):
         output = []
 
         for row in rows:
-
             sub_output = {}
             sub_output.update({'id': self._regexp_extract(id_pattern, self.get_from_soup(row, 'id'))})
             sub_output.update({'title': self.get_from_soup(row, 'title')})

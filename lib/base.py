@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 from .tools import *
 from bs4 import Tag, NavigableString
 
