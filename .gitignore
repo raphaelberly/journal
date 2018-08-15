@@ -1,0 +1,6 @@
+
+.idea/
+tmp/
+
+config/credentials.yaml
+config/app.py
