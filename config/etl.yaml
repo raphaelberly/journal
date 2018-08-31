@@ -47,5 +47,13 @@ definitions:
     url: https://datasets.imdbws.com/title.principals.tsv.gz
     columns:
       tconst: movie
-      nconst: personn
+      nconst: person
       category: role
+    filter:
+      role:
+        - writer
+        - actress
+        - actor
+        - director
+        - producer
+        - composer
