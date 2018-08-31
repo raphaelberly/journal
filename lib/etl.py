@@ -110,7 +110,7 @@ class ETL:
         transaction = connection.begin()
         LOGGER.info('Emptying table {0}.{1}'.format(schema, table))
         try:
-            connection.execute('DELETE FROM {0}.{1}'.format(schema, table))
+            connection.execute('TRUNCATE TABLE {0}.{1}'.format(schema, table))
             transaction.commit()
         except:
             transaction.rollback()
