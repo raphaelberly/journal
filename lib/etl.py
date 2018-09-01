@@ -14,6 +14,7 @@ import logging
 import requests
 import numpy as np
 import pandas as pd
+from math import ceil
 from tqdm import tqdm
 from sqlalchemy import create_engine
 from .tools import chunk_file, get_database_uri, read_config
@@ -47,10 +48,9 @@ class ETL:
     def extract(self):
         LOGGER.info('Downloading {}...'.format(self.target_type))
         # Download file
+        url = self.etl_config['url']
         file_path = self.config['parameters']['file_path'].format(self.target_type)
-        data = requests.get(self.etl_config['url'])
-        with open(file_path, 'wb') as f:
-            f.write(data.content)
+        self._download_file(url, file_path)
         # Uncompress downloaded file
         uncompressed_file_path = os.path.splitext(file_path)[0]
         if os.path.exists(uncompressed_file_path):
@@ -92,6 +92,19 @@ class ETL:
             self._empty_table(engine, schema, self.target_type)
         # Insert by batch
         self._insert_by_batch(df, engine, 100, params=params)
+
+    @staticmethod
+    def _download_file(url, file_path, block_size=1024):
+
+        r = requests.get(url, stream=True)
+        total_size = int(r.headers.get('content-length', 0))
+
+        with open(file_path, 'wb') as f:
+            for chunk in tqdm(r.iter_content(block_size), total=ceil(total_size/block_size), unit_scale=True):
+                if chunk:
+                    f.write(chunk)
+
+        return file_path
 
     def _insert_by_batch(self, df, engine, nb_batches, params):
         batch_size = int(len(df) / nb_batches)
