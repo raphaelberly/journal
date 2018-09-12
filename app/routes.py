@@ -3,7 +3,7 @@ from app import app
 from app import db
 from flask import render_template, redirect, url_for, session, request
 from app.forms import *
-from app.models import Record
+from app.models import Record, Title
 from lib.search import Search
 
 
@@ -89,3 +89,11 @@ def respond(movie_id):
             return render_template('response.html', searchForm=searchForm, movie_id=movie_id, response='cancelled')
     # Else, redirect to search page
     return redirect(url_for('search'))
+
+
+@app.route('/recent', methods=['GET'])
+def recent(nb_movies=5):
+    recent_movies = Record.query.join(Title) \
+        .order_by(Record.date.desc(), Record.insert_datetime.desc()) \
+        .all()[:nb_movies]
+    return render_template('recent.html', recent_movies=recent_movies)

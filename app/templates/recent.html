@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="classic">
+
+<table>
+<td>
+    {% for movie in recent_movies %}
+        <tr>
+            <p>
+                <span class="big-number">&nbsp;&nbsp; {{ [movie.grade|int, movie.grade]|max }}</span>/10
+                <br/>
+                <b>{{ movie.title.title }} ({{ movie.title.year }})</b>
+                <br/>
+                {{ ', '.join(movie.title.genres.split(',')) }}
+            </p>
+        </tr>
+    {% endfor %}
+</td>
+</table>
+
+</div>
+
+{% endblock %}
