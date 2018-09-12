@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>My Movie Journal</title>
+        <title>{{title or 'Journal'}}</title>
         <meta name="viewport" content="width=device-width, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,7 +16,7 @@
             <a href="{{url_for('recent')}}"><img src="/static/images/icon_logo.png" width="30px"></a>
         </td>
         <td>
-            Recent
+            {{title or 'Journal'}}
         </td>
         <td width="30px">
             <span style="cursor:pointer" onclick="openNav()">&#9776;</span>
@@ -28,7 +28,7 @@
         <a href="#">Search</a>
         <a href="{{url_for('recent')}}">Recent</a>
         <a href="#">Recommend</a>
-        <a href="#">Statistics</a>
+        <a href="{{url_for('statistics')}}">Statistics</a>
     </div>
 
     {% block content %}

@@ -1,15 +1,32 @@
 
+h2 {
+
+    font: 22px Trebuchet MS, sans-serif;
+    font-style: bold;
+    color: #6caee0;
+
+}
+
 div.classic {
 
     width: 100%;
     padding-top: 90px;
     line-height: 1.5;
 
-
 }
 
 .big-number {
 
     font: 35px Trebuchet MS, sans-serif;
+
+}
+
+.sub-content {
+
+    margin: 35px;
+    margin-top: 10px;
+    padding: 10px;
+	border: 1px solid #6caee0;
+    border-radius: 2px;
 
 }

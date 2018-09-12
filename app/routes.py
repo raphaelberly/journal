@@ -1,10 +1,16 @@
 
 from app import app
 from app import db
+from datetime import datetime, date
 from flask import render_template, redirect, url_for, session, request
 from app.forms import *
 from app.models import Record, Title
 from lib.search import Search
+
+
+@app.context_processor
+def inject_now():
+    return {'now': datetime.now()}
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -96,4 +102,30 @@ def recent(nb_movies=5):
     recent_movies = Record.query.join(Title) \
         .order_by(Record.date.desc(), Record.insert_datetime.desc()) \
         .all()[:nb_movies]
-    return render_template('recent.html', recent_movies=recent_movies)
+    return render_template('recent.html', title='Recent', recent_movies=recent_movies)
+
+
+@app.route('/statistics', methods=['GET'])
+def statistics(nb_movies=3):
+
+    # Number of movies seen in total
+    metrics = {'total': Record.query.count()}
+    # This year's total
+    this_year = Record.query \
+        .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
+        .count()
+    metrics.update({'this_year': this_year})
+    # This month's total
+    this_month = Record.query \
+        .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
+        .filter(db.extract('month', Record.date) == db.extract('month', date.today())) \
+        .count()
+    metrics.update({'this_month': this_month})
+
+    best_movies = Record.query \
+        .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
+        .join(Title) \
+        .order_by(Record.grade.desc(), Record.date.desc()) \
+        .all()[:nb_movies]
+
+    return render_template('statistics.html', title='Statistics', metrics=metrics, best_movies=best_movies)

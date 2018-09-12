@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="classic">
+
+<table>
+<td>
+    <tr>
+        <p>
+            <span class="big-number">{{ metrics.this_month }}</span>
+            <br/>
+            movies this month
+        </p>
+    </tr>
+    <tr>
+        <p>
+            <span class="big-number">{{ metrics.this_year }}</span>
+            <br/>
+            movies this year
+        </p>
+    </tr>
+    <tr>
+        <p>
+            <span class="big-number">{{ metrics.total }}</span>
+            <br/>
+            movies since January, 2014
+        </p>
+    </tr>
+</td>
+</table>
+
+    <div class="sub-content">
+
+    <h2>Best of {{ now.year }}</h2>
+
+    <table>
+    <td>
+
+        {% if best_movies|length < 3 %}
+        <tr>
+            <p>
+                Not enough movies seen in {{ now.year }} yet. Keep up!
+            </p>
+        </tr>
+        {% endif %}
+
+        {% for i in range(best_movies|length) %}
+        {% set movie = best_movies[i] %}
+        <tr>
+            <p>
+                <span class="big-number">{{ i+1 }}</span>
+                <br/>
+                <b>{{ movie.title.title }} ({{ movie.title.year }})</b>
+                <br/>
+                {{ ', '.join(movie.title.genres.split(',')) }}
+                <br/>
+                {{ [movie.grade|int, movie.grade]|max }}/10
+            </p>
+        </tr>
+        {% endfor %}
+    </td>
+    </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
