@@ -3,20 +3,46 @@
         <title>My Movie Journal</title>
         <meta name="viewport" content="width=device-width, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="white">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <link rel="apple-touch-icon" href="/static/images/custom_icon.png">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/form-search.css')}}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
-    </head>
-    <body>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style-new.css')}}">
 
-        <form action="{{ url_for('search') }}" method="post" class="form-search">
-            {{ searchForm.hidden_tag() }}
-            {{ searchForm.input(placeholder="Type a movie title here...") }}
-            <button type="submit">Search</button>
-        </form>
-        {% block content %}
-        {% endblock %}
-    </body>
+</head>
+<body>
+
+    <div class="navbar"><table><tr>
+        <td width="30px">
+            <a href="{{url_for('recent')}}"><img src="/static/images/icon_logo.png" width="30px"></a>
+        </td>
+        <td>
+            Recent
+        </td>
+        <td width="30px">
+            <span style="cursor:pointer" onclick="openNav()">&#9776;</span>
+        </td>
+    </tr></table></div>
+
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="#">Search</a>
+        <a href="{{url_for('recent')}}">Recent</a>
+        <a href="#">Recommend</a>
+        <a href="#">Statistics</a>
+    </div>
+
+    {% block content %}
+    {% endblock %}
+
+    <script>
+        function openNav() {
+            document.getElementById("mySidenav").style.width = "250px";
+        }
+
+        function closeNav() {
+            document.getElementById("mySidenav").style.width = "0";
+        }
+    </script>
+
+</body>
 </html>

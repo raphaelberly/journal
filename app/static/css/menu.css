@@ -1,0 +1,63 @@
+
+body {
+    font: 15px Trebuchet MS, sans-serif;
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+
+}
+
+.navbar {
+  overflow: hidden;
+  background-color: #6caee0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+.navbar table {
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  padding: 20px 20px;
+  font-size: 22px;
+
+}
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    background-color: #6caee0;
+    overflow-x: hidden;
+    transition: 0.2s;
+    padding-top: 90px;
+    -webkit-box-shadow: -15px 0 50px rgba(0, 0, 0, 0.3);
+}
+
+.sidenav a {
+    margin: 15px 25px;
+    text-decoration: none;
+  	text-align: right;
+    font-size: 22px;
+    color: #fff;
+    display: block;
+    transition: 0.2s;
+}
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 0px;
+    font-size: 40px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
