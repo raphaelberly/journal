@@ -3,15 +3,6 @@
 
 {% block content %}
 
-<div class="form-search">
-
-<form method="post" action="{{ url_for('search2') }}">
-    <input id="input" name="input" placeholder="Type a movie title here..." type="text" value="{{ input or '' + '' }}">
-    <button type="submit">Go</button>
-</form>
-
-</div>
-
 <div class="search-results">
 
 <table>
@@ -22,20 +13,20 @@
         <img src="{{ movie.get('image') }}">
     </td></tr>
     <tr><td>
-            <b>{{ movie.get('title') }} ({{ movie.get('year') }})</b>
-            {% if movie.get('genre') %}
-                <br/> {{ movie.get('genre') }}
-            {% endif %}
-            {% if movie.get('directors') %}
-                <br/> By {{ ' and '.join(movie.get('directors')) }}
-            {% endif %}
-            {% if movie.get('cast') %}
-                <br/> With {{ ', '.join(movie.get('cast')) }}
-            {% endif %}
+        <b>{{ movie.get('title') }} ({{ movie.get('year') }})</b>
+        {% if movie.get('genre') %}
+            <br/> {{ movie.get('genre') }}
+        {% endif %}
+        {% if movie.get('directors') %}
+            <br/> By {{ ' and '.join(movie.get('directors')) }}
+        {% endif %}
+        {% if movie.get('cast') %}
+            <br/> With {{ ', '.join(movie.get('cast')) }}
+        {% endif %}
     </td></tr>
     <tr><td>
         {% if not movie['id'] in records %}
-        <input class="styled-button full" id="moreButton" name="moreButton" type="submit" value="Add">
+        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=movie.get('id'))}}';" value="Add">
         {% else %}
         <div class="mentions">
             <img src="/static/images/icon_check.png" width="20px">

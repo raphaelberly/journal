@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="search-results">
+
+<table>
+
+    <tr><td>
+        <img src="{{ movie.get('image') }}">
+    </td></tr>
+    <tr><td>
+        <b>{{ movie.get('title') }} ({{ movie.get('year') }})</b>
+        {% if movie.get('genre') %}
+            <br/> {{ movie.get('genre') }}
+        {% endif %}
+        {% if movie.get('directors') %}
+            <br/> By {{ ' and '.join(movie.get('directors')) }}
+        {% endif %}
+        {% if movie.get('cast') %}
+            <br/> With {{ ', '.join(movie.get('cast')) }}
+        {% endif %}
+    </td></tr>
+
+    {% if mode == 'show_slider' %}
+
+    <tr><td>
+    <form action="{{ url_for('movie', movie_id=movie['id']) }}" method="post">
+
+        <div class="slidecontainer">
+            <p style="bold"><span id="gradeValue"></span> / 10</p>
+            <input id="gradeRange" name="gradeRange" type="range" min="0" max="10" value="6.5" step="0.5" class="slider">
+        </div>
+        <input class="styled-button full" type="submit" value="OK">
+
+    </form>
+    </td></tr>
+
+    {% endif %}
+
+    {% if mode == 'show_add_confirmation' %}
+
+    <tr><td>
+
+    <div class="mentions">
+        <img src="/static/images/icon_check.png" width="20px">
+        <b>Movie successfully added</b>
+    </div>
+
+    </td></tr>
+    <tr><td>
+
+     <form action="{{ url_for('movie', movie_id=movie['id']) }}" method="post">
+
+        <input class="styled-button empty" type="submit" name="cancel" value="Cancel">
+
+    </form>
+
+    </td></tr>
+
+    {% endif %}
+
+    {% if mode == 'show_cancel_confirmation' %}
+
+    <tr><td>
+
+    <div class="mentions">
+        <img src="/static/images/icon_uncheck.png" width="20px">
+        <b>Movie removed</b>
+    </div>
+
+    </td></tr>
+
+    {% endif %}
+
+</table>
+
+</div>
+
+<script type = "text/javascript">
+        var slider = document.getElementById("gradeRange");
+        var output = document.getElementById("gradeValue");
+        output.innerHTML = slider.value;
+
+        slider.oninput = function() {
+            output.innerHTML = parseFloat(this.value).toFixed(1);
+        }
+</script>
+
+{% endblock %}

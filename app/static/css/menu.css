@@ -26,6 +26,25 @@ body {
 
 }
 
+.navbar .left {
+    width: 50px;
+    height: 10px;
+    text-align: left;
+}
+
+.navbar .left img {
+    width: 25px;
+}
+
+.navbar .right {
+    width: 50px;
+    text-align: right;
+}
+
+.navbar .right .openbtn {
+    width: 18px;
+}
+
 .sidenav {
     height: 100%;
     width: 0;
@@ -52,9 +71,9 @@ body {
 
 .sidenav .closebtn {
     position: absolute;
-    top: 0;
-    right: 0px;
-    font-size: 40px;
+    top: 29px;
+    right: 26px;
+    width: 18px;
 }
 
 @media screen and (max-height: 450px) {

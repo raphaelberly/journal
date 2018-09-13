@@ -1,3 +1,4 @@
+import logging
 
 from app import app
 from app import db
@@ -6,6 +7,9 @@ from flask import render_template, redirect, url_for, session, request
 from app.forms import *
 from app.models import Record, Title
 from lib.search import Search
+
+logging.basicConfig(level=logging.INFO)
+LOGGER = logging.getLogger(__name__)
 
 
 def get_post_result(key):
@@ -144,12 +148,40 @@ def search2():
             results = Search(input, 'config').get_results()
             records = dict(Record.query.with_entities(Record.movie, Record.grade).all())
 
-            # session['input'] = input
-            # session['results'] = results
+            session['input'] = input
+            session['results'] = results
             # session['records'] = records
 
-            print('SETTING INPUT TO {}'.format(input))
-            return render_template('search2.html', title='Search', input=input, results=results, records=records)
+            LOGGER.info('SETTING INPUT TO {}'.format(input))
+            return render_template('search2.html', title='Search', results=results, records=records)
 
-    print('INPUT NOT SET')
+    LOGGER.info('SETTING INPUT TO NONE')
+    session['input'] = None
+    # session['results'] = None
     return render_template('search2.html', title='Search')
+
+
+@app.route('/movie/<movie_id>', methods=['GET', 'POST'])
+def movie(movie_id):
+
+    movie = [item for item in session['results'] if item['id'] == movie_id][0]
+
+    if request.method == 'POST':
+        if 'gradeRange' in request.form:
+            # Get submitted grade
+            grade = float(get_post_result('gradeRange'))
+            # Add the movie to the database
+            record = Record(movie=movie_id, grade=grade)
+            db.session.add(record)
+            db.session.commit()
+            LOGGER.info('MOVIE {0} GOT GRADE {1}'.format(movie_id, grade))
+            return render_template('movie.html', title='Search', movie=movie, mode='show_add_confirmation')
+        elif 'cancel' in request.form:
+            to_delete = Record.query.filter_by(movie=movie_id).all()
+            for record in to_delete:
+                db.session.delete(record)
+            db.session.commit()
+            LOGGER.info('MOVIE {0} REMOVED'.format(movie_id))
+            return render_template('movie.html', title='Search', movie=movie, mode='show_cancel_confirmation')
+
+    return render_template('movie.html', title='Search', movie=movie, mode='show_slider')

@@ -9,29 +9,42 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style-new.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/form-search.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
 
 </head>
 <body>
 
     <div class="navbar"><table><tr>
-        <td width="30px">
-            <a href="{{url_for('search2')}}"><img src="/static/images/icon_logo.png" width="30px"></a>
+        <td class="left">
+            <a href="{{url_for('search2')}}"><img src="/static/images/icon_logo.png"></a>
         </td>
         <td>
             {{title or 'Journal'}}
         </td>
-        <td width="30px">
-            <span style="cursor:pointer" onclick="openNav()">&#9776;</span>
+        <td class="right">
+            <span style="cursor:pointer" onclick="openNav()"><img src="/static/images/icon_open_menu.png" class="openbtn"></span>
         </td>
     </tr></table></div>
 
     <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="javascript:void(0)" onclick="closeNav()"><img src="/static/images/icon_close_menu.png" class="closebtn"></a>
         <a href="{{url_for('search2')}}">Search</a>
         <a href="{{url_for('recent')}}">Recent</a>
-        <a href="#">Recommend</a>
         <a href="{{url_for('statistics')}}">Statistics</a>
     </div>
+
+    {% if title == 'Search' %}
+
+    <div class="form-search">
+
+    <form method="post" action="{{ url_for('search2') }}">
+        <input id="input" name="input" placeholder="Type a movie title here..." type="text" value="{{ session.get('input') or '' }}">
+        <button type="submit">Go</button>
+    </form>
+
+    </div>
+
+    {% endif %}
 
     {% block content %}
     {% endblock %}
