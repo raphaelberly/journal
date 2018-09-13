@@ -6,7 +6,7 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <link rel="apple-touch-icon" href="/static/images/custom_icon.png">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style-new.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/form-search.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
@@ -16,7 +16,7 @@
 
     <div class="navbar"><table><tr>
         <td class="left">
-            <a href="{{url_for('search2')}}"><img src="/static/images/icon_logo.png"></a>
+            <a href="{{url_for('search')}}"><img src="/static/images/icon_logo.png"></a>
         </td>
         <td>
             {{title or 'Journal'}}
@@ -28,7 +28,7 @@
 
     <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" onclick="closeNav()"><img src="/static/images/icon_close_menu.png" class="closebtn"></a>
-        <a href="{{url_for('search2')}}">Search</a>
+        <a href="{{url_for('search')}}">Search</a>
         <a href="{{url_for('recent')}}">Recent</a>
         <a href="{{url_for('statistics')}}">Statistics</a>
     </div>
@@ -37,7 +37,7 @@
 
     <div class="form-search">
 
-    <form method="post" action="{{ url_for('search2') }}">
+    <form method="post" action="{{ url_for('search') }}">
         <input id="input" name="input" placeholder="Type a movie title here..." type="text" value="{{ session.get('input') or '' }}">
         <button type="submit">Go</button>
     </form>

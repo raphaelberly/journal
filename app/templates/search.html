@@ -1,59 +1,44 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 
-    {% if mode %}
+<div class="search-results">
 
-        {% if mode == 'none' %}
-        <h3>Wops... No results were found.</h3>
-        {% endif %}
+<table>
 
-        {% if mode != 'none' %}
-        <table align="center" width="100%">
-        {% for movie in session['movies'] %}
-            {% if movie.get('image') and movie.get('title') and movie.get('year') %}
-            <tr><td>
-                    <table class="styled-table">
-                        <tr><td>
-                            <img src="{{ movie.get('image') }}" class="styled-poster">
-                        </td></tr>
-                        <tr><td>
-                            <b>
-                            {{ movie.get('title') }} ({{ movie.get('year') }})
-                            </b>
-                            {% if movie.get('genre') %}
-                                <br/>
-                                {{ movie.get('genre') }}
-                            {% endif %}
-                            {% if movie.get('directors') %}
-                                <br/>
-                                By {{ ' and '.join(movie.get('directors')) }}
-                            {% endif %}
-                            {% if movie.get('cast') %}
-                                <br/>
-                                With {{ ', '.join(movie.get('cast')) }}
-                            {% endif %}
-                        </td></tr>
-                        <tr><td>
-                            <table width="100%"><tr>
-                                <td align="{{'right' if mode == 'single' else 'center'}}" valign="top">
-                                    <input type="button" class="styled-button-2" onclick="location.href='{{ url_for('add', movie_id=movie.get('id')) }}';" value="Add movie" />
-                                </td>
-                                {% if mode == 'single' %}
-                                    <td align="left" valign="top">
-                                        <form action="" method="post">
-                                            {{ singleResultForm.hidden_tag() }}
-                                            {{ singleResultForm.moreButton(class="styled-button") }}
-                                        </form>
-                                    </td>
-                                {% endif %}
-                            </tr></table>
-                        </td></tr>
-                    </table>
-            </td></tr>
-            {% endif %}
-        {% endfor %}
-        </table>
+{% for movie in results %}
+
+    <tr><td>
+        <img src="{{ movie.get('image') }}">
+    </td></tr>
+    <tr><td>
+        <b>{{ movie.get('title') }} ({{ movie.get('year') }})</b>
+        {% if movie.get('genre') %}
+            <br/> {{ movie.get('genre') }}
         {% endif %}
-    {% endif %}
+        {% if movie.get('directors') %}
+            <br/> By {{ ' and '.join(movie.get('directors')) }}
+        {% endif %}
+        {% if movie.get('cast') %}
+            <br/> With {{ ', '.join(movie.get('cast')) }}
+        {% endif %}
+    </td></tr>
+    <tr><td>
+        {% if not movie['id'] in records %}
+        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=movie.get('id'))}}';" value="Add">
+        {% else %}
+        <div class="mentions">
+            <img src="/static/images/icon_check.png" width="20px">
+            <b>Seen: {{ [records[movie['id']]|int, records[movie['id']]]|max }}/10</b>
+        </div>
+        {% endif %}
+    </td></tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
 {% endblock %}
