@@ -7,13 +7,15 @@
         <link rel="apple-touch-icon" href="/static/images/custom_icon.png">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style-new.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/form-search.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
 
 </head>
 <body>
 
     <div class="navbar"><table><tr>
         <td width="30px">
-            <a href="{{url_for('recent')}}"><img src="/static/images/icon_logo.png" width="30px"></a>
+            <a href="{{url_for('search2')}}"><img src="/static/images/icon_logo.png" width="30px"></a>
         </td>
         <td>
             {{title or 'Journal'}}
@@ -25,7 +27,7 @@
 
     <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <a href="#">Search</a>
+        <a href="{{url_for('search2')}}">Search</a>
         <a href="{{url_for('recent')}}">Recent</a>
         <a href="#">Recommend</a>
         <a href="{{url_for('statistics')}}">Statistics</a>

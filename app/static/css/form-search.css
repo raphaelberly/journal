@@ -1,11 +1,19 @@
 .form-search{
-    margin-bottom: 25px;
-    text-align: center;
+
+    position: fixed;
+    top: 0px;
     width: 100%;
-    position: relative;
+    z-index: 1;
+
+    padding-top: 100px;
+    padding-bottom: 10px;
+    background-color: #fff;
+    text-align: center;
+
 }
 
 .form-search input{
+
     width: 100%;
     max-width: 220px;
     border-radius: 2px;
@@ -21,6 +29,8 @@
 }
 
 .form-search button{
+
+    width: 90px;
     border-bottom-left-radius: 1px;
     border-top-left-radius: 1px;
     border-bottom-right-radius: 2px;

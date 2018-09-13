@@ -1,0 +1,29 @@
+
+.styled-button {
+
+    -webkit-appearance: none;
+    font: bold 15px Trebuchet MS;
+    border-radius: 2px;
+    padding: 13px 20px;
+    cursor: pointer;
+    outline: none;
+    border: 1px solid #6caee0;
+    width: 90px;
+
+    margin-bottom: 20px;
+
+}
+
+.full {
+
+    background-color:  #6caee0;
+    color: #ffffff;
+
+}
+
+.empty {
+
+    background-color:  #ffffff;
+    color: #6caee0;
+
+}

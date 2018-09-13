@@ -8,6 +8,7 @@ body {
 }
 
 .navbar {
+  z-index: 2;
   overflow: hidden;
   background-color: #6caee0;
   position: fixed;
@@ -29,7 +30,7 @@ body {
     height: 100%;
     width: 0;
     position: fixed;
-    z-index: 1;
+    z-index: 3;
     top: 0;
     right: 0;
     background-color: #6caee0;

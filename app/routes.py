@@ -8,6 +8,10 @@ from app.models import Record, Title
 from lib.search import Search
 
 
+def get_post_result(key):
+    return dict(request.form)[key][0]
+
+
 @app.context_processor
 def inject_now():
     return {'now': datetime.now()}
@@ -129,3 +133,23 @@ def statistics(nb_movies=3):
         .all()[:nb_movies]
 
     return render_template('statistics.html', title='Statistics', metrics=metrics, best_movies=best_movies)
+
+
+@app.route('/search2', methods=['GET', 'POST'])
+def search2():
+
+    if request.method == 'POST':
+        if 'input' in request.form:
+            input = get_post_result('input')
+            results = Search(input, 'config').get_results()
+            records = dict(Record.query.with_entities(Record.movie, Record.grade).all())
+
+            # session['input'] = input
+            # session['results'] = results
+            # session['records'] = records
+
+            print('SETTING INPUT TO {}'.format(input))
+            return render_template('search2.html', title='Search', input=input, results=results, records=records)
+
+    print('INPUT NOT SET')
+    return render_template('search2.html', title='Search')
