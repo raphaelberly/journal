@@ -1,4 +1,22 @@
 
+body {
+    background-color: #6caee0;
+    background: linear-gradient(to bottom, #6caee0 0px, #6caee0 60px, #fff 60px, #fff 100%);
+    background-attachment: fixed;
+    font: 15px Trebuchet MS, sans-serif;
+    text-decoration: none;
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+}
+
+form {
+    margin: 0;
+}
+
+td {
+    padding: 0;
+}
 
 .classic {
     width: 100%;
@@ -25,27 +43,29 @@
 }
 
 .search-results {
-    margin-top: 180px;
+    margin-top: 156px;
     padding-left: 20px;
     padding-right: 20px;
 }
 
 .search-results table {
     width: 100%;
+    margin-bottom: 12px;
 }
 
 .search-results td {
     text-align: center;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
 }
 
 .search-results img {
-    margin-right: 3px;
-    vertical-align: text-bottom;
+    max-width: 180px;
+    width: 55%;
 }
 
 .search-results .dual {
     width: 100%;
+    margin-top: 10px;
 }
 
 .search-results .dual .left {
@@ -62,5 +82,11 @@
 }
 
 .mentions {
-    margin-bottom: 20px;
+	font-weight: bold;
+}
+
+.mentions img {
+    width: 20px;
+    margin-right: 3px;
+    vertical-align: text-bottom;
 }

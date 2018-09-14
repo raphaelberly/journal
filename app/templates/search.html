@@ -5,9 +5,9 @@
 
 <div class="search-results">
 
-<table>
-
 {% for movie in (session.get('results') or {}).values() %}
+
+<table>
 
     <tr><td>
         <a href="{{ url_for('movie', movie_id=movie['id']) }}"><img src="{{ movie.get('image') }}"></a>
@@ -29,15 +29,15 @@
         <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=movie['id'])}}';" value="Add">
         {% else %}
         <div class="mentions">
-            <img src="/static/images/icon_check.png" width="20px">
-            <b>Seen: {{ [movie['grade']|int, movie['grade']]|max }}/10</b>
+            <img src="/static/images/icon_check.png">
+            Seen: {{ [movie['grade']|int, movie['grade']]|max }}/10
         </div>
         {% endif %}
     </td></tr>
 
-{% endfor %}
-
 </table>
+
+{% endfor %}
 
 </div>
 

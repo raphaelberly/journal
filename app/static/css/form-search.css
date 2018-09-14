@@ -1,12 +1,13 @@
-.form-search{
+
+.form-search {
 
     position: fixed;
     top: 0px;
     width: 100%;
     z-index: 1;
 
-    padding-top: 100px;
-    padding-bottom: 10px;
+    padding-top: 85px;
+    padding-bottom: 20px;
     background-color: #fff;
     text-align: center;
 
@@ -15,7 +16,7 @@
 .form-search input{
 
     width: 100%;
-    max-width: 220px;
+    max-width: 242px; // optimized for iPhone 8
     border-radius: 2px;
     background-color:  #ffffff;
     padding: 14px 15px 14px 20px;
@@ -38,7 +39,7 @@
     background-color:  #6caee0;
     color: #ffffff;
     padding: 15px 22px;
-    margin-left: -6px;
+    margin-left: -8px;
     cursor: pointer;
     border: none;
     outline: none;

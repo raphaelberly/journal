@@ -30,7 +30,7 @@
     <form action="{{ url_for('movie', movie_id=movie['id']) }}" method="post">
 
         <div class="slidecontainer">
-            <p style="bold"><span id="gradeValue"></span> / 10</p>
+            <div class="mentions"><span id="gradeValue"></span>/10</div>
             <input id="gradeRange" name="gradeRange" type="range" min="0" max="10" value="{{ movie.get('grade', 6.5)|string }}" step="0.5" class="slider">
         </div>
         <input class="styled-button full" type="submit" value="{{ 'Update' if movie.get('grade') else 'Add' }}">
@@ -46,7 +46,7 @@
 
     <div class="mentions">
         <img src="/static/images/icon_check.png" width="20px">
-        <b>Movie successfully {{ 'updated' if movie.get('grade') else 'added' }}</b>
+        Movie successfully {{ 'updated' if movie.get('grade') else 'added' }}
     </div>
 
     </td></tr>
@@ -73,7 +73,7 @@
 
     <div class="mentions">
         <img src="/static/images/icon_uncheck.png" width="20px">
-        <b>Movie successfully removed</b>
+        Movie successfully removed
     </div>
 
     </td></tr>
