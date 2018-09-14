@@ -2,6 +2,8 @@
 
 {% block content %}
 
+{% set movie = session['results'][movie_id] %}
+
 <div class="search-results">
 
 <table>
@@ -29,44 +31,49 @@
 
         <div class="slidecontainer">
             <p style="bold"><span id="gradeValue"></span> / 10</p>
-            <input id="gradeRange" name="gradeRange" type="range" min="0" max="10" value="6.5" step="0.5" class="slider">
+            <input id="gradeRange" name="gradeRange" type="range" min="0" max="10" value="{{ movie.get('grade', 6.5)|string }}" step="0.5" class="slider">
         </div>
-        <input class="styled-button full" type="submit" value="OK">
+        <input class="styled-button full" type="submit" value="{{ 'Update' if movie.get('grade') else 'Add' }}">
 
     </form>
     </td></tr>
 
     {% endif %}
 
-    {% if mode == 'show_add_confirmation' %}
+    {% if mode == 'show_add_or_edit_confirmation' %}
 
     <tr><td>
 
     <div class="mentions">
         <img src="/static/images/icon_check.png" width="20px">
-        <b>Movie successfully added</b>
+        <b>Movie successfully {{ 'updated' if movie.get('grade') else 'added' }}</b>
     </div>
 
     </td></tr>
-    <tr><td>
-
-     <form action="{{ url_for('movie', movie_id=movie['id']) }}" method="post">
-
-        <input class="styled-button empty" type="submit" name="cancel" value="Cancel">
-
-    </form>
-
+    <tr>
+    <td>
+        <table class="dual"><tr>
+        <td class="left">
+            <input class="styled-button empty" type="button" onclick="location.href='{{ url_for('movie', movie_id=movie['id'])}}';" value="Edit">
+        </td>
+        <td class="right">
+            <form action="{{ url_for('movie', movie_id=movie['id']) }}" method="post">
+                <input class="styled-button empty" type="submit" name="remove" value="Remove">
+            </form>
+        </td>
+        </tr></table>
+    </td>
     </td></tr>
 
     {% endif %}
 
-    {% if mode == 'show_cancel_confirmation' %}
+    {% if mode == 'show_remove_confirmation' %}
 
     <tr><td>
 
     <div class="mentions">
         <img src="/static/images/icon_uncheck.png" width="20px">
-        <b>Movie removed</b>
+        <b>Movie successfully removed</b>
     </div>
 
     </td></tr>

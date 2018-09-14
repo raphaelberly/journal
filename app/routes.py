@@ -3,11 +3,10 @@ import logging
 from app import app
 from app import db
 from datetime import datetime, date
-from flask import render_template, redirect, url_for, session, request
+from flask import render_template, session, request
 from app.models import Record, Title
 from lib.search import Search
 
-logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 
 
@@ -60,44 +59,67 @@ def search():
 
     if request.method == 'POST':
         if 'input' in request.form:
+
+            # Get the results for the provided input
             input = get_post_result('input')
             results = Search(input, 'config').get_results()
+
+            # Add the grade to the result if the movie was seen already
             records = dict(Record.query.with_entities(Record.movie, Record.grade).all())
 
+            for result in results:
+                if records.get(result):
+                    results[result].update({'grade': records[result]})
+
+            # Store the results and the input in the session
             session['input'] = input
             session['results'] = results
-            # session['records'] = records
 
             LOGGER.info('SETTING INPUT TO {}'.format(input))
-            return render_template('search.html', title='Search', results=results, records=records)
+            return render_template('search.html', title='Search')
 
     LOGGER.info('SETTING INPUT TO NONE')
     session['input'] = None
-    # session['results'] = None
+    session['results'] = None
     return render_template('search.html', title='Search')
 
 
 @app.route('/movie/<movie_id>', methods=['GET', 'POST'])
 def movie(movie_id):
 
-    movie = [item for item in session['results'] if item['id'] == movie_id][0]
+    # print(request)
 
     if request.method == 'POST':
+
         if 'gradeRange' in request.form:
+
             # Get submitted grade
             grade = float(get_post_result('gradeRange'))
-            # Add the movie to the database
-            record = Record(movie=movie_id, grade=grade)
-            db.session.add(record)
-            db.session.commit()
-            LOGGER.info('MOVIE {0} GOT GRADE {1}'.format(movie_id, grade))
-            return render_template('movie.html', title='Search', movie=movie, mode='show_add_confirmation')
-        elif 'cancel' in request.form:
+
+            movie = session['results'][movie_id]
+            if movie.get('grade'):
+                # Update the movie in the database
+                Record.query.filter_by(movie=movie_id).update({'grade': grade})
+                db.session.commit()
+            else:
+                # Add the movie to the database
+                record = Record(movie=movie_id, grade=grade)
+                db.session.add(record)
+                db.session.commit()
+            # Update the movie item with the grade
+            session['results'][movie_id]['grade'] = grade
+            session.modified = True
+            return render_template('movie.html', title='Search', movie_id=movie_id, mode='show_add_or_edit_confirmation')
+
+        elif 'remove' in request.form:
+            # Delete the movie from the database
             to_delete = Record.query.filter_by(movie=movie_id).all()
             for record in to_delete:
                 db.session.delete(record)
             db.session.commit()
-            LOGGER.info('MOVIE {0} REMOVED'.format(movie_id))
-            return render_template('movie.html', title='Search', movie=movie, mode='show_cancel_confirmation')
+            # Remove the grade from the movie item
+            session['results'][movie_id].pop('grade')
+            session.modified = True
+            return render_template('movie.html', title='Search', movie_id=movie_id, mode='show_remove_confirmation')
 
-    return render_template('movie.html', title='Search', movie=movie, mode='show_slider')
+    return render_template('movie.html', title='Search', movie_id=movie_id, mode='show_slider')

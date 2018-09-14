@@ -7,10 +7,10 @@
 
 <table>
 
-{% for movie in results %}
+{% for movie in (session.get('results') or {}).values() %}
 
     <tr><td>
-        <img src="{{ movie.get('image') }}">
+        <a href="{{ url_for('movie', movie_id=movie['id']) }}"><img src="{{ movie.get('image') }}"></a>
     </td></tr>
     <tr><td>
         <b>{{ movie.get('title') }} ({{ movie.get('year') }})</b>
@@ -25,12 +25,12 @@
         {% endif %}
     </td></tr>
     <tr><td>
-        {% if not movie['id'] in records %}
-        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=movie.get('id'))}}';" value="Add">
+        {% if not movie.get('grade') %}
+        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=movie['id'])}}';" value="Add">
         {% else %}
         <div class="mentions">
             <img src="/static/images/icon_check.png" width="20px">
-            <b>Seen: {{ [records[movie['id']]|int, records[movie['id']]]|max }}/10</b>
+            <b>Seen: {{ [movie['grade']|int, movie['grade']]|max }}/10</b>
         </div>
         {% endif %}
     </td></tr>

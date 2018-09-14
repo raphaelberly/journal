@@ -1,61 +1,66 @@
 
 
 .classic {
-
     width: 100%;
     padding-top: 90px;
     line-height: 1.5;
-
 }
 
 .big-number {
-
     font: 35px Trebuchet MS, sans-serif;
-
 }
 
 .sub-content {
-
     margin: 35px;
     margin-top: 10px;
     padding: 10px;
 	border: 1px solid #6caee0;
     border-radius: 2px;
-
 }
 
 .sub-content h2 {
-
     font: 22px Trebuchet MS, sans-serif;
     font-style: bold;
     color: #6caee0;
-
 }
 
 .search-results {
-
     margin-top: 180px;
     padding-left: 20px;
     padding-right: 20px;
+}
 
+.search-results table {
+    width: 100%;
 }
 
 .search-results td {
-
     text-align: center;
     padding-bottom: 10px;
-
 }
 
 .search-results img {
-
     margin-right: 3px;
     vertical-align: text-bottom;
+}
+
+.search-results .dual {
+    width: 100%;
+}
+
+.search-results .dual .left {
+    text-align: right;
+    vertical-align: baseline;
+    padding-right: 5px;
+}
+
+.search-results .dual .right {
+    text-align: left;
+    vertical-align: baseline;
+    padding-left: 5px;
 
 }
 
 .mentions {
-
     margin-bottom: 20px;
-
 }
