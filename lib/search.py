@@ -44,7 +44,8 @@ class Search(Base):
         directors_pattern = re.compile(r'li_dr_\d')
         cast_pattern = re.compile(r'li_st_\d')
 
-        output = []
+        # Dicts are ordered in python 3.6+
+        output = {}
 
         for row in rows:
             sub_output = {}
@@ -60,7 +61,7 @@ class Search(Base):
             img = self.get_from_soup(row, 'image')
             sub_output.update({'image': self._magnify_image(img)})
 
-            output.append(sub_output)
+            output.update({sub_output['id']: sub_output})
 
         return output
 
