@@ -1,0 +1,46 @@
+
+.recent {
+    width: 100%;
+    padding-top: 110px;
+}
+
+.recent table {
+    border-spacing: 0;
+}
+
+.recent td {
+    padding-bottom: 25px;
+    line-height: 1.4;
+    vertical-align: top;
+}
+
+.time-ago {
+    font-weight: bold;
+    color: #6caee0;
+}
+
+.timeline {
+    width: 20px;
+}
+
+td.top {
+    background: url("/static/images/timeline-top.png");
+    background-size: 10px;
+    background-repeat: no-repeat;
+}
+
+td.middle {
+    background: url("/static/images/timeline-middle.png");
+    background-size: 10px;
+    background-repeat: no-repeat;
+}
+
+td.bottom {
+    background: url("/static/images/timeline-bottom.png");
+    background-size: 10px;
+    background-repeat: no-repeat;
+}
+
+div.bottom {
+    height: 160px;
+}

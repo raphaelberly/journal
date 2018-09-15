@@ -2,7 +2,7 @@ import logging
 
 from app import app
 from app import db
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from flask import render_template, session, request
 from app.models import Record, Title
 from lib.search import Search
@@ -14,16 +14,38 @@ def get_post_result(key):
     return dict(request.form)[key][0]
 
 
+def get_time_ago_string(dt):
+
+    def get_n_days_ago(n):
+        return date.today() - timedelta(days=n)
+
+    if dt >= get_n_days_ago(0):
+        return 'Today'
+
+    elif dt >= get_n_days_ago(1):
+        return 'Yesterday'
+
+    elif dt >= get_n_days_ago(6):
+        return '{0} days ago'.format((date.today() - dt).days)
+
+    else:
+        weeks = (date.today() - dt).days // 7
+        s = 's' if weeks > 1 else ''
+        return '{0} week{1} ago'.format(weeks, s)
+
+
 @app.context_processor
 def inject_now():
     return {'now': datetime.now()}
 
 
 @app.route('/recent', methods=['GET'])
-def recent(nb_movies=5):
+def recent(nb_movies=10):
     recent_movies = Record.query.join(Title) \
         .order_by(Record.date.desc(), Record.insert_datetime.desc()) \
         .all()[:nb_movies]
+    for movie in recent_movies:
+        movie.__setattr__('time_ago', get_time_ago_string(movie.date))
     return render_template('recent.html', title='Recent', recent_movies=recent_movies)
 
 

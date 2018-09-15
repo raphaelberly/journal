@@ -2,23 +2,34 @@
 
 {% block content %}
 
-<div class="classic">
+<div class="recent">
 
+    <center>
 <table>
-<td>
-    {% for movie in recent_movies %}
-        <tr>
-            <p>
-                <span class="big-number">&nbsp;&nbsp; {{ [movie.grade|int, movie.grade]|max }}</span>/10
-                <br/>
-                <b>{{ movie.title.title }} ({{ movie.title.year }})</b>
-                <br/>
-                {{ ', '.join(movie.title.genres.split(',')) }}
-            </p>
-        </tr>
-    {% endfor %}
-</td>
-</table>
+
+{% for i in range(recent_movies|length) %}
+{% set movie = recent_movies[i] %}
+<tr>
+    {% if i == 0 %}
+        <td class="timeline top"></td>
+    {% elif i == recent_movies|length - 1 %}
+        <td class="timeline bottom"><div class="bottom"></div></td>
+    {% else %}
+        <td class="timeline middle"></td>
+    {% endif %}
+    <td>
+        <span class="time-ago">{{ movie.time_ago }}</span>
+        <br/>
+        <b>{{ movie.title.title }} ({{ movie.title.year }})</b>
+        <br/>
+        {{ ', '.join(movie.title.genres.split(',')) }}
+        <br/>
+        {{ [movie.grade|int, movie.grade]|max }}/10
+    </td>
+</tr>
+{% endfor %}
+
+</table></center>
 
 </div>
 

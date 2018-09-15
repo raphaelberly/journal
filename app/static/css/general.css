@@ -42,51 +42,12 @@ td {
     color: #6caee0;
 }
 
-.search-results {
-    margin-top: 156px;
-    padding-left: 20px;
-    padding-right: 20px;
-}
-
-.search-results table {
-    width: 100%;
-    margin-bottom: 12px;
-}
-
-.search-results td {
-    text-align: center;
-    padding-bottom: 8px;
-}
-
-.search-results img {
-    max-width: 180px;
-    width: 55%;
-}
-
-.search-results .dual {
-    width: 100%;
-    margin-top: 10px;
-}
-
-.search-results .dual .left {
-    text-align: right;
-    vertical-align: baseline;
-    padding-right: 5px;
-}
-
-.search-results .dual .right {
-    text-align: left;
-    vertical-align: baseline;
-    padding-left: 5px;
-
-}
-
 .mentions {
 	font-weight: bold;
 }
 
 .mentions img {
-    width: 20px;
+    width: 20px !important;
     margin-right: 3px;
     vertical-align: text-bottom;
 }
