@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from time import time
 import re
 import string
 
@@ -79,7 +80,7 @@ class Search(Base):
             return None
 
     def _magnify_image(self, image):
-        output = image
-        for change in self.config['images']:
-            output = output.replace(change['smaller'], change['bigger'])
+        start = time()
+        output = '{0}{1}{2}'.format(image.split(self.config['images']['split_on'])[0], self.config['images']['split_on'][0], self.config['images']['version_str'])
+        print('Magnifying image took: {:.10f} seconds'.format(time() - start))
         return output

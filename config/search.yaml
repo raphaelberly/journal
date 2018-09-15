@@ -68,11 +68,5 @@ find:
     format: loadlate
 
 images:
-  - smaller: ._V1_UX67_CR0,0,67,98_AL_.jpg
-    bigger: ._V1_UX182_CR0,0,182,268_AL_.jpg
-  - smaller: ._V1_UY98_CR1,0,67,98_AL_.jpg
-    bigger: ._V1_UY268_CR5,0,182,268_AL_.jpg
-  - smaller: ._V1_UY98_CR0,0,67,98_AL_.jpg
-    bigger: ._V1_UY268_CR1,0,182,268_AL_.jpg
-  - smaller: ._V1_UY98_CR2,0,67,98_AL_.jpg
-    bigger: ._V1_UY268_CR7,0,182,268_AL_.jpg
+  split_on: "@"
+  version_str: "._V1_UY268_CR7,0,182,268_AL_.jpg"
