@@ -80,8 +80,10 @@ class Search(Base):
         else:
             return None
 
-    def _magnify_image(self, image):
-        start = time()
-        output = '{0}{1}{2}'.format(image.split(self.config['images']['split_on'])[0], self.config['images']['split_on'][0], self.config['images']['version_str'])
-        print('Magnifying image took: {:.10f} seconds'.format(time() - start))
-        return output
+    def _magnify_image(self, image_url):
+        output_url = '{0}{1}{2}'.format(
+            image_url.split(self.config['images']['split_on'])[0],
+            self.config['images']['split_on'][0],
+            self.config['images']['version_str']
+        )
+        return output_url

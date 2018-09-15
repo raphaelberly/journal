@@ -68,5 +68,5 @@ find:
     format: loadlate
 
 images:
-  split_on: "@"
-  version_str: "._V1_UY268_CR7,0,182,268_AL_.jpg"
+  split_on: "._"
+  version_str: "V1_UY268_CR7,0,182,268_AL_.jpg"
