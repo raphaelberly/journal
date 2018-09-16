@@ -1,0 +1,41 @@
+
+.statistics {
+    width: 100%;
+    padding-top: 60px;
+}
+
+.statistics table {
+    border-spacing: 10px 50px;
+}
+
+.statistics td {
+    padding-bottom: 5px;
+    line-height: 1.5;
+    vertical-align: top;
+}
+
+.statistics .icon img {
+    height: 40px;
+}
+
+.top-type {
+    font-size: 20px;
+    color: #6caee0;
+    line-height: 2.1;
+}
+
+.top-name {
+    font-weight: bold;
+    line-height: 2;
+}
+
+.top-movies {
+    font-style: italic;
+}
+
+td.sideline {
+    width: 10px;
+    background: url("/static/images/sideline.png");
+    background-size: 10px;
+    background-repeat: repeat-y;
+}

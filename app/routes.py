@@ -4,7 +4,7 @@ from app import app
 from app import db
 from datetime import datetime, date, timedelta
 from flask import render_template, session, request
-from app.models import Record, Title
+from app.models import Record, Title, Director, Writer, Genre
 from lib.search import Search
 
 LOGGER = logging.getLogger(__name__)
@@ -50,29 +50,38 @@ def recent(nb_movies=10):
 
 
 @app.route('/statistics', methods=['GET'])
-def statistics(nb_movies=3):
+def statistics(nb_elements=3):
 
-    # Number of movies seen in total
-    metrics = {'total': Record.query.count()}
-    # This year's total
-    this_year = Record.query \
-        .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
-        .count()
-    metrics.update({'this_year': this_year})
+    counts = {}
     # This month's total
     this_month = Record.query \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
         .filter(db.extract('month', Record.date) == db.extract('month', date.today())) \
         .count()
-    metrics.update({'this_month': this_month})
-
-    best_movies = Record.query \
+    counts.update({'this_month': {'count': this_month, 'description': 'movies this month'}})
+    # This year's total
+    this_year = Record.query \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
-        .join(Title) \
-        .order_by(Record.grade.desc(), Record.date.desc()) \
-        .all()[:nb_movies]
+        .count()
+    counts.update({'this_year': {'count': this_year, 'description': 'movies this year'}})
+    # Number of movies seen in total
+    counts.update({'total': {'count': Record.query.count(), 'description': 'movies since January, 2014'}})
 
-    return render_template('statistics.html', title='Statistics', metrics=metrics, best_movies=best_movies)
+    tops = {}
+    top_models = {
+        'genres': {'model': Genre, 'min_movie_qty': 10},
+        'directors': {'model': Director, 'min_movie_qty': 3},
+        'writers': {'model': Writer, 'min_movie_qty': 4}
+    }
+    for top in top_models:
+        model = top_models[top]['model']
+        values = model.query \
+            .filter(model.count >= top_models[top]['min_movie_qty']) \
+            .order_by(model.grade.desc(), model.rating.desc()) \
+            .all()[:nb_elements]
+        tops.update({top: values})
+
+    return render_template('statistics.html', title='Statistics', counts=counts, tops=tops)
 
 
 @app.route('/', methods=['GET', 'POST'])

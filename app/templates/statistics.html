@@ -2,67 +2,50 @@
 
 {% block content %}
 
-<div class="classic">
+<div class="statistics">
 
-<table>
-<td>
+<center><table>
+
     <tr>
-        <p>
-            <span class="big-number">{{ metrics.this_month }}</span>
-            <br/>
-            movies this month
-        </p>
+        <td class="icon"><img src="/static/images/statistics/overall.png"></td>
+        <td class="sideline"></td>
+        <td>
+            <p class="top-type">Overall</p>
+            {% for element in counts %}
+                <p><span class="big-number">{{ counts[element].count }}</span>
+                <br/>{{ counts[element].description }}</p>
+            {% endfor %}
+        </td>
     </tr>
+
+{% for element in tops %}
+
     <tr>
-        <p>
-            <span class="big-number">{{ metrics.this_year }}</span>
-            <br/>
-            movies this year
-        </p>
-    </tr>
-    <tr>
-        <p>
-            <span class="big-number">{{ metrics.total }}</span>
-            <br/>
-            movies since January, 2014
-        </p>
-    </tr>
-</td>
-</table>
-
-    <div class="sub-content">
-
-    <h2>Best of {{ now.year }}</h2>
-
-    <table>
+    <td class="icon"><img src="/static/images/statistics/{{ element }}.png"></td>
+    <td class="sideline"></td>
     <td>
+    <p class="top-type">Top {{ element }}</p>
 
-        {% if best_movies|length < 3 %}
-        <tr>
-            <p>
-                Not enough movies seen in {{ now.year }} yet. Keep up!
-            </p>
-        </tr>
-        {% endif %}
+    {% for top in tops[element] %}
 
-        {% for i in range(best_movies|length) %}
-        {% set movie = best_movies[i] %}
-        <tr>
-            <p>
-                <span class="big-number">{{ i+1 }}</span>
-                <br/>
-                <b>{{ movie.title.title }} ({{ movie.title.year }})</b>
-                <br/>
-                {{ ', '.join(movie.title.genres.split(',')) }}
-                <br/>
-                {{ [movie.grade|int, movie.grade]|max }}/10
-            </p>
-        </tr>
+        <p><span class="big-number">{{ "%.1f"|format(top.grade) }}</span>
+        <br/><span class="top-name">{{ top.name }}</span>
+        <br/>Top {{ top.top_3|length }} movies ({{ top.count }} in total):
+
+        {% for title in top.top_3 %}
+
+            <br/><span class="top-movies"> &bull; {{ title }}</span>
         {% endfor %}
-    </td>
-    </table>
+        </p>
 
-    </div>
+    {% endfor %}
+
+    </td>
+    </tr>
+
+{% endfor %}
+
+</table></center>
 
 </div>
 
