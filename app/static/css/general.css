@@ -1,8 +1,6 @@
 
 body {
-    background-color: #6caee0;
-    background: linear-gradient(to bottom, #6caee0 0px, #6caee0 60px, #fff 60px, #fff 100%);
-    background-attachment: fixed;
+    background-color: #fff;
     font: 15px Trebuchet MS, sans-serif;
     text-decoration: none;
     text-align: center;
