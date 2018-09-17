@@ -40,14 +40,13 @@
     height: 100%;
     width: 0;
     position: fixed;
-    z-index: 3;
+    z-index: 4;
     top: 0;
     right: 0;
     background-color: #6caee0;
     overflow-x: hidden;
     transition: 0.2s;
     padding-top: 90px;
-    -webkit-box-shadow: -15px 0 50px rgba(0, 0, 0, 0.3);
 }
 
 .sidenav a {
@@ -73,3 +72,12 @@
 }
 
 
+.sidenavback {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  z-index: -1;
+  top: 0;
+  right: 0;
+  background-color: rgba(0,0,0,0.0);
+}
