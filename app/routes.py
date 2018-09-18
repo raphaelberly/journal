@@ -4,7 +4,7 @@ from app import app
 from app import db
 from datetime import datetime, date, timedelta
 from flask import render_template, session, request
-from app.models import Record, Title, Director, Writer, Genre
+from app.models import Record, Title, Top, Genre
 from lib.search import Search
 
 LOGGER = logging.getLogger(__name__)
@@ -69,16 +69,24 @@ def statistics(nb_elements=3):
 
     tops = {}
     top_models = {
-        'genres': {'model': Genre, 'min_movie_qty': 10},
-        'directors': {'model': Director, 'min_movie_qty': 3},
-        'writers': {'model': Writer, 'min_movie_qty': 4}
+        'directors': {'model': Top, 'role': 'director', 'min_movie_qty': 3},
+        'actors': {'model': Top, 'role': 'actor', 'min_movie_qty': 5},
+        'actresses': {'model': Top, 'role': 'actress', 'min_movie_qty': 4},
+        'genres': {'model': Genre, 'min_movie_qty': 10}
     }
     for top in top_models:
         model = top_models[top]['model']
-        values = model.query \
-            .filter(model.count >= top_models[top]['min_movie_qty']) \
-            .order_by(model.grade.desc(), model.rating.desc()) \
-            .all()[:nb_elements]
+        if 'role' in top_models[top].keys():
+            values = model.query \
+                .filter_by(role=top_models[top]['role']) \
+                .filter(model.count >= top_models[top]['min_movie_qty']) \
+                .order_by(model.grade.desc(), model.rating.desc()) \
+                .all()[:nb_elements]
+        else:
+            values = model.query \
+                .filter(model.count >= top_models[top]['min_movie_qty']) \
+                .order_by(model.grade.desc(), model.rating.desc()) \
+                .all()[:nb_elements]
         tops.update({top: values})
 
     return render_template('statistics.html', title='Statistics', counts=counts, tops=tops)

@@ -30,9 +30,9 @@
 
         <p><span class="big-number">{{ "%.1f"|format(top.grade) }}</span>
         <br/><span class="top-name">{{ top.name }}</span>
-        <br/>Top {{ top.top_3|length }} movies ({{ top.count }} in total):
+        <br/>Top {{ top.top_3_movies|length }} movies ({{ top.count }} in total):
 
-        {% for title in top.top_3 %}
+        {% for title in top.top_3_movies %}
 
             <br/><span class="top-movies"> &bull; {{ title }}</span>
         {% endfor %}
