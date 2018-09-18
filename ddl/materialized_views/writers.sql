@@ -12,7 +12,7 @@ movies AS (
     t.title,
     unnest(string_to_array(c.writers, ',')) AS writer
   FROM journal.crew c
-  INNER JOIN journal.views v
+  INNER JOIN journal.records v
     ON c.movie = v.movie
   INNER JOIN journal.ratings r
     ON c.movie = r.movie

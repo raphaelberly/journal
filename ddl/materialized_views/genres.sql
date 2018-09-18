@@ -11,7 +11,7 @@ movies_with_genre AS (
     r.rating,
     v.date,
     t.title
-  FROM journal.views v
+  FROM journal.records v
   INNER JOIN journal.ratings r
     ON v.movie = r.movie
   INNER JOIN journal.titles t

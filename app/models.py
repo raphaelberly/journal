@@ -31,7 +31,7 @@ class Record(db.Model):
 
     title = db.relationship("Title", back_populates="record")
 
-    __tablename__ = "views"
+    __tablename__ = "records"
     __table_args__ = {"schema": "journal"}
 
     def __init__(self, movie, grade):
