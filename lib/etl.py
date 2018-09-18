@@ -57,7 +57,7 @@ class ETL:
             os.unlink(uncompressed_file_path)
         gunzip(file_path)
         # Split resulting file into chunks
-        chunks_folder = chunk_file(uncompressed_file_path)
+        chunks_folder = chunk_file(uncompressed_file_path, chunk_size=10**6)
         # Return the chunk paths list
         return sorted([os.path.join(chunks_folder, file) for file in os.listdir(chunks_folder)])
 
@@ -91,7 +91,7 @@ class ETL:
         if replace:
             self._empty_table(engine, schema, self.target_type)
         # Insert by batch
-        self._insert_by_batch(df, engine, 100, params=params)
+        self._insert_by_batch(df, engine, 20, params=params)
 
     @staticmethod
     def _download_file(url, file_path, block_size=1024):
