@@ -1,3 +1,4 @@
+
 CREATE MATERIALIZED VIEW journal.genres AS (
 
 WITH
@@ -10,7 +11,8 @@ movies_with_genre AS (
     v.grade,
     r.rating,
     v.date,
-    t.title
+    t.title,
+    t.year
   FROM journal.records v
   INNER JOIN journal.ratings r
     ON v.movie = r.movie
@@ -24,6 +26,7 @@ genres AS (
   SELECT
     m.genre,
     array_agg(m.title ORDER BY m.grade DESC, m.rating DESC) AS titles,
+    array_agg(m.year ORDER BY m.grade DESC, m.rating DESC) AS titles_year,
     avg(m.grade)  AS grade,
     avg(m.rating) AS rating,
     count(*)      AS count
@@ -33,8 +36,9 @@ genres AS (
 )
 
 SELECT
-  g.genre       AS name,
-  g.titles[1:3] AS top_3,
+  g.genre             AS name,
+  g.titles[1:3]       AS top_3_movies,
+  g.titles_year[1:3]  AS top_3_movies_year,
   g.grade,
   g.rating,
   g.count
