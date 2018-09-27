@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import logging
+
 import yaml
 from lib.etl import ETL
+
+LOGGER = logging.getLogger(__name__)
 
 # Create argument parser
 parser = argparse.ArgumentParser()
@@ -23,3 +27,5 @@ for target_type in target_types:
     assert target_type in type_list, 'Provided types must be in {}'.format(type_list)
     etl = ETL(target_type)
     etl.run()
+
+LOGGER.info('Done.')
