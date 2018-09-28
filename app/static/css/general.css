@@ -1,5 +1,10 @@
 
 body {
+
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+
     background-color: #fff;
     font: 15px Trebuchet MS, sans-serif;
     text-decoration: none;
