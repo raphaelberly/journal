@@ -6,6 +6,8 @@
 
 .recent table {
     border-spacing: 0;
+    padding-right: 30px;
+    padding-left: 30px;
 }
 
 .recent td {

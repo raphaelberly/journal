@@ -6,6 +6,8 @@
 
 .statistics table {
     border-spacing: 10px 50px;
+    padding-left: 20px;
+    padding-right: 25px;
 }
 
 .statistics td {
