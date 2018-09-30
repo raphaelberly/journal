@@ -55,7 +55,7 @@ def recent(nb_movies=25):
 
 
 @app.route('/statistics', methods=['GET'])
-def statistics(nb_elements=3):
+def statistics():
 
     counts = {}
     # This month's total
@@ -74,10 +74,11 @@ def statistics(nb_elements=3):
 
     tops = {}
     top_models = {
-        'directors': {'model': Top, 'role': 'director', 'min_movie_qty': 3},
-        'actors': {'model': Top, 'role': 'actor', 'min_movie_qty': 5},
-        'actresses': {'model': Top, 'role': 'actress', 'min_movie_qty': 4},
-        'genres': {'model': Genre, 'min_movie_qty': 10}
+        'directors': {'model': Top, 'role': 'director', 'min_movie_qty': 3, 'nb_elements': 5},
+        'actors': {'model': Top, 'role': 'actor', 'min_movie_qty': 5, 'nb_elements': 5},
+        'actresses': {'model': Top, 'role': 'actress', 'min_movie_qty': 4, 'nb_elements': 5},
+        'genres': {'model': Genre, 'min_movie_qty': 10, 'nb_elements': 5},
+        'composers': {'model': Top, 'role': 'composer', 'min_movie_qty': 4, 'nb_elements': 3}
     }
     for top in top_models:
         model = top_models[top]['model']
@@ -86,12 +87,12 @@ def statistics(nb_elements=3):
                 .filter_by(role=top_models[top]['role']) \
                 .filter(model.count >= top_models[top]['min_movie_qty']) \
                 .order_by(model.grade.desc(), model.rating.desc()) \
-                .all()[:nb_elements]
+                .all()[:top_models[top]['nb_elements']]
         else:
             values = model.query \
                 .filter(model.count >= top_models[top]['min_movie_qty']) \
                 .order_by(model.grade.desc(), model.rating.desc()) \
-                .all()[:nb_elements]
+                .all()[:top_models[top]['nb_elements']]
         tops.update({top: values})
 
     return render_template('statistics.html', title='Statistics', counts=counts, tops=tops)
