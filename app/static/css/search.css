@@ -6,7 +6,7 @@
     width: 100%;
     z-index: 1;
 
-    padding-top: 85px;
+    padding-top: 100px;
     padding-bottom: 20px;
     background-color: #fff;
     text-align: center;
@@ -50,7 +50,7 @@
 
 
 .search-results {
-    margin-top: 156px;
+    margin-top: 171px;
     padding-left: 20px;
     padding-right: 20px;
 }
