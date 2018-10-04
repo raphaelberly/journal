@@ -11,6 +11,11 @@ body {
     text-align: center;
     margin: 0px;
     padding: 0px;
+
+    min-height: 100%;
+	min-height: calc(100% + constant(safe-area-inset-top));
+	min-height: calc(100% + env(safe-area-inset-top));
+
 }
 
 form {

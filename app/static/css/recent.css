@@ -1,7 +1,9 @@
 
 .recent {
     width: 100%;
-    padding-top: 125px;
+    padding-top: 110px;
+    padding-top: calc(110px + constant(safe-area-inset-top));
+    padding-top: calc(110px + env(safe-area-inset-top));
 }
 
 .recent table {

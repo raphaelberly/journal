@@ -6,14 +6,18 @@
   position: fixed;
   top: 0px;
   width: 100%;
-  height: 80px;
+  height: 65px;
+  height: calc(65px + constant(safe-area-inset-top));
+  height: calc(65px + env(safe-area-inset-top));
 }
 
 .navbar table {
   width: 100%;
   text-align: center;
   color: #fff;
-  margin-top: 15px;
+  margin-top: 0;
+  margin-top: constant(safe-area-inset-top);
+  margin-top: env(safe-area-inset-top);
   padding: 18px 20px 15px 20px;
   font-size: 22px;
 }
@@ -37,6 +41,7 @@
 }
 
 .sidenav {
+
     height: 100%;
     width: 0;
     position: fixed;
@@ -47,6 +52,7 @@
     overflow-x: hidden;
     transition: 0.2s;
     padding-top: 90px;
+
 }
 
 .sidenav a {
@@ -61,7 +67,9 @@
 
 .sidenav .closebtn {
     position: absolute;
-    top: 40px;
+    top: 25px;
+    top: calc(25px + constant(safe-area-inset-top));
+    top: calc(25px + env(safe-area-inset-top));
     left: 26px;
     width: 18px;
 }
@@ -73,11 +81,13 @@
 
 
 .sidenavback {
-  height: 100%;
-  width: 100%;
-  position: fixed;
-  z-index: -1;
-  top: 0;
-  right: 0;
-  background-color: rgba(0,0,0,0.0);
+
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    z-index: -1;
+    top: 0;
+    right: 0;
+    background-color: rgba(0,0,0,0.0);
+
 }
