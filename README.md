@@ -4,9 +4,11 @@ _Since January 2014, I have been keeping an Excel log of movies as I watched the
 
 This project aims at keeping a journal of the movies I have seen. It takes the form of a Postgres database containing both the logs of all the movies I have seen and [open IMDb data](https://www.imdb.com/interfaces/). This enables me to get a lot of information about the movies I have seen, and also to be able to compute all kinds of useful statistics (proportion of movies watched per genre, favourite directors, actors, writers, etc.)
 
-In order to add movies to the database (with their IMDb ID!) conveniently, whenever I want from my phone or my computer, I also built a simple Flask website, which looks something like this:
+In order to add movies to the database (with their IMDb ID!) conveniently, whenever I want from my phone or my computer, I also built a web app, in the form of a Flask Website, which looks something like this:
 
 <div align="center" border="1px"><img src="img/search_page.png" width="250px"/></div>
+
+It recently evolved into a more sophisticated web app offering new features, such as a "Recent" page to check the most recent movies seen and a "Statistics" page.
 
 
 ### Overview
@@ -50,15 +52,42 @@ Usage example: `python main_search.py -m "star wars the force awakens"`
 
 ### 3. Flask App
 
-At this point, the Journal takes the form of a database containing the open IMDb data, and the movies I watched identified by their IMDb ID, which I can get with the `main_search.py` script. But this is not convenient: I cannot do it from any device, or even from my phone, and more importantly it requires to write an "insert" SQL query.
+At this point, the Journal takes the form of a database containing the open IMDb data, and the movies I watched identified by their IMDb ID, which I can get with the `main_search.py` script. But this is not convenient:
 
-This is why I built a Flask web-app, which enables me to have a proper interface for searching and adding movies to my journal, from anywhere and without the need to write an SQL query.
+- I cannot do it from any device, or even from my phone, and more importantly it requires to write an "insert" SQL query.
+- I cannot check easily which movies I watched recently or compute basic statistics. It also requires an SQL query.
+
+This is why I built a Flask web-app, which enables me to do these things I cannot do easily, and more. For now, it has three pages, which can be reached through a dynamic menu on the top right.
 
 The web-app code (routes, HTML templates, CSS code, etc.) can be found in the `app` folder. It is hosted on my Raspberry Pi so I can reach it at any time from my phone or computer.
 
-Here is how it looks like:
+**Important Note:** 
 
-<div align="center" border="1px"><img src="img/dual_pages.png" width="500px"/></div>
+**The Flask application must be run on a python 3.6+ environment**, since it uses the fact that basic python dicts are ordered. Using it with a lower Python version will result in search page malfunctions.
+
+#### 3.1 Search page
+
+The "Search" page enables me to have a proper interface for searching and adding movies to my journal, from anywhere and without the need to write an SQL query.
+
+<div align="center" border="1px"><img src="img/search_page_menu.png" width="500px"/></div>
+
+This page is the landing page of the web-app. Also, clicking on the top-left icon will always bring you back to an empty search page, while the top-right icon is the menu, it enables the user to acces the other pages.
+
+#### 3.2 Recent page
+
+The "Recent" page aims at enabling me to have an easy access to the last movies I saw.
+
+<div align="center" border="1px"><img src="img/recent_page.png" width="250px"/></div>
+
+The timeline was made using a combination of images, CSS styling and HTML table.
+
+#### 3.3 Statistics page
+
+The "Statistics" page aims at providing me with some statistics regarding my activity and tastes.
+
+Some statistics are really basic, such as the number of movies seen within the last month, or year. But some statistics are more interesting, such as the best directors, best actors, etc. For instance, if I did not know a lot about directors, so I might have liked very much several movies of a specific director and not know him! This would show him within the list that you can see above:
+
+<div align="center" border="1px"><img src="img/statistics_page.png" width="250px"/></div>
 
 
 ### 4. Movie Recommendation (in progress)
