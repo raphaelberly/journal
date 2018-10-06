@@ -8,7 +8,7 @@
     cursor: pointer;
     outline: none;
     border: 1px solid #6caee0;
-    width: 90px;
+    min-width: 100px;
 
 }
 
