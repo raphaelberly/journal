@@ -143,10 +143,12 @@ def movie(movie_id):
 
             movie = session['results'][movie_id]
             if movie.get('grade'):
+                action = 'updated'
                 # Update the movie in the database
                 Record.query.filter_by(movie=movie_id).update({'grade': grade})
                 db.session.commit()
             else:
+                action = 'added'
                 # Add the movie to the database
                 record = Record(movie=movie_id, grade=grade)
                 db.session.add(record)
@@ -154,7 +156,9 @@ def movie(movie_id):
             # Update the movie item with the grade
             session['results'][movie_id]['grade'] = grade
             session.modified = True
-            return render_template('movie.html', title='Search', movie_id=movie_id, mode='show_add_or_edit_confirmation')
+            return render_template(
+                'movie.html', title='Search', movie_id=movie_id, mode='show_add_or_edit_confirmation', action=action
+            )
 
         elif 'remove' in request.form:
             # Delete the movie from the database
