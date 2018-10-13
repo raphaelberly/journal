@@ -33,10 +33,15 @@ def get_time_ago_string(dt):
         s = 's' if weeks > 1 else ''
         return '{0} week{1} ago'.format(weeks, s)
 
-    else:
+    elif dt >= get_n_days_ago(364):
         months = (date.today() - dt).days // 28
         s = 's' if months > 1 else ''
         return '{0} month{1} ago'.format(months, s)
+
+    else:
+        years = (date.today() - dt).days // 365
+        s = 's' if years > 1 else ''
+        return '{0} year{1} ago'.format(years, s)
 
 
 @app.context_processor
@@ -44,14 +49,24 @@ def inject_now():
     return {'now': datetime.now()}
 
 
-@app.route('/recent', methods=['GET'])
+@app.route('/recent', methods=['GET', 'POST'])
 def recent(nb_movies=25):
-    recent_movies = Record.query.join(Title) \
-        .order_by(Record.date.desc(), Record.insert_datetime.desc()) \
-        .all()[:nb_movies]
-    for movie in recent_movies:
-        movie.__setattr__('time_ago', get_time_ago_string(movie.date))
-    return render_template('recent.html', title='Recent', recent_movies=recent_movies)
+
+    query = db.session \
+        .query(Record.date, Record.insert_datetime, Record.grade, Title.title, Title.year, Title.genres) \
+        .select_from(Record).join(Record.title) \
+        .order_by(Record.date.desc(), Record.insert_datetime.desc())
+
+    show = 'recent'
+    if request.method == 'POST':
+        if 'show_all' in request.form:
+            show = 'all'
+
+    if show == 'recent':
+        query = query.limit(nb_movies)
+
+    movies = query.all()
+    return render_template('recent.html', title='Recent', movies=movies, show=show, get_time_ago=get_time_ago_string)
 
 
 @app.route('/statistics', methods=['GET'])
@@ -131,8 +146,6 @@ def search():
 
 @app.route('/movie/<movie_id>', methods=['GET', 'POST'])
 def movie(movie_id):
-
-    # print(request)
 
     if request.method == 'POST':
 

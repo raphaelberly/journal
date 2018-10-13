@@ -4,25 +4,24 @@
 
 <div class="recent">
 
-    <center>
-<table>
+<center><table>
 
-{% for i in range(recent_movies|length) %}
-{% set movie = recent_movies[i] %}
+{% for i in range(movies|length) %}
+{% set movie = movies[i] %}
 <tr>
     {% if i == 0 %}
         <td class="timeline top"></td>
-    {% elif i == recent_movies|length - 1 %}
+    {% elif i == movies|length - 1 %}
         <td class="timeline bottom"><div class="bottom"></div></td>
     {% else %}
         <td class="timeline middle"></td>
     {% endif %}
     <td>
-        <span class="time-ago">{{ movie.time_ago }}</span>
+        <span class="time-ago">{{ get_time_ago(movie.date) }}</span>
         <br/>
-        <b>{{ movie.title.title }} ({{ movie.title.year }})</b>
+        <b>{{ movie.title }} ({{ movie.year }})</b>
         <br/>
-        {{ ', '.join(movie.title.genres.split(',')) }}
+        {{ ', '.join(movie.genres.split(',')) }}
         <br/>
         {{ [movie.grade|int, movie.grade]|max }}/10
     </td>
@@ -30,6 +29,12 @@
 {% endfor %}
 
 </table></center>
+
+{% if show == 'recent' %}
+<form action="{{ url_for('recent') }}" method="post">
+    <input class="styled-button full" type="submit" id="show_more_button" name="show_all" value="{{ 'Load All' }}">
+</form>
+{% endif %}
 
 </div>
 

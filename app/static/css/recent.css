@@ -18,6 +18,10 @@
     vertical-align: top;
 }
 
+#show_more_button {
+    margin-bottom: 30px;
+}
+
 .time-ago {
     font-weight: bold;
     color: #6caee0;
