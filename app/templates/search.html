@@ -5,6 +5,18 @@
 
 <div class="search-results">
 
+{% if session.get('results') == {} %}
+<table>
+    <tr><td>
+    <img id="img-no-results" src="static/images/fail.png">
+    </td></tr>
+    <tr><td>
+    Wops, no results were found
+    </td></tr>
+</table>
+{% endif %}
+
+
 {% for movie in (session.get('results') or {}).values() %}
 
 <table>

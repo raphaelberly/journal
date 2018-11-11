@@ -35,7 +35,7 @@ class Search(Base):
 
         rows = self.get_from_soup(soup, 'rows')
         if not rows:
-            return []
+            return {}
 
         rows = rows[:self.config['nb_results']]
 

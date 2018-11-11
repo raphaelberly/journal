@@ -60,6 +60,10 @@
     padding-right: 20px;
 }
 
+#img-no-results {
+    width: 40px;
+}
+
 .search-results table {
     width: 100%;
     margin-bottom: 12px;
