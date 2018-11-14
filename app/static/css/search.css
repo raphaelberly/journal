@@ -51,7 +51,6 @@
 }
 
 
-
 .search-results {
     margin-top: 156px;
     margin-top: calc(156px + constant(safe-area-inset-top));
@@ -61,7 +60,9 @@
 }
 
 #img-no-results {
-    width: 40px;
+    width: 30px;
+    margin-top: 8px;
+    margin-bottom: 4px;
 }
 
 .search-results table {
