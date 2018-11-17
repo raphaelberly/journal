@@ -52,22 +52,22 @@
 
 
 .search-results {
-    margin-top: 156px;
-    margin-top: calc(156px + constant(safe-area-inset-top));
-    margin-top: calc(156px + env(safe-area-inset-top));
+    padding-top: 156px;
+    padding-top: calc(156px + constant(safe-area-inset-top));
+    padding-top: calc(156px + env(safe-area-inset-top));
     padding-left: 20px;
     padding-right: 20px;
 }
 
 #img-no-results {
     width: 30px;
-    margin-top: 8px;
-    margin-bottom: 4px;
+    padding-top: 8px;
+    padding-bottom: 4px;
 }
 
 .search-results table {
     width: 100%;
-    margin-bottom: 12px;
+    padding-bottom: 12px;
 }
 
 .search-results td {
@@ -82,7 +82,7 @@
 
 .search-results .dual {
     width: 100%;
-    margin-top: 10px;
+    padding-top: 10px;
 }
 
 .search-results .dual .left {
