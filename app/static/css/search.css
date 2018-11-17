@@ -18,8 +18,8 @@
 
 .form-search input{
 
-    width: 100%;
-    max-width: 242px;
+    width: calc(100% - 90px - 40px);
+    max-width: 280px;
     border-radius: 2px;
     background-color:  #ffffff;
     padding: 14px 15px 14px 20px;
