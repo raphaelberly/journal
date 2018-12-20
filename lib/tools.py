@@ -6,6 +6,8 @@ import sys
 
 import yaml
 
+from sqlalchemy import create_engine
+
 
 def get_database_uri(**params):
     return '{type}://{user}:{password}@{host}:{port}/{db}'.format(**params)
@@ -59,3 +61,12 @@ def chunk_file(file_path, chunk_size=10**6, header=True):
         i += 1
 
     return folder
+
+
+def df_to_table(df, schema, table, if_exists='append', config_folder='config'):
+
+    credentials = read_config(os.path.join(config_folder, 'credentials.yaml'))
+    engine = create_engine(get_database_uri(**credentials['pi']))
+    params = {'name': table, 'schema': schema, 'index': False}
+
+    df.to_sql(con=engine, if_exists=if_exists, **params)
