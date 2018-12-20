@@ -1,4 +1,5 @@
 import logging
+from functools import lru_cache
 
 from app import app
 from app import db
@@ -8,6 +9,9 @@ from app.models import Record, Title, Top, Genre
 from lib.search import Search
 
 LOGGER = logging.getLogger(__name__)
+
+
+CACHE_SIZE = 10
 
 
 def get_post_result(key):
@@ -42,6 +46,12 @@ def get_time_ago_string(dt):
         years = (date.today() - dt).days // 365
         s = 's' if years > 1 else ''
         return '{0} year{1} ago'.format(years, s)
+
+
+# Cache search results
+@lru_cache(CACHE_SIZE)
+def get_search_results(input):
+    return Search(input, 'config').get_results()
 
 
 @app.context_processor
@@ -122,7 +132,7 @@ def search():
 
             # Get the results for the provided input
             input = get_post_result('input')
-            results = Search(input, 'config').get_results()
+            results = get_search_results(input)
 
             # Add the grade to the result if the movie was seen already
             records = dict(Record.query.with_entities(Record.movie, Record.grade).all())
