@@ -70,3 +70,20 @@ def df_to_table(df, schema, table, if_exists='append', config_folder='config'):
     params = {'name': table, 'schema': schema, 'index': False}
 
     df.to_sql(con=engine, if_exists=if_exists, **params)
+
+
+def resolve(name):
+    """
+    Copied directly from: https://github.com/python/cpython/blob/master/Lib/logging/config.py
+    """
+    name = name.split('.')
+    used = name.pop(0)
+    found = __import__(used)
+    for n in name:
+        used = used + '.' + n
+        try:
+            found = getattr(found, n)
+        except AttributeError:
+            __import__(used)
+            found = getattr(found, n)
+    return found
