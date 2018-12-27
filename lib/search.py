@@ -1,23 +1,31 @@
 # -*- coding: utf-8 -*-
+from itertools import islice as slice
 
-from time import time
+import os
 import re
-import string
-
 import requests
+import string
 from bs4 import BeautifulSoup, SoupStrainer
 
-from .base import Base
+from lib.tools import read_config, resolve
 
 
-class Search(Base):
+class Search(object):
 
     def __init__(self, raw_input, config_folder='config'):
-        # Instantiate base
-        Base.__init__(self, 'search', config_folder)
+        # Config
+        self.config = read_config(os.path.join(config_folder, 'search.yaml'))
+        self.credentials = read_config(os.path.join(config_folder, 'credentials.yaml'))
         # Parse data
         input = self._clean_string(raw_input)
         self.link = self._get_link(input)
+
+    @staticmethod
+    def _clean_string(input):
+        punctuation = re.compile("[{}]".format(re.escape(string.punctuation)))
+        aux = punctuation.sub('', input)
+        aux = re.sub("\s\s+", " ", aux)
+        return aux.lower().strip(' ')
 
     def _get_link(self, input):
         url = self.config['url']
@@ -27,50 +35,49 @@ class Search(Base):
             min_votes=url['min_votes']
         )
 
-    def get_results(self):
-
-        strainer = SoupStrainer(**self._format_params(self.config.get('content')))
-        headers = {"Accept-Language": "en-US,en;q=0.5"}
-        soup = BeautifulSoup(requests.get(self.link, headers=headers).content, 'lxml', parse_only=strainer)
-
-        rows = self.get_from_soup(soup, 'rows')
-        if not rows:
-            return {}
-
-        rows = rows[:self.config['nb_results']]
-
-        id_pattern = re.compile(r'/(t{2}\d{7})/')
-        year_pattern = re.compile(r'\((\d{4})\)')
-        directors_pattern = re.compile(r'li_dr_\d')
-        cast_pattern = re.compile(r'li_st_\d')
-
-        # Dicts are ordered in python 3.6+
-        output = {}
-
-        for row in rows:
-            sub_output = {}
-            sub_output.update({'id': self._regexp_extract(id_pattern, self.get_from_soup(row, 'id'))})
-            sub_output.update({'title': self.get_from_soup(row, 'title')})
-            sub_output.update({'genre': self.get_from_soup(row, 'genre')})
-            sub_output.update({'year': self._regexp_extract(year_pattern, self.get_from_soup(row, 'year'))})
-
-            staff = self.get_from_soup(row, 'staff')
-            sub_output.update({'directors': [item.text for item in staff.find_all('a', href=directors_pattern)]})
-            sub_output.update({'cast': [item.text for item in staff.find_all('a', href=cast_pattern)]})
-
-            img = self.get_from_soup(row, 'image')
-            sub_output.update({'image': self._magnify_image(img)})
-
-            output.update({sub_output['id']: sub_output})
-
-        return output
+    @staticmethod
+    def _format_params(params):
+        if 'tag' not in params:
+            raise KeyError(f"'tag' key must be in {params}")
+        if params.get('type') and params.get('key'):
+            return {'name': params.get('tag'), 'attrs': {params.get('type'): params.get('key')}}
+        else:
+            return {'name': params.get('tag')}
 
     @staticmethod
-    def _clean_string(input):
-        punctuation = re.compile("[{}]".format(re.escape(string.punctuation)))
-        aux = punctuation.sub('', input)
-        aux = re.sub("\s\s+", " ", aux)
-        return aux.lower().strip(' ')
+    def _apply(soup, items):
+        for item in items:
+            func = resolve(item['func'])
+            soup = func(soup, *item.get('args', []))
+        return soup
+
+    def _find(self, soup, params):
+        if not soup:
+            return None
+        if type(params) == dict:
+            return soup.find(**self._format_params(params))
+        if type(params) == list:
+            output = soup
+            for param in params:
+                output = self._find(output, param)
+            return output
+
+    def _find_all(self, soup, params):
+        output = soup.find(**self._format_params(params))
+        while output is not None:
+            yield output
+            output = output.find_next(**self._format_params(params))
+
+    def get_rows(self):
+        strainer = SoupStrainer(**self._format_params(self.config['content']))
+        headers = {"Accept-Language": "en-US,en;q=0.5"}
+        soup = BeautifulSoup(requests.get(self.link, headers).content, 'lxml', parse_only=strainer)
+        return self._find_all(soup, self.config['rows'])
+
+    def get_from_soup(self, soup, detail):
+        detail = self.config['find'][detail]
+        result = self._find(soup, detail['params'])
+        return self._apply(result, detail.get('apply', []))
 
     @staticmethod
     def _regexp_extract(pattern, string):
@@ -87,3 +94,32 @@ class Search(Base):
             self.config['images']['version_str']
         )
         return output_url
+
+    def parse_rows(self, rows):
+
+        id_pattern = re.compile(r'/(t{2}\d{7})/')
+        year_pattern = re.compile(r'\((\d{4})\)')
+        directors_pattern = re.compile(r'li_dr_\d')
+        cast_pattern = re.compile(r'li_st_\d')
+
+        for row in rows:
+
+            output = {
+                'id': self._regexp_extract(id_pattern, self.get_from_soup(row, 'id')),
+                'title': self.get_from_soup(row, 'title'),
+                'genre': self.get_from_soup(row, 'genre'),
+                'year': self._regexp_extract(year_pattern, self.get_from_soup(row, 'year')),
+                'image': self._magnify_image(self.get_from_soup(row, 'image')),
+            }
+
+            staff = self.get_from_soup(row, 'staff')
+            output.update({'directors': [item.text for item in staff.find_all('a', href=directors_pattern)]})
+            output.update({'cast': [item.text for item in staff.find_all('a', href=cast_pattern)]})
+
+            yield output
+
+    def get_results(self):
+        rows = self.get_rows()
+        parsed_rows = self.parse_rows(rows)
+        parsed_rows = slice(parsed_rows, self.config['nb_results'])
+        return list(parsed_rows)

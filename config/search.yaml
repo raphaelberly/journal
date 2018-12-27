@@ -18,40 +18,45 @@ content:
   type: id
   key: main
 
+rows:
+  tag: div
+  type: class
+  key: mode-advanced
+
 find:
-  rows:
-    params:
-      - tag: div
-        type: class
-        key: mode-advanced
-        multiple: True
 
   title:
     params:
       - tag: h3
       - tag: a
-    format: text
+    apply:
+      - func: lib.apply_functions.get_text
 
   id:
     params:
       - tag: h3
       - tag: a
-    format: href
+    apply:
+      - func: lib.apply_functions.get_url
 
   genre:
     params:
       - tag: span
         type: class
         key: genre
-    format: text
-    strip: " ,\t\n\r\xa0"
+    apply:
+      - func: lib.apply_functions.get_text
+      - func: lib.apply_functions.strip
+        args:
+          - " ,\t\n\r\xa0"
 
   year:
     params:
       - tag: span
         type: class
         key: lister-item-year
-    format: text
+    apply:
+      - func: lib.apply_functions.get_text
 
   staff:
     params:
@@ -65,7 +70,8 @@ find:
         type: class
         key: lister-item-image
       - tag: img
-    format: loadlate
+    apply:
+      - func: lib.apply_functions.get_image_url
 
 images:
   split_on: "._"
