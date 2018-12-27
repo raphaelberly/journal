@@ -119,7 +119,13 @@ class Search(object):
             yield output
 
     def get_results(self):
+
         rows = self.get_rows()
         parsed_rows = self.parse_rows(rows)
-        parsed_rows = slice(parsed_rows, self.config['nb_results'])
-        return list(parsed_rows)
+        results = slice(parsed_rows, self.config['nb_results'])
+
+        output = {}
+        for result in results:
+            output.update({result['id']: result})
+
+        return output
