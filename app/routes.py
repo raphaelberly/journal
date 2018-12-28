@@ -5,7 +5,7 @@ from app import app
 from app import db
 from datetime import datetime, date, timedelta
 from flask import render_template, session, request
-from app.models import Record, Title, Top, Genre
+from app.models import Record, Title, Top, Genre, WatchlistItem
 from lib.search import Search
 
 LOGGER = logging.getLogger(__name__)
@@ -152,6 +152,24 @@ def search():
     session['input'] = None
     session['results'] = None
     return render_template('search.html', title='Search')
+
+
+@app.route('/watchlist', methods=['GET', 'POST'])
+def watchlist():
+
+    if not session.get('watchlist'):
+        # Query watchlist on DB
+        watchlist_items = WatchlistItem.query.all()
+        # Format results
+        watchlist = {}
+        for item in watchlist_items:
+            item.__dict__.pop('_sa_instance_state')
+            watchlist.update({item.movie: item.__dict__})
+        # Update session['watchlist']
+        session['watchlist'] = watchlist
+        session.modified = True
+
+    return render_template('watchlist.html', title='Watchlist')
 
 
 @app.route('/movie/<movie_id>', methods=['GET', 'POST'])
