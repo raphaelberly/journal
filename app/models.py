@@ -21,6 +21,23 @@ class Title(db.Model):
         return '<Title {0}: {1}>'.format(self.movie, self.title)
 
 
+class WatchlistItem(db.Model):
+
+    movie = db.Column(db.String(9), primary_key=True)
+    title = db.Column(db.String(256))
+    year = db.Column(db.Integer)
+    genres = db.Column(db.String(256))
+    directors = db.Column(db.ARRAY(db.String(256)))
+    cast = db.Column(db.ARRAY(db.String(256)))
+    image = db.Column(db.String(1024))
+
+    __tablename__ = "watchlist"
+    __table_args__ = {"schema": "journal"}
+
+    def __repr__(self):
+        return '<Watchlist item {0}: {1}>'.format(self.movie, self.title)
+
+
 class Record(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
