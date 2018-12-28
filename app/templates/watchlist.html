@@ -5,19 +5,19 @@
 
 <div class="search-results">
 
-{% if session.get('results', {}) == {} %}
+{% if session.get('watchlist', {}) == {} %}
 <table>
     <tr><td>
     <img id="img-no-results" src="static/images/fail.png">
     </td></tr>
     <tr><td>
-    Wops, no results were found
+    Wops, no movies in watchlist.
     </td></tr>
 </table>
 {% endif %}
 
 
-{% for movie in (session.get('results', {})).values() %}
+{% for movie in (session.get('watchlist', {})).values() %}
 
 <table>
 
