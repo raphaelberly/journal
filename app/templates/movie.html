@@ -2,7 +2,11 @@
 
 {% block content %}
 
-{% set movie = session['results'][movie_id] %}
+{% if session.get('results') %}
+{% set item = session['results'].get(movie_id) or session['watchlist'][movie_id] %}
+{% else %}
+{% set item = session['watchlist'][movie_id] %}
+{% endif %}
 
 <div class="search-results">
 
