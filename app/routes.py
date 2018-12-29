@@ -48,6 +48,17 @@ def get_time_ago_string(dt):
         return '{0} year{1} ago'.format(years, s)
 
 
+def remove_from_watchlist(movie_id):
+    # Remove from watchlist on database
+    to_delete = WatchlistItem.query.filter_by(movie=movie_id).all()
+    for record in to_delete:
+        db.session.delete(record)
+    db.session.commit()
+    # Remove from watchlist on session
+    session['watchlist'].pop(movie_id)
+    session.modified = True
+
+
 # Cache search results
 @lru_cache(CACHE_SIZE)
 def get_search_results(input):
@@ -169,6 +180,23 @@ def watchlist():
         session['watchlist'] = watchlist
         session.modified = True
 
+    if request.method == 'POST':
+        if 'add_to_watchlist' in request.form:
+            movie_id = request.args.get('add')
+            # Add to watchlist on database
+            item = WatchlistItem(**session['results'][movie_id])
+            db.session.add(item)
+            db.session.commit()
+            # Add to watchlist on session
+            session['watchlist'][movie_id] = session['results'][movie_id]
+            session.modified = True
+            return render_template('watchlist.html', title='Watchlist', added=movie_id)
+
+        elif 'remove_from_watchlist' in request.form:
+            movie_id = request.args.get('remove')
+            remove_from_watchlist(movie_id)
+            return render_template('watchlist.html', title='Watchlist', removed=movie_id)
+
     return render_template('watchlist.html', title='Watchlist')
 
 
@@ -190,16 +218,17 @@ def movie(movie_id):
                 db.session.commit()
             else:
                 action = 'added'
-                # Add the movie to the database
+                # Add the movie to the records database
                 record = Record(movie=movie_id, grade=grade)
                 db.session.add(record)
                 db.session.commit()
+                # Remove the movie from the watchlist
+                remove_from_watchlist(movie_id)
             # Update the movie item with the grade
             session['results'][movie_id]['grade'] = grade
             session.modified = True
-            return render_template(
-                'movie.html', title='Search', movie_id=movie_id, mode='show_add_or_edit_confirmation', action=action
-            )
+            return render_template('movie.html', title='Movie', movie_id=movie_id,
+                                   mode='show_add_or_edit_confirmation', action=action)
 
         elif 'remove' in request.form:
             # Delete the movie from the database
@@ -210,6 +239,7 @@ def movie(movie_id):
             # Remove the grade from the movie item
             session['results'][movie_id].pop('grade')
             session.modified = True
-            return render_template('movie.html', title='Search', movie_id=movie_id, mode='show_remove_confirmation')
+            return render_template('movie.html', title='Movie', movie_id=movie_id,
+                                   mode='show_remove_confirmation')
 
-    return render_template('movie.html', title='Search', movie_id=movie_id, mode='show_slider')
+    return render_template('movie.html', title='Movie', movie_id=movie_id, mode='show_slider')

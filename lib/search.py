@@ -105,9 +105,9 @@ class Search(object):
         for row in rows:
 
             output = {
-                'id': self._regexp_extract(id_pattern, self.get_from_soup(row, 'id')),
+                'movie': self._regexp_extract(id_pattern, self.get_from_soup(row, 'movie')),
                 'title': self.get_from_soup(row, 'title'),
-                'genre': self.get_from_soup(row, 'genre'),
+                'genres': self.get_from_soup(row, 'genres'),
                 'year': self._regexp_extract(year_pattern, self.get_from_soup(row, 'year')),
                 'image': self._magnify_image(self.get_from_soup(row, 'image')),
             }
@@ -126,6 +126,6 @@ class Search(object):
 
         output = {}
         for result in results:
-            output.update({result['id']: result})
+            output.update({result['movie']: result})
 
         return output

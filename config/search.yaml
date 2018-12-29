@@ -32,14 +32,14 @@ find:
     apply:
       - func: lib.apply_functions.get_text
 
-  id:
+  movie:
     params:
       - tag: h3
       - tag: a
     apply:
       - func: lib.apply_functions.get_url
 
-  genre:
+  genres:
     params:
       - tag: span
         type: class

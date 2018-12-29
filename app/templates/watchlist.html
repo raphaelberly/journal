@@ -5,7 +5,7 @@
 
 <div class="search-results">
 
-{% if session.get('watchlist', {}) == {} %}
+{% if session.get('watchlist') == {} %}
 <table>
     <tr><td>
     <img id="img-no-results" src="static/images/fail.png">
@@ -17,33 +17,37 @@
 {% endif %}
 
 
-{% for movie in (session.get('watchlist', {})).values() %}
+{% for item in (session.get('watchlist') or {}).values() %}
 
 <table>
 
     <tr><td>
-        <a href="{{ url_for('movie', movie_id=movie['id']) }}"><img src="{{ movie.get('image') }}"></a>
+        <a href="{{ url_for('movie', movie_id=item['movie']) }}"><img src="{{ item.get('image') }}"></a>
     </td></tr>
     <tr><td>
-        <b>{{ movie.get('title') }}{% if movie.get('year') %} ({{ movie['year'] }}){% endif %}</b>
-        {% if movie.get('genre') %}
-            <br/> {{ movie['genre'] }}
+        <b>{{ item.get('title') }}{% if item.get('year') %} ({{ item['year'] }}){% endif %}</b>
+        {% if item.get('genres') %}
+            <br/> {{ item['genres'] }}
         {% endif %}
-        {% if movie.get('directors') %}
-            <br/> By {{ ' and '.join(movie['directors']) }}
+        {% if item.get('directors') %}
+            <br/> By {{ ' and '.join(item['directors']) }}
         {% endif %}
-        {% if movie.get('cast') %}
-            <br/> With {{ ', '.join(movie['cast']) }}
+        {% if item.get('cast') %}
+            <br/> With {{ ', '.join(item['cast']) }}
         {% endif %}
     </td></tr>
     <tr><td>
-        {% if not movie.get('grade') %}
-        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=movie['id'])}}';" value="Add">
-        {% else %}
-        <div class="mentions">
-            <img src="/static/images/icon_check.png">
-            Seen: {{ [movie['grade']|int, movie['grade']]|max }}/10
-        </div>
+        {% if not item.get('grade') %}
+        <table class="dual"><tr>
+        <td class="left">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['movie']) }}';" value="Add">
+        </td>
+        <td class="right">
+            <form action="{{ url_for('watchlist', remove=item['movie']) }}" method="post">
+                <input class="styled-button empty" type="submit" name="remove_from_watchlist" value="Unlist">
+            </form>
+        </td>
+        </tr></table>
         {% endif %}
     </td></tr>
 

@@ -13,8 +13,8 @@
     </td></tr>
     <tr><td>
         <b>{{ movie.get('title') }} ({{ movie.get('year') }})</b>
-        {% if movie.get('genre') %}
-            <br/> {{ movie.get('genre') }}
+        {% if movie.get('genres') %}
+            <br/> {{ movie.get('genres') }}
         {% endif %}
         {% if movie.get('directors') %}
             <br/> By {{ ' and '.join(movie.get('directors')) }}
@@ -27,7 +27,7 @@
     {% if mode == 'show_slider' %}
 
     <tr><td>
-    <form action="{{ url_for('movie', movie_id=movie['id']) }}" method="post">
+    <form action="{{ url_for('movie', movie_id=movie['movie']) }}" method="post">
 
         <div class="slidecontainer">
             <div class="mentions"><span id="gradeValue"></span>/10</div>
@@ -54,10 +54,10 @@
     <td>
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button empty" type="button" onclick="location.href='{{ url_for('movie', movie_id=movie['id'])}}';" value="Edit">
+            <input class="styled-button empty" type="button" onclick="location.href='{{ url_for('movie', movie_id=movie['movie'])}}';" value="Edit">
         </td>
         <td class="right">
-            <form action="{{ url_for('movie', movie_id=movie['id']) }}" method="post">
+            <form action="{{ url_for('movie', movie_id=movie['movie']) }}" method="post">
                 <input class="styled-button empty" type="submit" name="remove" value="Remove">
             </form>
         </td>
