@@ -8,36 +8,36 @@
 {% set item = session['watchlist'][movie_id] %}
 {% endif %}
 
-<div class="search-results">
+<div class="movies nobar">
 
 <table>
 
     <tr><td>
-        <img src="{{ movie.get('image') }}">
+        <img src="{{ item.get('image') }}">
     </td></tr>
     <tr><td>
-        <b>{{ movie.get('title') }} ({{ movie.get('year') }})</b>
-        {% if movie.get('genres') %}
-            <br/> {{ movie.get('genres') }}
+        <b>{{ item.get('title') }}{% if item.get('year') %} ({{ item['year'] }}){% endif %}</b>
+        {% if item.get('genres') %}
+            <br/> {{ item['genres'] }}
         {% endif %}
-        {% if movie.get('directors') %}
-            <br/> By {{ ' and '.join(movie.get('directors')) }}
+        {% if item.get('directors') %}
+            <br/> By {{ ' and '.join(item['directors']) }}
         {% endif %}
-        {% if movie.get('cast') %}
-            <br/> With {{ ', '.join(movie.get('cast')) }}
+        {% if item.get('cast') %}
+            <br/> With {{ ', '.join(item['cast']) }}
         {% endif %}
     </td></tr>
 
     {% if mode == 'show_slider' %}
 
     <tr><td>
-    <form action="{{ url_for('movie', movie_id=movie['movie']) }}" method="post">
+    <form action="{{ url_for('movie', movie_id=item['movie']) }}" method="post">
 
         <div class="slidecontainer">
             <div class="mentions"><span id="gradeValue"></span>/10</div>
-            <input id="gradeRange" name="gradeRange" type="range" min="1" max="10" value="{{ movie.get('grade', 6)|string }}" step="1" class="slider">
+            <input id="gradeRange" name="gradeRange" type="range" min="1" max="10" value="{{ item.get('grade', 6)|string }}" step="1" class="slider">
         </div>
-        <input class="styled-button full" type="submit" value="{{ 'Update' if movie.get('grade') else 'Add' }}">
+        <input class="styled-button full" type="submit" value="{{ 'Update' if item.get('grade') else 'Add' }}">
 
     </form>
     </td></tr>
@@ -58,10 +58,10 @@
     <td>
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button empty" type="button" onclick="location.href='{{ url_for('movie', movie_id=movie['movie'])}}';" value="Edit">
+            <input class="styled-button empty" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['movie'])}}';" value="Edit">
         </td>
         <td class="right">
-            <form action="{{ url_for('movie', movie_id=movie['movie']) }}" method="post">
+            <form action="{{ url_for('movie', movie_id=item['movie']) }}" method="post">
                 <input class="styled-button empty" type="submit" name="remove" value="Remove">
             </form>
         </td>

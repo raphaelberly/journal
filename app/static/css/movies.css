@@ -1,0 +1,38 @@
+
+#img-no-results {
+    width: 30px;
+    padding-top: 8px;
+    padding-bottom: 4px;
+}
+
+.movies {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.movies.bar {
+    padding-top: 156px;
+    padding-top: calc(156px + constant(safe-area-inset-top));
+    padding-top: calc(156px + env(safe-area-inset-top));
+}
+
+.movies.nobar {
+    padding-top: 85px;
+    padding-top: calc(85px + constant(safe-area-inset-top));
+    padding-top: calc(85px + env(safe-area-inset-top));
+}
+
+.movies table {
+    width: 100%;
+    padding-bottom: 12px;
+}
+
+.movies td {
+    text-align: center;
+    padding-bottom: 8px;
+}
+
+.movies img {
+    max-width: 180px;
+    width: 55%;
+}

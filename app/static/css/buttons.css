@@ -25,3 +25,27 @@
     color: #6caee0;
 
 }
+
+.dual {
+    width: 100%;
+    padding-top: 10px;
+}
+
+table.dual {
+    border-collapse: collapse;
+}
+
+.dual .left {
+	padding: 0;
+    padding-right: 5px;
+    text-align: right;
+    vertical-align: baseline;
+}
+
+.dual .right {
+	padding: 0;
+    padding-left: 5px;
+    text-align: left;
+    vertical-align: baseline;
+
+}
