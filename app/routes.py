@@ -170,7 +170,7 @@ def watchlist():
 
     if not session.get('watchlist'):
         # Query watchlist on DB
-        watchlist_items = WatchlistItem.query.all()
+        watchlist_items = WatchlistItem.query.order_by(WatchlistItem.insert_datetime.desc()).all()
         # Format results
         watchlist = {}
         for item in watchlist_items:
@@ -188,7 +188,7 @@ def watchlist():
             db.session.add(item)
             db.session.commit()
             # Add to watchlist on session
-            session['watchlist'][movie_id] = session['results'][movie_id]
+            session['watchlist'] = {movie_id: session['results'][movie_id], **session['watchlist']}
             session.modified = True
             return render_template('watchlist.html', title='Watchlist', added=movie_id)
 

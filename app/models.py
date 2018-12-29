@@ -23,6 +23,7 @@ class Title(db.Model):
 
 class WatchlistItem(db.Model):
 
+    insert_datetime = db.Column(db.DateTime())
     movie = db.Column(db.String(9), primary_key=True)
     title = db.Column(db.String(256))
     year = db.Column(db.Integer)
