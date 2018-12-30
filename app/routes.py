@@ -1,4 +1,5 @@
-import logging
+import sys
+
 from functools import lru_cache
 
 from app import app
@@ -7,8 +8,6 @@ from datetime import datetime, date, timedelta
 from flask import render_template, session, request
 from app.models import Record, Title, Top, Genre, WatchlistItem
 from lib.search import Search
-
-LOGGER = logging.getLogger(__name__)
 
 
 CACHE_SIZE = 10
@@ -155,11 +154,8 @@ def search():
             # Store the results and the input in the session
             session['input'] = input
             session['results'] = results
-
-            LOGGER.info('SETTING INPUT TO {}'.format(input))
             return render_template('search.html', title='Search')
 
-    LOGGER.info('SETTING INPUT TO NONE')
     session['input'] = None
     session['results'] = None
     return render_template('search.html', title='Search')
@@ -168,7 +164,7 @@ def search():
 @app.route('/watchlist', methods=['GET', 'POST'])
 def watchlist():
 
-    if not session.get('watchlist'):
+    if not request.method == 'POST':
         # Query watchlist on DB
         watchlist_items = WatchlistItem.query.order_by(WatchlistItem.insert_datetime.desc()).all()
         # Format results
@@ -178,13 +174,12 @@ def watchlist():
             watchlist.update({item.movie: item.__dict__})
         # Update session['watchlist']
         session['watchlist'] = watchlist
-        session.modified = True
 
     if request.method == 'POST':
         if 'add_to_watchlist' in request.form:
             movie_id = request.args.get('add')
             # Add to watchlist on database
-            item = WatchlistItem(**session['results'][movie_id])
+            item = WatchlistItem(insert_datetime=datetime.now(), **session['results'][movie_id])
             db.session.add(item)
             db.session.commit()
             # Add to watchlist on session
