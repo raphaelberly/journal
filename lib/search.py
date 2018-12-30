@@ -7,14 +7,15 @@ import requests
 import string
 from bs4 import BeautifulSoup, SoupStrainer
 
-from lib.tools import read_config, resolve
+from lib.tools import read_config
+from lib.bs4_helper import BeautifulSoupHelper
 
 
-class Search(object):
+class Search(BeautifulSoupHelper):
 
     def __init__(self, raw_input, config_folder='config'):
         # Config
-        self.config = read_config(os.path.join(config_folder, 'search.yaml'))
+        super().__init__(os.path.join(config_folder, 'search.yaml'))
         self.credentials = read_config(os.path.join(config_folder, 'credentials.yaml'))
         # Parse data
         input = self._clean_string(raw_input)
@@ -35,49 +36,11 @@ class Search(object):
             min_votes=url['min_votes']
         )
 
-    @staticmethod
-    def _format_params(params):
-        if 'tag' not in params:
-            raise KeyError(f"'tag' key must be in {params}")
-        if params.get('type') and params.get('key'):
-            return {'name': params.get('tag'), 'attrs': {params.get('type'): params.get('key')}}
-        else:
-            return {'name': params.get('tag')}
-
-    @staticmethod
-    def _apply(soup, items):
-        for item in items:
-            func = resolve(item['func'])
-            soup = func(soup, *item.get('args', []))
-        return soup
-
-    def _find(self, soup, params):
-        if not soup:
-            return None
-        if type(params) == dict:
-            return soup.find(**self._format_params(params))
-        if type(params) == list:
-            output = soup
-            for param in params:
-                output = self._find(output, param)
-            return output
-
-    def _find_all(self, soup, params):
-        output = soup.find(**self._format_params(params))
-        while output is not None:
-            yield output
-            output = output.find_next(**self._format_params(params))
-
     def get_rows(self):
         strainer = SoupStrainer(**self._format_params(self.config['content']))
         headers = {"Accept-Language": "en-US,en;q=0.5"}
         soup = BeautifulSoup(requests.get(self.link, headers).content, 'lxml', parse_only=strainer)
         return self._find_all(soup, self.config['rows'])
-
-    def get_from_soup(self, soup, detail):
-        detail = self.config['find'][detail]
-        result = self._find(soup, detail['params'])
-        return self._apply(result, detail.get('apply', []))
 
     @staticmethod
     def _regexp_extract(pattern, string):
