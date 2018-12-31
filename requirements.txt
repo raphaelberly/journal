@@ -17,7 +17,7 @@ MarkupSafe==1.1.0
 numpy==1.15.4
 pandas==0.23.4
 pbr==5.1.1
-psycopg2==2.7.6.1
+psycopg2-binary==2.7.6.1
 python-dateutil==2.7.5
 python-editor==1.0.3
 pytz==2018.7
@@ -29,6 +29,7 @@ SQLAlchemy==1.2.14
 stevedore==1.30.0
 tqdm==4.28.1
 urllib3==1.24.1
+user-agent==0.1.9
 virtualenv==16.1.0
 virtualenv-clone==0.4.0
 virtualenvwrapper==4.8.2
