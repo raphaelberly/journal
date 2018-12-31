@@ -46,9 +46,7 @@ def remove_from_watchlist(movie_id):
     for record in to_delete:
         db.session.delete(record)
     db.session.commit()
-    # Remove from watchlist on session
-    session['watchlist'].pop(movie_id)
-    session.modified = True
+    refresh_watchlist()
 
 
 @app.context_processor
@@ -148,19 +146,23 @@ def search():
     return render_template('search.html', title='Search')
 
 
+def refresh_watchlist():
+    # Query watchlist on DB
+    watchlist_items = WatchlistItem.query.order_by(WatchlistItem.insert_datetime.desc()).all()
+    # Format results
+    watchlist = {}
+    for item in watchlist_items:
+        item.__dict__.pop('_sa_instance_state')
+        watchlist.update({item.movie: item.__dict__})
+    # Update session['watchlist']
+    session['watchlist'] = watchlist
+
+
 @app.route('/watchlist', methods=['GET', 'POST'])
 def watchlist():
 
     if not request.method == 'POST':
-        # Query watchlist on DB
-        watchlist_items = WatchlistItem.query.order_by(WatchlistItem.insert_datetime.desc()).all()
-        # Format results
-        watchlist = {}
-        for item in watchlist_items:
-            item.__dict__.pop('_sa_instance_state')
-            watchlist.update({item.movie: item.__dict__})
-        # Update session['watchlist']
-        session['watchlist'] = watchlist
+        refresh_watchlist()
 
     if request.method == 'POST':
         if 'add_to_watchlist' in request.form:
@@ -169,9 +171,8 @@ def watchlist():
             item = WatchlistItem(insert_datetime=datetime.now(), **session['results'][movie_id])
             db.session.add(item)
             db.session.commit()
-            # Add to watchlist on session
-            session['watchlist'] = {movie_id: session['results'][movie_id], **session['watchlist']}
-            session.modified = True
+            # Refresh session watchlist
+            refresh_watchlist()
             return render_template('watchlist.html', title='Watchlist', added=movie_id)
 
         elif 'remove_from_watchlist' in request.form:
