@@ -6,6 +6,8 @@ import re
 import requests
 import string
 from bs4 import BeautifulSoup, SoupStrainer
+from functools import lru_cache
+from user_agent import generate_user_agent
 
 from lib.tools import read_config
 from lib.bs4_helper import BeautifulSoupHelper
@@ -36,10 +38,19 @@ class Search(BeautifulSoupHelper):
             min_votes=url['min_votes']
         )
 
+    @staticmethod
+    @lru_cache(1)
+    def generate_headers():
+        user_agent = generate_user_agent(os='mac', device_type='desktop')
+        return {
+            'Accept-Language': 'en-US,en;q=0.5',
+            'User-Agent': user_agent
+        }
+
     def get_rows(self):
+        response = requests.get(self.link, headers=self.generate_headers()).content
         strainer = SoupStrainer(**self._format_params(self.config['content']))
-        headers = {"Accept-Language": "en-US,en;q=0.5"}
-        soup = BeautifulSoup(requests.get(self.link, headers).content, 'lxml', parse_only=strainer)
+        soup = BeautifulSoup(response, features='lxml', parse_only=strainer)
         return self._find_all(soup, self.config['rows'])
 
     @staticmethod
