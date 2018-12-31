@@ -23,7 +23,7 @@
             <a href="{{url_for('search')}}"><img src="/static/images/icon_logo.png"></a>
         </td>
         <td>
-            {{title or 'Journal'}}
+            <span style="cursor:pointer" onclick="topFunction()">{{title or 'Journal'}}</span>
         </td>
         <td class="right">
             <span style="cursor:pointer" onclick="openNav()"><img src="/static/images/icon_open_menu.png" class="openbtn"></span>
@@ -91,6 +91,12 @@
                 },false);
             }
         })(document,window.navigator,'standalone');
+    </script>
+    <script>
+        function topFunction() {
+          document.body.scrollTop = 0; // For Safari
+          document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
     </script>
 
 </body>
