@@ -42,13 +42,3 @@ td.middle {
     background-size: 10px;
     background-repeat: no-repeat;
 }
-
-td.bottom {
-    background: url("/static/images/timeline-bottom.png");
-    background-size: 10px;
-    background-repeat: no-repeat;
-}
-
-div.bottom {
-    height: 160px;
-}
