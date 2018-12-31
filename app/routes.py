@@ -1,16 +1,9 @@
-import sys
-
-from functools import lru_cache
-
 from app import app
 from app import db
 from datetime import datetime, date, timedelta
 from flask import render_template, session, request
 from app.models import Record, Title, Top, Genre, WatchlistItem
 from lib.search import Search
-
-
-CACHE_SIZE = 10
 
 
 def get_post_result(key):
@@ -56,12 +49,6 @@ def remove_from_watchlist(movie_id):
     # Remove from watchlist on session
     session['watchlist'].pop(movie_id)
     session.modified = True
-
-
-# Cache search results
-@lru_cache(CACHE_SIZE)
-def get_search_results(input):
-    return Search(input, 'config').get_results()
 
 
 @app.context_processor
@@ -142,7 +129,7 @@ def search():
 
             # Get the results for the provided input
             input = get_post_result('input')
-            results = get_search_results(input)
+            results = Search(input, 'config').get_results()
 
             # Add the grade to the result if the movie was seen already
             records = dict(Record.query.with_entities(Record.movie, Record.grade).all())
