@@ -194,7 +194,9 @@ def movie(movie_id):
             grade = float(get_post_result('gradeRange'))
 
             # Get movie item
-            movie = {**dict(session['results'] or {}), **dict(session['watchlist'] or {})}[movie_id]
+            movie = {
+                **dict(session.get('results') or {}), **dict(session.get('watchlist') or {})
+            }[movie_id]
 
             if movie.get('grade'):
                 action = 'updated'
@@ -209,11 +211,11 @@ def movie(movie_id):
                 db.session.commit()
 
             # Update the movie item with the grade
-            if session['results'] and (movie_id in session['results']):
+            if session.get('results') and (movie_id in session['results']):
                 session['results'][movie_id]['grade'] = grade
                 session.modified = True
             # Remove from watchlist
-            if session['watchlist'] and (movie_id in session['watchlist']):
+            if session.get('watchlist') and (movie_id in session['watchlist']):
                 remove_from_watchlist(movie_id)
 
             return render_template('movie.html', title='Movie', movie_id=movie_id,

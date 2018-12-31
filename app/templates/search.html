@@ -38,7 +38,7 @@
     </td></tr>
     <tr><td>
         {% if not item.get('grade') %}
-            {% if not item['movie'] in session['watchlist'] %}
+            {% if not item['movie'] in (session.get('watchlist') or {}) %}
             <table class="dual"><tr>
             <td class="left">
                 <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['movie'])}}';" value="Add">
