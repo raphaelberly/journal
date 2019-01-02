@@ -1,43 +1,15 @@
+from datetime import date, datetime
+from flask import render_template, request, session
+
 from app import app
 from app import db
-from datetime import datetime, date, timedelta
-from flask import render_template, session, request
-from app.models import Record, Title, Top, Genre, WatchlistItem
+from app.models import Genre, Record, Title, Top, WatchlistItem
 from lib.search import Search
+from lib.tools import get_time_ago_string
 
 
 def get_post_result(key):
     return dict(request.form)[key][0]
-
-
-def get_time_ago_string(dt):
-
-    def get_n_days_ago(n):
-        return date.today() - timedelta(days=n)
-
-    if dt >= get_n_days_ago(0):
-        return 'Today'
-
-    elif dt >= get_n_days_ago(1):
-        return 'Yesterday'
-
-    elif dt >= get_n_days_ago(6):
-        return '{0} days ago'.format((date.today() - dt).days)
-
-    elif dt >= get_n_days_ago(27):
-        weeks = (date.today() - dt).days // 7
-        s = 's' if weeks > 1 else ''
-        return '{0} week{1} ago'.format(weeks, s)
-
-    elif dt >= get_n_days_ago(364):
-        months = (date.today() - dt).days // 28
-        s = 's' if months > 1 else ''
-        return '{0} month{1} ago'.format(months, s)
-
-    else:
-        years = (date.today() - dt).days // 365
-        s = 's' if years > 1 else ''
-        return '{0} year{1} ago'.format(years, s)
 
 
 def remove_from_watchlist(movie_id):
@@ -71,7 +43,8 @@ def recent(nb_movies=25):
         query = query.limit(nb_movies)
 
     movies = query.all()
-    return render_template('recent.html', title='Recent', movies=movies, show=show, get_time_ago=get_time_ago_string)
+    return render_template('recent.html', title='Recent', movies=movies, show=show,
+                           get_time_ago=get_time_ago_string)
 
 
 @app.route('/statistics', methods=['GET'])

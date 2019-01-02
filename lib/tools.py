@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
+import sys
 
 import os
 import shutil
-import sys
-
 import yaml
-
+from datetime import date, timedelta
 from sqlalchemy import create_engine
 
 
@@ -70,6 +69,36 @@ def df_to_table(df, schema, table, if_exists='append', config_folder='config'):
     params = {'name': table, 'schema': schema, 'index': False}
 
     df.to_sql(con=engine, if_exists=if_exists, **params)
+
+
+def get_time_ago_string(dt):
+
+    def get_n_days_ago(n):
+        return date.today() - timedelta(days=n)
+
+    if dt >= get_n_days_ago(0):
+        return 'Today'
+
+    elif dt >= get_n_days_ago(1):
+        return 'Yesterday'
+
+    elif dt >= get_n_days_ago(6):
+        return '{0} days ago'.format((date.today() - dt).days)
+
+    elif dt >= get_n_days_ago(27):
+        weeks = (date.today() - dt).days // 7
+        s = 's' if weeks > 1 else ''
+        return '{0} week{1} ago'.format(weeks, s)
+
+    elif dt >= get_n_days_ago(364):
+        months = (date.today() - dt).days // 28
+        s = 's' if months > 1 else ''
+        return '{0} month{1} ago'.format(months, s)
+
+    else:
+        years = (date.today() - dt).days // 365
+        s = 's' if years > 1 else ''
+        return '{0} year{1} ago'.format(years, s)
 
 
 def resolve(name):
