@@ -79,12 +79,12 @@ def statistics():
             values = model.query \
                 .filter_by(role=top_models[top]['role']) \
                 .filter(model.count >= top_models[top]['min_movie_qty']) \
-                .order_by(model.grade.desc(), model.rating.desc()) \
+                .order_by(model.grade.desc(), model.count.desc(), model.rating.desc()) \
                 .all()[:top_models[top]['nb_elements']]
         else:
             values = model.query \
                 .filter(model.count >= top_models[top]['min_movie_qty']) \
-                .order_by(model.grade.desc(), model.rating.desc()) \
+                .order_by(model.grade.desc(), model.count.desc(), model.rating.desc()) \
                 .all()[:top_models[top]['nb_elements']]
         tops.update({top: values})
 
