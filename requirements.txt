@@ -6,6 +6,7 @@ chardet==3.0.4
 Click==7.0
 colorlog==3.1.4
 Flask==1.0.2
+Flask-Login==0.4.1
 Flask-SQLAlchemy==2.3.2
 gunicorn==19.9.0
 idna==2.6
@@ -17,7 +18,7 @@ MarkupSafe==1.1.0
 numpy==1.15.4
 pandas==0.23.4
 pbr==5.1.1
-psycopg2-binary==2.7.6.1
+psycopg2==2.7.6.1
 python-dateutil==2.7.5
 python-editor==1.0.3
 pytz==2018.7
