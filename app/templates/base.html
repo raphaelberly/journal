@@ -1,22 +1,28 @@
 <html>
-    <head>
-        <title>{{title or 'Journal'}}</title>
-        <meta name="viewport" content="width=device-width, user-scalable=no, viewport-fit=cover" />
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <link rel="apple-touch-icon" href="/static/images/apple_touch_icon.png">
-        <link rel="apple-touch-startup-image" href="/static/images/apple_startup_image.png" sizes="750x1334" />
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css')}}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/recent.css')}}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/statistics.css')}}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css')}}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/movies.css')}}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
 
+<head>
+    <title>{{title or 'Journal'}}</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/static/images/apple_touch_icon.png">
+    <link rel="apple-touch-startup-image" href="/static/images/apple_startup_image.png" sizes="750x1334" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recent.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/statistics.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/movies.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
+    {% if title == 'Login' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css')}}">
+    {% endif %}
 </head>
+
 <body ontouchstart="">
+
+    {% if title != 'Login' %}
 
     <div class="navbar"><table><tr>
         <td class="left">
@@ -36,20 +42,10 @@
         <a href="{{url_for('recent')}}">Recent</a>
         <a href="{{url_for('watchlist')}}">Watchlist</a>
         <a href="{{url_for('statistics')}}">Statistics</a>
+        <a href="{{url_for('logout')}}">Logout</a>
     </div>
 
     <a href="javascript:void(0)" onclick="closeNav()"><div class="sidenavback" id="sidenavback"></div></a>
-
-    {% if title == 'Search' %}
-
-    <div class="form-search">
-
-    <form method="post" action="{{ url_for('search') }}">
-        <input id="input" name="input" placeholder="Type a movie title here..." type="text" value="{{ session.get('input') or '' }}">
-        <button type="submit">Go</button>
-    </form>
-
-    </div>
 
     {% endif %}
 

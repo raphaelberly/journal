@@ -1,0 +1,44 @@
+
+body {
+    background-color: #6caee0;
+}
+
+.login {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.login input{
+
+    border-radius: 2px;
+    background-color:  #88B5DF;
+    padding: 14px 15px 14px 20px;
+    border: 1px solid #6caee0;
+
+    color:#4E565C;
+    outline: none;
+    -webkit-appearance: none;
+
+    font: 15px Trebuchet MS;
+    color: #fff;
+}
+
+.login td {
+    text-align: center;
+}
+
+.login button {
+    margin-top: 20%;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #C3D9EF;
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: #C3D9EF;
+}
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: #C3D9EF;
+}

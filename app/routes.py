@@ -1,9 +1,11 @@
 from datetime import date, datetime
-from flask import render_template, request, session
+from flask import render_template, request, session, url_for
+from flask_login import login_user, logout_user, login_required
+from werkzeug.utils import redirect
 
 from app import app
-from app import db
-from app.models import Genre, Record, Title, Top, WatchlistItem
+from app import db, login
+from app.models import Genre, Record, Title, Top, WatchlistItem, User
 from lib.search import Search
 from lib.tools import get_time_ago_string
 
@@ -26,7 +28,35 @@ def inject_now():
     return {'now': datetime.now()}
 
 
+# Redirect all auth failures to login page
+@login.unauthorized_handler
+def unauthorized_callback():
+    return redirect(url_for('login'))
+
+
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+
+    if request.method == 'POST':
+        if 'username' in request.form:
+            user = User.query.filter_by(username=get_post_result('username')).first()
+            if user is None or not user.check_password(get_post_result('password')):
+                return redirect(url_for('login'))
+            login_user(user, remember=False)
+            return redirect(url_for('search'))
+
+    return render_template('login.html', title='Login')
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+
 @app.route('/recent', methods=['GET', 'POST'])
+@login_required
 def recent(nb_movies=25):
 
     query = db.session \
@@ -48,6 +78,7 @@ def recent(nb_movies=25):
 
 
 @app.route('/statistics', methods=['GET'])
+@login_required
 def statistics():
 
     counts = {}
@@ -91,8 +122,8 @@ def statistics():
     return render_template('statistics.html', title='Statistics', counts=counts, tops=tops)
 
 
-@app.route('/', methods=['GET', 'POST'])
 @app.route('/search', methods=['GET', 'POST'])
+@login_required
 def search():
 
     if request.method == 'POST':
@@ -132,6 +163,7 @@ def refresh_watchlist():
 
 
 @app.route('/watchlist', methods=['GET', 'POST'])
+@login_required
 def watchlist():
 
     if not request.method == 'POST':
@@ -157,6 +189,7 @@ def watchlist():
 
 
 @app.route('/movie/<movie_id>', methods=['GET', 'POST'])
+@login_required
 def movie(movie_id):
 
     if request.method == 'POST':

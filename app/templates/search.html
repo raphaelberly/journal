@@ -3,6 +3,16 @@
 
 {% block content %}
 
+<div class="form-search">
+
+<form method="post" action="{{ url_for('search') }}">
+    <input id="input" name="input" placeholder="Type a movie title here..." type="text" value="{{ session.get('input') or '' }}">
+    <button type="submit">Go</button>
+</form>
+
+</div>
+
+
 <div class="movies bar">
 
 {% if session.get('results') == {} %}
