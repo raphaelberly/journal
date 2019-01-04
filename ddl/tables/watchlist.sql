@@ -7,6 +7,7 @@ CREATE TABLE journal.watchlist(
   genres TEXT NOT NULL,
   directors TEXT[] NOT NULL,
   "cast" TEXT[] NOT NULL,
-  image VARCHAR(1024)
+  image VARCHAR(1024),
+  username VARCHAR(20) NOT NULL
 
 );

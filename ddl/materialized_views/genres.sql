@@ -6,6 +6,7 @@ WITH
 movies_with_genre AS (
 
   SELECT
+    v.username,
     unnest(string_to_array(t.genres, ',')) AS genre,
     v.movie,
     v.grade,
@@ -24,6 +25,7 @@ movies_with_genre AS (
 genres AS (
 
   SELECT
+    m.username,
     m.genre,
     array_agg(m.title ORDER BY m.grade DESC, m.rating DESC) AS titles,
     array_agg(m.year ORDER BY m.grade DESC, m.rating DESC) AS titles_year,
@@ -31,11 +33,12 @@ genres AS (
     avg(m.rating) AS rating,
     count(*)      AS count
   FROM movies_with_genre m
-  GROUP BY 1
+  GROUP BY 1,2
 
 )
 
 SELECT
+  g.username,
   g.genre             AS name,
   g.titles[1:3]       AS top_3_movies,
   g.titles_year[1:3]  AS top_3_movies_year,

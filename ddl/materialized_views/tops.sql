@@ -4,6 +4,7 @@ CREATE MATERIALIZED VIEW journal.tops AS (
 WITH raw AS (
 
 SELECT
+  r.username,
   p.person,
   n.name,
   p.role,
@@ -28,6 +29,7 @@ INNER JOIN journal.ratings rt
 persons_and_roles AS (
 
   SELECT
+    r.username,
     r.person,
     r.name,
     r.role,
@@ -37,11 +39,12 @@ persons_and_roles AS (
     avg(r.rating)                                                         AS rating,
     count(*)                                                              AS count
   FROM raw r
-  GROUP BY 1,2,3
+  GROUP BY 1,2,3,4
 
 )
 
 SELECT
+  d.username,
   d.person,
   d.role,
   d.name,
