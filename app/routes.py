@@ -133,8 +133,8 @@ def search():
             results = Search(input, 'config').get_results()
 
             # Add the grade to the result if the movie was seen already
-            records = dict(Record.query.with_entities(Record.movie, Record.grade).all())
-
+            records = dict(Record.query.with_entities(Record.movie, Record.grade)
+                           .filter(Record.username == current_user.username).all())
             for result in results:
                 if records.get(result):
                     results[result].update({'grade': records[result]})
