@@ -14,15 +14,6 @@ def get_post_result(key):
     return dict(request.form)[key][0]
 
 
-def remove_from_watchlist(movie_id):
-    # Remove from watchlist on database
-    to_delete = WatchlistItem.query.filter_by(movie=movie_id).all()
-    for record in to_delete:
-        db.session.delete(record)
-    db.session.commit()
-    refresh_watchlist()
-
-
 @app.context_processor
 def inject_now():
     return {'now': datetime.now()}
@@ -62,8 +53,9 @@ def logout():
 def recent(nb_movies=25):
 
     query = db.session \
-        .query(Record.date, Record.insert_datetime, Record.grade, Title.title, Title.year, Title.genres) \
+        .query(Record.username, Record.date, Record.insert_datetime, Record.grade, Title.title, Title.year, Title.genres) \
         .select_from(Record).join(Record.title) \
+        .filter(Record.username == current_user.username) \
         .order_by(Record.date.desc(), Record.insert_datetime.desc())
 
     show = 'recent'
@@ -86,12 +78,14 @@ def statistics():
     counts = {}
     # This month's total
     this_month = Record.query \
+        .filter_by(username=current_user.username) \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
         .filter(db.extract('month', Record.date) == db.extract('month', date.today())) \
         .count()
     counts.update({'this_month': {'count': this_month, 'description': 'movies this month'}})
     # This year's total
     this_year = Record.query \
+        .filter_by(username=current_user.username) \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
         .count()
     counts.update({'this_year': {'count': this_year, 'description': 'movies this year'}})
@@ -110,12 +104,14 @@ def statistics():
         model = top_models[top]['model']
         if 'role' in top_models[top].keys():
             values = model.query \
+                .filter_by(username=current_user.username) \
                 .filter_by(role=top_models[top]['role']) \
                 .filter(model.count >= top_models[top]['min_movie_qty']) \
                 .order_by(model.grade.desc(), model.count.desc(), model.rating.desc()) \
                 .all()[:top_models[top]['nb_elements']]
         else:
             values = model.query \
+                .filter_by(username=current_user.username) \
                 .filter(model.count >= top_models[top]['min_movie_qty']) \
                 .order_by(model.grade.desc(), model.count.desc(), model.rating.desc()) \
                 .all()[:top_models[top]['nb_elements']]
@@ -153,47 +149,82 @@ def search():
     return render_template('search.html', title='Search')
 
 
-def refresh_watchlist():
+def get_watchlist():
     # Query watchlist on DB
-    watchlist_items = WatchlistItem.query.order_by(WatchlistItem.insert_datetime.desc()).all()
+    watchlist_items = WatchlistItem.query \
+        .filter_by(username=current_user.username) \
+        .order_by(WatchlistItem.insert_datetime.desc()) \
+        .all()
     # Format results
     watchlist = {}
     for item in watchlist_items:
         item.__dict__.pop('_sa_instance_state')
         watchlist.update({item.movie: item.__dict__})
-    # Update session['watchlist']
-    session['watchlist'] = watchlist
+    # Return
+    return watchlist
+
+
+def remove_from_watchlist(movie_id):
+    # Remove from watchlist on database
+    to_delete = WatchlistItem.query.filter_by(movie=movie_id, username=current_user.username).all()
+    for record in to_delete:
+        db.session.delete(record)
+    db.session.commit()
 
 
 @app.route('/watchlist', methods=['GET', 'POST'])
 @login_required
 def watchlist():
 
-    if not request.method == 'POST':
-        refresh_watchlist()
-
     if request.method == 'POST':
+
         if 'add_to_watchlist' in request.form:
             movie_id = request.args.get('add')
             # Add to watchlist on database
-            item = WatchlistItem(insert_datetime=datetime.now(), **session['results'][movie_id])
+            item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username,
+                                 **session['results'][movie_id])
             db.session.add(item)
             db.session.commit()
-            # Refresh session watchlist
-            refresh_watchlist()
-            return render_template('watchlist.html', title='Watchlist', added=movie_id)
+            # Update watchlist
+            watchlist_dict = get_watchlist()
+            return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
 
         elif 'remove_from_watchlist' in request.form:
             movie_id = request.args.get('remove')
             remove_from_watchlist(movie_id)
-            return render_template('watchlist.html', title='Watchlist', removed=movie_id)
+            watchlist_dict = get_watchlist()
+            return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
 
-    return render_template('watchlist.html', title='Watchlist')
+    watchlist_dict = get_watchlist()
+    return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
+
+
+def get_movie(movie):
+
+    item = {}
+    if session.get('results'):
+        item = session['results'].get(movie) or {}
+    if not item:
+        item = WatchlistItem.query \
+            .filter_by(username=current_user.username, movie=movie) \
+            .order_by(WatchlistItem.insert_datetime.desc()) \
+            .first()
+        if item:
+            item = item.__dict__
+            item.pop('_sa_instance_state')
+    if not item:
+        item = session.get('last_item') or {}
+
+    return item
 
 
 @app.route('/movie/<movie_id>', methods=['GET', 'POST'])
 @login_required
 def movie(movie_id):
+
+    # Get movie item
+    movie = get_movie(movie_id)
+    session['last_item'] = movie
 
     if request.method == 'POST':
 
@@ -202,44 +233,47 @@ def movie(movie_id):
             # Get submitted grade
             grade = float(get_post_result('gradeRange'))
 
-            # Get movie item
-            movie = {
-                **dict(session.get('results') or {}), **dict(session.get('watchlist') or {})
-            }[movie_id]
-
             if movie.get('grade'):
                 action = 'updated'
                 # Update the movie in the database
-                Record.query.filter_by(movie=movie_id).update({'grade': grade})
+                Record.query \
+                    .filter_by(username=current_user.username, movie=movie_id) \
+                    .update({'grade': grade})
                 db.session.commit()
             else:
                 action = 'added'
                 # Add the movie to the records database
-                record = Record(movie=movie_id, grade=grade)
+                record = Record(username=current_user.username, movie=movie_id, grade=grade)
                 db.session.add(record)
                 db.session.commit()
 
+            # Update movie item
+            movie.update({'grade': grade})
+            # Update last_item
+            session['last_item']['grade'] = grade
+            session.modified = True
             # Update the movie item with the grade
             if session.get('results') and (movie_id in session['results']):
                 session['results'][movie_id]['grade'] = grade
                 session.modified = True
-            # Remove from watchlist
-            if session.get('watchlist') and (movie_id in session['watchlist']):
-                remove_from_watchlist(movie_id)
+            # Remove from watchlist (if in it)
+            remove_from_watchlist(movie_id)
 
-            return render_template('movie.html', title='Movie', movie_id=movie_id,
+            return render_template('movie.html', title='Movie', item=movie,
                                    mode='show_add_or_edit_confirmation', action=action)
 
         elif 'remove' in request.form:
             # Delete the movie from the database
-            to_delete = Record.query.filter_by(movie=movie_id).all()
+            to_delete = Record.query.filter_by(username=current_user.username, movie=movie_id).all()
             for record in to_delete:
                 db.session.delete(record)
             db.session.commit()
             # Remove the grade from the movie item
-            session['results'][movie_id].pop('grade')
+            if session['results'].get('movie_id'):
+                session['results'][movie_id].pop('grade')
+            session['last_item'].pop('grade')
             session.modified = True
-            return render_template('movie.html', title='Movie', movie_id=movie_id,
+            return render_template('movie.html', title='Movie', item=movie,
                                    mode='show_remove_confirmation')
 
-    return render_template('movie.html', title='Movie', movie_id=movie_id, mode='show_slider')
+    return render_template('movie.html', title='Movie', item=movie, mode='show_slider')

@@ -5,7 +5,7 @@
 
 <div class="movies nobar">
 
-{% if session.get('watchlist') == {} %}
+{% if not watchlist %}
 <table>
     <tr><td>
     <img id="img-no-results" src="static/images/fail.png">
@@ -17,7 +17,7 @@
 {% endif %}
 
 
-{% for item in (session.get('watchlist') or {}).values() %}
+{% for item in watchlist.values() %}
 
 <table>
 

@@ -2,12 +2,6 @@
 
 {% block content %}
 
-{% if session.get('results') %}
-{% set item = session['results'].get(movie_id) or session['watchlist'][movie_id] %}
-{% else %}
-{% set item = session['watchlist'][movie_id] %}
-{% endif %}
-
 <div class="movies nobar">
 
 <table>

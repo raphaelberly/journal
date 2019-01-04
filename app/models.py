@@ -51,6 +51,7 @@ class Title(db.Model):
 class WatchlistItem(db.Model):
 
     insert_datetime = db.Column(db.DateTime())
+    username = db.Column(db.String(20), primary_key=True)
     movie = db.Column(db.String(9), primary_key=True)
     title = db.Column(db.String(256))
     year = db.Column(db.Integer)
@@ -73,14 +74,16 @@ class Record(db.Model):
     movie = db.Column(db.String(9), db.ForeignKey(Title.movie))
     date = db.Column(db.Date, nullable=False)
     grade = db.Column(db.Float, nullable=False)
+    username = db.Column(db.String(20))
 
     title = db.relationship("Title", back_populates="record")
 
     __tablename__ = "records"
     __table_args__ = {"schema": "journal"}
 
-    def __init__(self, movie, grade):
+    def __init__(self, username, movie, grade):
 
+        self.username = username
         self.insert_datetime = datetime.now()
         self.movie = movie
         self.date = datetime.now().date()
@@ -92,6 +95,7 @@ class Record(db.Model):
 
 class Top(db.Model):
 
+    username = db.Column(db.String(20), primary_key=True)
     person = db.Column(db.String(9), primary_key=True)
     role = db.Column(db.String(256), primary_key=True)
     name = db.Column(db.String(256))
@@ -110,6 +114,7 @@ class Top(db.Model):
 
 class Genre(db.Model):
 
+    username = db.Column(db.String(20), primary_key=True)
     name = db.Column(db.String(256), primary_key=True)
     top_3_movies = db.Column(db.ARRAY(db.String(256)))
     top_3_movies_year = db.Column(db.ARRAY(db.Integer))
