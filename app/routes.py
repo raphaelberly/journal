@@ -90,7 +90,8 @@ def statistics():
         .count()
     counts.update({'this_year': {'count': this_year, 'description': 'movies this year'}})
     # Number of movies seen in total
-    counts.update({'total': {'count': Record.query.count(), 'description': 'movies since January, 2014'}})
+    total = Record.query.filter_by(username=current_user.username).count()
+    counts.update({'total': {'count': total, 'description': 'movies since January, 2014'}})
 
     tops = {}
     top_models = {
