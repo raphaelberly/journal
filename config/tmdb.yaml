@@ -1,0 +1,7 @@
+
+url:
+
+  api_root: https://api.themoviedb.org/3/
+  img_root: https://image.tmdb.org/t/p/w{width}
+  search: search/movie
+  movie: movie/{movie_id}
