@@ -6,17 +6,12 @@ from werkzeug.utils import redirect
 from app import app
 from app import db, login
 from app.models import Genre, Record, Title, Top, WatchlistItem, User
-from lib.search import Search
+from lib.tmdb import Tmdb
 from lib.tools import get_time_ago_string
 
 
 def get_post_result(key):
     return dict(request.form)[key][0]
-
-
-@app.context_processor
-def inject_now():
-    return {'now': datetime.now()}
 
 
 # HANDLE ACME CHALLENGE PROPERLY (FOR HTTPS CERT RENEWAL)
@@ -137,7 +132,8 @@ def search():
 
             # Get the results for the provided input
             input = get_post_result('input')
-            results = Search(input, 'config').get_results()
+            tmdb = Tmdb()
+            results = tmdb.movie(tmdb.search(input)[0])
 
             # Add the grade to the result if the movie was seen already
             records = dict(Record.query.with_entities(Record.movie, Record.grade)

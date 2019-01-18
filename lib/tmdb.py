@@ -39,12 +39,11 @@ class Tmdb(object):
         output = {
             result['imdb_id']: {
                 'movie': result['imdb_id'],
-                'tmdb_id': result['id'],
                 'title': result['title'],
                 'year': result['release_date'][:4],
-                'image': self._conf['url']['img_root'].format(width='180') + result['poster_path'],
-                'genres': [genre['name'] for genre in result['genres']],
-                'cast': [item['name'] for item in result['credits']['cast'][:3]],
+                'image': self._conf['url']['img_root'].format(width='200') + result['poster_path'],
+                'genres': ', '.join([genre['name'] for genre in result['genres']]),
+                'cast': [item['name'] for item in result['credits']['cast'][:4]],
                 'directors': [
                     item['name'] for item in result['credits']['crew'] if item['job'] == 'Director'
                 ]
