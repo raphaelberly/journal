@@ -37,13 +37,16 @@
     <tr><td>
         <b>{{ item.get('title') }}{% if item.get('year') %} ({{ item['year'] }}){% endif %}</b>
         {% if item.get('genres') %}
-            <br/> {{ item['genres'] }}
+            <br/>{{ ', '.join(item['genres']) }}
         {% endif %}
         {% if item.get('directors') %}
-            <br/> By {{ ' and '.join(item['directors']) }}
+            <br/>By {{ ' and '.join(item['directors']) }}
         {% endif %}
         {% if item.get('cast') %}
-            <br/> With {{ ', '.join(item['cast']) }}
+            <br/>With {{ ', '.join(item['cast']) }}
+        {% endif %}
+        {% if item.get('duration') %}
+            <br/>{{ item['duration'] }}
         {% endif %}
     </td></tr>
     <tr><td>

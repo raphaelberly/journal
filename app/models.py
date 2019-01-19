@@ -55,9 +55,10 @@ class WatchlistItem(db.Model):
     movie = db.Column(db.String(9), primary_key=True)
     title = db.Column(db.String(256))
     year = db.Column(db.Integer)
-    genres = db.Column(db.String(256))
+    genres = db.Column(db.ARRAY(db.String(256)))
     directors = db.Column(db.ARRAY(db.String(256)))
     cast = db.Column(db.ARRAY(db.String(256)))
+    duration = db.Column(db.String(10))
     image = db.Column(db.String(1024))
 
     __tablename__ = "watchlist"

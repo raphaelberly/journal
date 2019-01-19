@@ -41,8 +41,9 @@ class Tmdb(object):
                 'movie': result['imdb_id'],
                 'title': result['title'],
                 'year': result['release_date'][:4],
+                'duration': f'{result["runtime"] // 60}h {result["runtime"] % 60}min',
                 'image': self._conf['url']['img_root'].format(width='200') + result['poster_path'],
-                'genres': ', '.join([genre['name'] for genre in result['genres']]),
+                'genres': [genre['name'] for genre in result['genres'][:3]],
                 'cast': [item['name'] for item in result['credits']['cast'][:4]],
                 'directors': [
                     item['name'] for item in result['credits']['crew'] if item['job'] == 'Director'
