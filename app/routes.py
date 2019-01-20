@@ -9,6 +9,8 @@ from app.models import Genre, Record, Title, Top, WatchlistItem, User
 from lib.tmdb import Tmdb
 from lib.tools import get_time_ago_string
 
+tmdb = Tmdb()
+
 
 def get_post_result(key):
     return dict(request.form)[key][0]
@@ -122,33 +124,46 @@ def statistics():
     return render_template('statistics.html', title='Statistics', counts=counts, tops=tops)
 
 
+def enrich_results(results):
+    # Add the grade to the result if the movie was seen already
+    records = dict(Record.query.with_entities(Record.movie, Record.grade)
+                   .filter(Record.username == current_user.username).all())
+    for result in results:
+        if records.get(result):
+            results[result].update({'grade': records[result]})
+    return results
+
+
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/search', methods=['GET', 'POST'])
 @login_required
 def search():
 
     if request.method == 'POST':
-        if 'input' in request.form:
 
+        if 'input' in request.form:
             # Get the results for the provided input
             input = get_post_result('input')
-            tmdb = Tmdb()
-            results = tmdb.movie(tmdb.search(input)[0])
-
-            # Add the grade to the result if the movie was seen already
-            records = dict(Record.query.with_entities(Record.movie, Record.grade)
-                           .filter(Record.username == current_user.username).all())
-            for result in results:
-                if records.get(result):
-                    results[result].update({'grade': records[result]})
-
+            search = tmdb.search(input)
+            results = enrich_results(tmdb.movie(search[0])) if len(search) > 0 else {}
             # Store the results and the input in the session
             session['input'] = input
-            session['results'] = results
-            return render_template('search.html', title='Search')
+
+        elif 'more_results' in request.form:
+            # Get search results (cached)
+            search = tmdb.search(session['input'])
+            # Get movie details for each result (first one is cached)
+            results = {}
+            for movie_id in search:
+                results.update(tmdb.movie(movie_id))
+            results = enrich_results(results)
+
+        else:
+            raise NotImplementedError
+
+        return render_template('search.html', title='Search', results=results)
 
     session['input'] = None
-    session['results'] = None
     return render_template('search.html', title='Search')
 
 

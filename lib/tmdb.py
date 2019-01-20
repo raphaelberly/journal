@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+from functools import lru_cache
 
 from lib.tools import read_config
 
@@ -12,11 +13,10 @@ class Tmdb(object):
         self._api_key = credentials['tmdb']['api_key']
         self._conf = read_config(os.path.join(config_path, 'tmdb.yaml'))
 
+    @lru_cache(10)
     def search(self, query):
-
         url = self._conf['url']['api_root'] + self._conf['url']['search']
         params = {'query': query, 'api_key': self._api_key}
-
         response = requests.get(url, params)
         return self._parse_search_response(response)
 
@@ -26,6 +26,7 @@ class Tmdb(object):
             return []
         return [item['id'] for item in json.loads(response.content)['results']]
 
+    @lru_cache(20)
     def movie(self, movie_id):
         url = self._conf['url']['api_root'] + self._conf['url']['movie'].format(movie_id=movie_id)
         params = {'api_key': self._api_key, 'append_to_response': 'credits'}

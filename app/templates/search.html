@@ -15,7 +15,7 @@
 
 <div class="movies bar">
 
-{% if session.get('results') == {} %}
+{% if results == {} %}
 <table>
     <tr><td>
     <img id="img-no-results" src="static/images/fail.png">
@@ -27,7 +27,7 @@
 {% endif %}
 
 
-{% for item in (session.get('results') or {}).values() %}
+{% for item in (results or {}).values() %}
 
 <table>
 
