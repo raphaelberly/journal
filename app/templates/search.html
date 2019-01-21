@@ -15,7 +15,7 @@
 
 <div class="movies bar">
 
-{% if results == {} %}
+{% if results == [] %}
 <table>
     <tr><td>
     <img id="img-no-results" src="static/images/fail.png">
@@ -27,12 +27,16 @@
 {% endif %}
 
 
-{% for item in (results or {}).values() %}
+{% for item in results %}
 
 <table>
 
     <tr><td>
-        <a href="{{ url_for('movie', movie_id=item['movie']) }}"><img src="{{ item.get('image') }}"></a>
+        {% if item.get('grade') %}
+        <a href="{{ url_for('movie', movie_id=item['tmdb_id']) }}"><img src="{{ item.get('image') }}"></a>
+        {% else %}
+        <a href="{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True) }}"><img src="{{ item.get('image') }}"></a>
+        {% endif %}
     </td></tr>
     <tr><td>
         <b>{{ item.get('title') }}{% if item.get('year') %} ({{ item['year'] }}){% endif %}</b>
@@ -51,18 +55,18 @@
     </td></tr>
     <tr><td>
         {% if not item.get('grade') %}
-            {% if not item['movie'] in (session.get('watchlist') or {}) %}
+            {% if not item['movie'] in watchlist %}
             <table class="dual"><tr>
             <td class="left">
-                <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['movie'])}}';" value="Add">
+                <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True)}}';" value="Add">
             </td>
             <td class="right">
-                <form action="{{ url_for('watchlist', add=item['movie']) }}" method="post">
+                <form action="{{ url_for('watchlist', add=item['tmdb_id']) }}" method="post">
                     <input class="styled-button empty" type="submit" name="add_to_watchlist" value="Watchlist">
                 </form>
             </td>
             {% else %}
-            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['id'])}}';" value="Add">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True)}}';" value="Add">
             {% endif %}
             </tr></table>
         {% else %}

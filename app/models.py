@@ -53,6 +53,7 @@ class WatchlistItem(db.Model):
     insert_datetime = db.Column(db.DateTime())
     username = db.Column(db.String(20), primary_key=True)
     movie = db.Column(db.String(9), primary_key=True)
+    tmdb_id = db.Column(db.Integer)
     title = db.Column(db.String(256))
     year = db.Column(db.Integer)
     genres = db.Column(db.ARRAY(db.String(256)))

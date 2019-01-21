@@ -34,21 +34,21 @@ class Tmdb(object):
         return self._parse_movie_response(response)
 
     def _parse_movie_response(self, response):
-        if response.status_code != 200:
-            return {}
         result = json.loads(response.content)
         output = {
-            result['imdb_id']: {
-                'movie': result['imdb_id'],
-                'title': result['title'],
-                'year': result['release_date'][:4],
-                'duration': f'{result["runtime"] // 60}h {result["runtime"] % 60}min',
-                'image': self._conf['url']['img_root'].format(width='200') + result['poster_path'],
-                'genres': [genre['name'] for genre in result['genres'][:3]],
-                'cast': [item['name'] for item in result['credits']['cast'][:4]],
-                'directors': [
-                    item['name'] for item in result['credits']['crew'] if item['job'] == 'Director'
-                ]
-            }
+            'movie': result['imdb_id'],
+            'tmdb_id': result['id'],
+            'title': result['title'],
+            'year': result['release_date'][:4],
+            'duration': f'{result["runtime"] // 60}h {result["runtime"] % 60}min',
+            'image': self._conf['url']['img_root'].format(width='200') + result['poster_path'],
+            'genres': [genre['name'] for genre in result['genres'][:3]],
+            'cast': [item['name'] for item in result['credits']['cast'][:4]],
+            'directors': [
+                item['name'] for item in result['credits']['crew'] if item['job'] == 'Director'
+            ]
         }
         return output
+
+    def search_movies(self, query, number_of_results):
+        return [self.movie(movie_id) for movie_id in self.search(query)[:number_of_results]]

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import date, datetime
 from flask import render_template, request, session, url_for
 from flask_login import login_user, logout_user, login_required, current_user
@@ -124,13 +125,25 @@ def statistics():
     return render_template('statistics.html', title='Statistics', counts=counts, tops=tops)
 
 
-def enrich_results(results):
-    # Add the grade to the result if the movie was seen already
+def add_movie_grade(result):
+    result = deepcopy(result)
+    # Add the grade to result when seen already
+    record = Record.query.with_entities(Record.grade) \
+        .filter(Record.username == current_user.username) \
+        .filter(Record.movie == result['movie']).first()
+    if record:
+        result.update({'grade': record[0]})
+    return result
+
+
+def add_movies_grade(results):
+    results = deepcopy(results)
+    # Add the grade to each result when seen already
     records = dict(Record.query.with_entities(Record.movie, Record.grade)
                    .filter(Record.username == current_user.username).all())
     for result in results:
-        if records.get(result):
-            results[result].update({'grade': records[result]})
+        if records.get(result['movie']):
+            result.update({'grade': records[result['movie']]})
     return results
 
 
@@ -143,28 +156,33 @@ def search():
 
         if 'input' in request.form:
             # Get the results for the provided input
-            input = get_post_result('input')
-            search = tmdb.search(input)
-            results = enrich_results(tmdb.movie(search[0])) if len(search) > 0 else {}
+            query = get_post_result('input')
+            number_of_results = 1
             # Store the results and the input in the session
-            session['input'] = input
+            session['input'] = query
 
         elif 'more_results' in request.form:
             # Get search results (cached)
-            search = tmdb.search(session['input'])
-            # Get movie details for each result (first one is cached)
-            results = {}
-            for movie_id in search:
-                results.update(tmdb.movie(movie_id))
-            results = enrich_results(results)
+            query = session['input']
+            number_of_results = 5
 
         else:
             raise NotImplementedError
 
-        return render_template('search.html', title='Search', results=results)
+        results = add_movies_grade(tmdb.search_movies(query, number_of_results))
+        return render_template('search.html', title='Search', results=results,
+                               watchlist=get_watchlist_ids())
 
     session['input'] = None
     return render_template('search.html', title='Search')
+
+
+def get_watchlist_ids():
+    # Query watchlist on DB
+    watchlist = WatchlistItem.query.with_entities(WatchlistItem.movie) \
+        .filter(WatchlistItem.username == current_user.username) \
+        .all()
+    return [item for item, in watchlist]
 
 
 def get_watchlist():
@@ -197,10 +215,10 @@ def watchlist():
     if request.method == 'POST':
 
         if 'add_to_watchlist' in request.form:
-            movie_id = request.args.get('add')
+            movie_id = int(request.args.get('add'))
             # Add to watchlist on database
             item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username,
-                                 **session['results'][movie_id])
+                                 **tmdb.movie(movie_id))
             db.session.add(item)
             db.session.commit()
             # Update watchlist
@@ -217,32 +235,16 @@ def watchlist():
     return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
 
 
-def get_movie(movie):
-
-    item = {}
-    if session.get('results'):
-        item = session['results'].get(movie) or {}
-    if not item:
-        item = WatchlistItem.query \
-            .filter_by(username=current_user.username, movie=movie) \
-            .order_by(WatchlistItem.insert_datetime.desc()) \
-            .first()
-        if item:
-            item = item.__dict__
-            item.pop('_sa_instance_state')
-    if not item:
-        item = session.get('last_item') or {}
-
-    return item
-
-
 @app.route('/movie/<movie_id>', methods=['GET', 'POST'])
 @login_required
 def movie(movie_id):
 
     # Get movie item
-    movie = get_movie(movie_id)
-    session['last_item'] = movie
+    movie_id = int(movie_id)
+    movie = add_movie_grade(tmdb.movie(movie_id))
+
+    if request.method == 'GET' and request.args.get('show_slider'):
+        return render_template('movie.html', title='Movie', item=movie, mode='show_slider')
 
     if request.method == 'POST':
 
@@ -255,43 +257,29 @@ def movie(movie_id):
                 action = 'updated'
                 # Update the movie in the database
                 Record.query \
-                    .filter_by(username=current_user.username, movie=movie_id) \
+                    .filter_by(username=current_user.username, movie=movie['movie']) \
                     .update({'grade': grade})
                 db.session.commit()
             else:
                 action = 'added'
                 # Add the movie to the records database
-                record = Record(username=current_user.username, movie=movie_id, grade=grade)
+                record = Record(username=current_user.username, movie=movie['movie'], grade=grade)
                 db.session.add(record)
                 db.session.commit()
 
-            # Update movie item
-            movie.update({'grade': grade})
-            # Update last_item
-            session['last_item']['grade'] = grade
-            session.modified = True
-            # Update the movie item with the grade
-            if session.get('results') and (movie_id in session['results']):
-                session['results'][movie_id]['grade'] = grade
-                session.modified = True
             # Remove from watchlist (if in it)
-            remove_from_watchlist(movie_id)
+            remove_from_watchlist(movie['movie'])
 
             return render_template('movie.html', title='Movie', item=movie,
                                    mode='show_add_or_edit_confirmation', action=action)
 
         elif 'remove' in request.form:
             # Delete the movie from the database
-            to_delete = Record.query.filter_by(username=current_user.username, movie=movie_id).all()
+            to_delete = Record.query.filter_by(username=current_user.username, movie=movie['movie']).all()
             for record in to_delete:
                 db.session.delete(record)
             db.session.commit()
-            # Remove the grade from the movie item
-            if session['results'].get('movie_id'):
-                session['results'][movie_id].pop('grade')
-            session['last_item'].pop('grade')
-            session.modified = True
             return render_template('movie.html', title='Movie', item=movie,
                                    mode='show_remove_confirmation')
 
-    return render_template('movie.html', title='Movie', item=movie, mode='show_slider')
+    return render_template('movie.html', title='Movie', item=movie, mode='show_buttons')

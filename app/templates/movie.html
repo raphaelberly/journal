@@ -28,7 +28,7 @@
     {% if mode == 'show_slider' %}
 
     <tr><td>
-    <form action="{{ url_for('movie', movie_id=item['movie']) }}" method="post">
+    <form action="{{ url_for('movie', movie_id=item['tmdb_id']) }}" method="post">
 
         <div class="slidecontainer">
             <div class="mentions"><span id="gradeValue"></span>/10</div>
@@ -50,15 +50,19 @@
         Movie successfully {{ action }}
     </div>
 
+    {% endif %}
+
+    {% if mode == 'show_buttons' %}
+
     </td></tr>
     <tr>
     <td>
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button empty" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['movie'])}}';" value="Edit">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True)}}';" value="Edit">
         </td>
         <td class="right">
-            <form action="{{ url_for('movie', movie_id=item['movie']) }}" method="post">
+            <form action="{{ url_for('movie', movie_id=item['tmdb_id']) }}" method="post">
                 <input class="styled-button empty" type="submit" name="remove" value="Remove">
             </form>
         </td>
