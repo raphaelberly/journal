@@ -57,7 +57,8 @@ def logout():
 def recent(nb_movies=25):
 
     query = db.session \
-        .query(Record.username, Record.date, Record.insert_datetime, Record.grade, Title.title, Title.year, Title.genres) \
+        .query(Record.username, Record.date, Record.tmdb_id, Record.insert_datetime, Record.grade,
+               Title.title, Title.year, Title.genres) \
         .select_from(Record).join(Record.title) \
         .filter(Record.username == current_user.username) \
         .order_by(Record.date.desc(), Record.insert_datetime.desc())

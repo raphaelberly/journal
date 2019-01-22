@@ -18,6 +18,11 @@
     vertical-align: top;
 }
 
+.recent a {
+    text-decoration: none;
+    color: black;
+}
+
 #show_more_button {
     margin-bottom: 30px;
 }

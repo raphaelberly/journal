@@ -7,7 +7,7 @@
 <center><table>
 
 {% for i in range(movies|length) %}
-{% set movie = movies[i] %}
+{% set item = movies[i] %}
 <tr>
     {% if i == 0 %}
         <td class="timeline top"></td>
@@ -15,13 +15,13 @@
         <td class="timeline middle"></td>
     {% endif %}
     <td>
-        <span class="time-ago">{{ get_time_ago(movie.date) }}</span>
+        <span class="time-ago">{{ get_time_ago(item.date) }}</span>
         <br/>
-        <b>{{ movie.title }} ({{ movie.year }})</b>
+        <b><a href="{{ url_for('movie', movie_id=item['tmdb_id']) }}">{{ item.title }} ({{ item.year }})</a></b>
         <br/>
-        {{ ', '.join(movie.genres.split(',')) }}
+        {{ ', '.join(item.genres.split(',')) }}
         <br/>
-        {{ [movie.grade|int, movie.grade]|max }}/10
+        {{ [item.grade|int, item.grade]|max }}/10
     </td>
 </tr>
 {% endfor %}
