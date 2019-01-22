@@ -263,7 +263,8 @@ def movie(movie_id):
             else:
                 action = 'added'
                 # Add the movie to the records database
-                record = Record(username=current_user.username, movie=movie['movie'], grade=grade)
+                record = Record(username=current_user.username, movie=movie['movie'],
+                                tmdb_id=movie['tmdb_id'], grade=grade)
                 db.session.add(record)
                 db.session.commit()
 

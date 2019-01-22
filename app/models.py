@@ -73,21 +73,23 @@ class Record(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     insert_datetime = db.Column(db.DateTime, nullable=True)
-    movie = db.Column(db.String(9), db.ForeignKey(Title.movie))
+    movie = db.Column(db.String(9), db.ForeignKey(Title.movie), nullable=False)
+    tmdb_id = db.Column(db.Integer, nullable=False)
     date = db.Column(db.Date, nullable=False)
     grade = db.Column(db.Float, nullable=False)
-    username = db.Column(db.String(20))
+    username = db.Column(db.String(20), nullable=False)
 
     title = db.relationship("Title", back_populates="record")
 
     __tablename__ = "records"
     __table_args__ = {"schema": "journal"}
 
-    def __init__(self, username, movie, grade):
+    def __init__(self, username, movie, tmdb_id, grade):
 
         self.username = username
         self.insert_datetime = datetime.now()
         self.movie = movie
+        self.tmdb_id = tmdb_id
         self.date = datetime.now().date()
         self.grade = grade
 
