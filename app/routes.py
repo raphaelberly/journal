@@ -2,6 +2,7 @@ from copy import deepcopy
 from datetime import date, datetime
 from flask import render_template, request, session, url_for
 from flask_login import login_user, logout_user, login_required, current_user
+from sqlalchemy import func
 from werkzeug.utils import redirect
 
 from app import app
@@ -96,7 +97,10 @@ def statistics():
     counts.update({'this_year': {'count': this_year, 'description': 'movies this year'}})
     # Number of movies seen in total
     total = Record.query.filter_by(username=current_user.username).count()
-    counts.update({'total': {'count': total, 'description': 'movies since January, 2014'}})
+    start_date = db.session.query(func.min(Record.date))\
+        .filter(Record.username == current_user.username).scalar()
+    counts.update({'total': {'count': total, 'description': 'movies since {}'
+                  .format(start_date.strftime("%B, %Y"))}})
 
     tops = {}
     top_models = {
