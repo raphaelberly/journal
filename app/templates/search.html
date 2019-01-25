@@ -3,10 +3,14 @@
 
 {% block content %}
 
+{% if not query %}
+    {% set query = '' %}
+{% endif %}
+
 <div class="form-search">
 
-<form method="post" action="{{ url_for('search') }}">
-    <input id="input" name="input" placeholder="Type a movie title here..." type="text" value="{{ session.get('input') or '' }}">
+<form method="get" action="{{ url_for('search') }}">
+    <input name="query" placeholder="Type a movie title here..." type="text" value="{{ query }}">
     <button type="submit">Go</button>
 </form>
 
@@ -74,12 +78,42 @@
             <img src="/static/images/icon_check.png">
             Seen: {{ [item['grade']|int, item['grade']]|max }}/10
         </div>
-    {% endif %}
+        {% endif %}
     </td></tr>
 
 </table>
 
 {% endfor %}
+
+{% if show_more_button %}
+<table>
+    <tr><td>
+        <a id="show_more_button" href="javascript:get_show_more_button_link()">more results</a>
+    </td></tr>
+</table>
+{% endif %}
+
+<script type = "text/javascript">
+
+    var show_more_button = document.getElementById("show_more_button");
+    var show_more_link = "{{ url_for('search', query=query, nb_results=results|length+2, scroll='_scroll_placeholder') }}"
+
+    function decodeEntities(encodedString) {
+        var textArea = document.createElement('textarea');
+        textArea.innerHTML = encodedString;
+        return textArea.value;
+    }
+
+    get_show_more_button_link = function() {
+        show_more_button.href = decodeEntities(show_more_link.replace('_scroll_placeholder', window.scrollY));
+        show_more_button.click();
+    };
+
+    {% if scroll %}
+        window.scrollTo(0, {{ scroll }});
+    {% endif %}
+
+</script>
 
 </div>
 

@@ -157,29 +157,17 @@ def add_movies_grade(results):
 @login_required
 def search():
 
-    if request.method == 'POST':
+    if request.args.get('query'):
+        query = request.args['query']
+        nb_results = int(request.args.get('nb_results', 1))
+        results = add_movies_grade(tmdb.search_movies(query, nb_results))
+        show_more_button = (len(results) == nb_results)
+        scroll = int(request.args.get('scroll', 0))
+        return render_template('search.html', query=query, results=results, scroll=scroll,
+                               show_more_button=show_more_button, watchlist=get_watchlist_ids())
 
-        if 'input' in request.form:
-            # Get the results for the provided input
-            query = get_post_result('input')
-            number_of_results = 1
-            # Store the results and the input in the session
-            session['input'] = query
-
-        elif 'more_results' in request.form:
-            # Get search results (cached)
-            query = session['input']
-            number_of_results = 5
-
-        else:
-            raise NotImplementedError
-
-        results = add_movies_grade(tmdb.search_movies(query, number_of_results))
-        return render_template('search.html', title='Search', results=results,
-                               watchlist=get_watchlist_ids())
-
-    session['input'] = None
-    return render_template('search.html', title='Search')
+    else:
+        return render_template('search.html', title='Search')
 
 
 def get_watchlist_ids():
