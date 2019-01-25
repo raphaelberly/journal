@@ -89,15 +89,15 @@
 {% if show_more_button %}
 <table>
     <tr><td>
-        <a id="show_more_button" href="javascript:get_show_more_button_link()">more results</a>
+        <a id="show_more_link" href="javascript:get_show_more_url()">More results</a>
     </td></tr>
 </table>
 {% endif %}
 
 <script type = "text/javascript">
 
-    var show_more_button = document.getElementById("show_more_button");
-    var show_more_link = "{{ url_for('search', query=query, nb_results=results|length*2+1, scroll='_scroll_placeholder') }}"
+    var show_more_link = document.getElementById("show_more_link");
+    var show_more_root_url = "{{ url_for('search', query=query, nb_results=results|length*2+1, scroll='_scroll_placeholder') }}"
 
     function decodeEntities(encodedString) {
         var textArea = document.createElement('textarea');
@@ -105,9 +105,9 @@
         return textArea.value;
     }
 
-    get_show_more_button_link = function() {
-        show_more_button.href = decodeEntities(show_more_link.replace('_scroll_placeholder', window.scrollY));
-        show_more_button.click();
+    get_show_more_url = function() {
+        show_more_link.href = decodeEntities(show_more_root_url.replace('_scroll_placeholder', window.scrollY));
+        show_more_link.click();
     };
 
     {% if scroll %}
