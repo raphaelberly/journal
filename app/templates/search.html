@@ -34,7 +34,7 @@
 {% for item in results %}
 
 <table>
-
+    {% if item.get('image') %}
     <tr><td>
         {% if item.get('grade') %}
         <a href="{{ url_for('movie', movie_id=item['tmdb_id']) }}"><img src="{{ item.get('image') }}"></a>
@@ -42,6 +42,7 @@
         <a href="{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True) }}"><img src="{{ item.get('image') }}"></a>
         {% endif %}
     </td></tr>
+    {% endif %}
     <tr><td>
         <b>{{ item.get('title') }}{% if item.get('year') %} ({{ item['year'] }}){% endif %}</b>
         {% if item.get('genres') %}

@@ -160,8 +160,8 @@ def search():
     if request.args.get('query'):
         query = request.args['query']
         nb_results = int(request.args.get('nb_results', 1))
-        results = add_movies_grade(tmdb.search_movies(query, nb_results))
-        show_more_button = (len(results) == nb_results)
+        results, show_more_button = tmdb.search_movies(query, nb_results)
+        results = add_movies_grade(results)
         scroll = int(request.args.get('scroll', 0))
         return render_template('search.html', query=query, results=results, scroll=scroll,
                                show_more_button=show_more_button, watchlist=get_watchlist_ids())

@@ -35,20 +35,34 @@ class Tmdb(object):
 
     def _parse_movie_response(self, response):
         result = json.loads(response.content)
+        # If no IMDb ID, return None
+        if not (result.get('imdb_id') and result.get('title') and result.get('release_date')):
+            return
+        # Otherwise, compute the output dict
         output = {
             'movie': result['imdb_id'],
             'tmdb_id': result['id'],
             'title': result['title'],
             'year': result['release_date'][:4],
-            'duration': f'{result["runtime"] // 60}h {result["runtime"] % 60}min',
-            'image': self._conf['url']['img_root'].format(width='200') + result['poster_path'],
-            'genres': [genre['name'] for genre in result['genres'][:3]],
-            'cast': [item['name'] for item in result['credits']['cast'][:4]],
-            'directors': [
-                item['name'] for item in result['credits']['crew'] if item['job'] == 'Director'
-            ]
+            'genres': [genre['name'] for genre in result.get('genres', [])[:3]],
+            'cast': [item['name'] for item in result['credits'].get('cast', [])[:4]],
+            'directors': [item['name'] for item in result['credits'].get('crew', [])
+                          if item['job'] == 'Director'],
+            'duration': f'{result["runtime"] // 60}h {result["runtime"] % 60}min' if
+                        result.get('runtime') else None,
+            'image': None if not result.get('poster_path') else
+                    self._conf['url']['img_root'].format(width='200') + result['poster_path'],
         }
         return output
 
     def search_movies(self, query, number_of_results):
-        return [self.movie(movie_id) for movie_id in self.search(query)[:number_of_results]]
+        i = 0
+        output = []
+        results = self.search(query)
+        print(results)
+        while (len(output) < number_of_results) and (i < len(results)):
+            result = self.movie(results[i])
+            if result:
+                output.append(result)
+            i += 1
+        return output, i < len(results)
