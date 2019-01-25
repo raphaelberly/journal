@@ -96,7 +96,7 @@
 <script type = "text/javascript">
 
     var show_more_button = document.getElementById("show_more_button");
-    var show_more_link = "{{ url_for('search', query=query, nb_results=results|length+2, scroll='_scroll_placeholder') }}"
+    var show_more_link = "{{ url_for('search', query=query, nb_results=results|length*2+1, scroll='_scroll_placeholder') }}"
 
     function decodeEntities(encodedString) {
         var textArea = document.createElement('textarea');
