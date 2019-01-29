@@ -13,7 +13,7 @@ class Tmdb(object):
         self._api_key = credentials['tmdb']['api_key']
         self._conf = read_config(os.path.join(config_path, 'tmdb.yaml'))
 
-    @lru_cache(10)
+    @lru_cache(8)
     def search(self, query):
         url = self._conf['url']['api_root'] + self._conf['url']['search']
         params = {'query': query, 'api_key': self._api_key}
@@ -26,7 +26,7 @@ class Tmdb(object):
             return []
         return [item['id'] for item in json.loads(response.content)['results']]
 
-    @lru_cache(20)
+    @lru_cache(24)
     def movie(self, movie_id):
         url = self._conf['url']['api_root'] + self._conf['url']['movie'].format(movie_id=movie_id)
         params = {'api_key': self._api_key, 'append_to_response': 'credits'}
@@ -59,7 +59,6 @@ class Tmdb(object):
         i = 0
         output = []
         results = self.search(query)
-        print(results)
         while (len(output) < number_of_results) and (i < len(results)):
             result = self.movie(results[i])
             if result:
