@@ -1,5 +1,5 @@
 from copy import deepcopy
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from flask import render_template, request, session, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy import func
@@ -41,7 +41,7 @@ def login():
             user = User.query.filter_by(username=get_post_result('username')).first()
             if user is None or not user.check_password(get_post_result('password')):
                 return redirect(url_for('login'))
-            login_user(user, remember=True)
+            login_user(user, remember=True, duration=timedelta(days=90))
             return redirect(url_for('search'))
 
     return render_template('login.html', title='Login')
