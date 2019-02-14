@@ -9,7 +9,7 @@ definitions:
     columns:
       tconst: movie
       titleType: type
-      primaryTitle: title
+      originalTitle: title
       startYear: year
       runtimeMinutes: duration
       genres: genres
