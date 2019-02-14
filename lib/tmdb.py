@@ -42,7 +42,7 @@ class Tmdb(object):
         output = {
             'movie': result['imdb_id'],
             'tmdb_id': result['id'],
-            'title': result['title'],
+            'title': result['original_title'],
             'year': result['release_date'][:4],
             'genres': [genre['name'] for genre in result.get('genres', [])[:3]],
             'cast': [item['name'] for item in result['credits'].get('cast', [])[:4]],
