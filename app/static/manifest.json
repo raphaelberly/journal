@@ -1,0 +1,16 @@
+{
+  "short_name": "Journal",
+  "name": "Journal",
+  "icons": [
+    {
+      "src": "/static/images/apple_startup_image.png",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/search",
+  "background_color": "#6caee0",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#6caee0",
+  "orientation": "portrait"
+}
