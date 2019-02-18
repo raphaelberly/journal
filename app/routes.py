@@ -62,6 +62,7 @@ def recent(nb_movies=25):
                Title.title, Title.year, Title.genres) \
         .select_from(Record).join(Record.title) \
         .filter(Record.username == current_user.username) \
+        .filter(Record.recent == True) \
         .order_by(Record.date.desc(), Record.insert_datetime.desc())
 
     show = 'recent'

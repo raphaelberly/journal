@@ -78,6 +78,7 @@ class Record(db.Model):
     date = db.Column(db.Date, nullable=False)
     grade = db.Column(db.Float, nullable=False)
     username = db.Column(db.String(20), nullable=False)
+    recent = db.Column(db.Boolean, nullable=True)
 
     title = db.relationship("Title", back_populates="record")
 
