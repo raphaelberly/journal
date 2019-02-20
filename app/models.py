@@ -93,6 +93,7 @@ class Record(db.Model):
         self.tmdb_id = tmdb_id
         self.date = datetime.now().date()
         self.grade = grade
+        self.recent = True
 
     def __repr__(self):
         return '<Movie {}>'.format(self.movie)
