@@ -28,10 +28,8 @@
 
 </table></center>
 
-{% if show == 'recent' %}
-<form action="{{ url_for('recent') }}" method="post">
-    <input class="styled-button full" type="submit" id="show_more_button" name="show_all" value="{{ 'Load All' }}">
-</form>
+{% if show_button %}
+<input class="styled-button full" type="button" id="show_more_button" onclick="location.href='{{ url_for('recent', show_all=True)}}';" value="More">
 {% endif %}
 
 </div>

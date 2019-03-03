@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import date, datetime, timedelta
-from flask import render_template, request, session, url_for
+from flask import render_template, request, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy import func
 from werkzeug.utils import redirect
@@ -53,9 +53,14 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/recent', methods=['GET', 'POST'])
+@app.route('/recent', methods=['GET'])
 @login_required
-def recent(nb_movies=25):
+def recent():
+
+    nb_recent = Record.query \
+        .filter(Record.username == current_user.username) \
+        .filter(Record.recent == True) \
+        .count()
 
     query = db.session \
         .query(Record.username, Record.date, Record.tmdb_id, Record.insert_datetime, Record.grade,
@@ -65,16 +70,13 @@ def recent(nb_movies=25):
         .filter(Record.recent == True) \
         .order_by(Record.date.desc(), Record.insert_datetime.desc())
 
-    show = 'recent'
-    if request.method == 'POST':
-        if 'show_all' in request.form:
-            show = 'all'
-
-    if show == 'recent':
-        query = query.limit(nb_movies)
+    if not request.args.get('show_all'):
+        query = query.limit(25)
 
     movies = query.all()
-    return render_template('recent.html', title='Recent', movies=movies, show=show,
+    show_button = nb_recent > len(movies)
+
+    return render_template('recent.html', title='Recent', movies=movies, show_button=show_button,
                            get_time_ago=get_time_ago_string)
 
 
