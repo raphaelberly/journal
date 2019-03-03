@@ -75,9 +75,10 @@ def recent():
 
     movies = query.all()
     show_button = nb_recent > len(movies)
+    scroll = int(request.args.get('scroll', 0))
 
     return render_template('recent.html', title='Recent', movies=movies, show_button=show_button,
-                           get_time_ago=get_time_ago_string)
+                           get_time_ago=get_time_ago_string, scroll=scroll)
 
 
 @app.route('/statistics', methods=['GET'])

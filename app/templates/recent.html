@@ -29,9 +29,31 @@
 </table></center>
 
 {% if show_button %}
-<input class="styled-button full" type="button" onclick="location.href='{{ url_for('recent', show_all=True)}}';" value="More">
+<input class="styled-button full" type="button" id="more_button" onclick="javascript:get_more_button_url()" value="More">
 {% endif %}
 
 </div>
+
+<script type = "text/javascript">
+
+    var more_button = document.getElementById("more_button");
+    var more_button_root_url = "{{ url_for('recent', show_all=True, scroll='_scroll_placeholder') }}"
+
+    function decodeEntities(encodedString) {
+        var textArea = document.createElement('textarea');
+        textArea.innerHTML = encodedString;
+        return textArea.value;
+    }
+
+    get_more_button_url = function() {
+        console.log(decodeEntities(more_button_root_url.replace('_scroll_placeholder', window.scrollY)))
+        window.location.href = decodeEntities(more_button_root_url.replace('_scroll_placeholder', window.scrollY));
+    };
+
+    {% if scroll %}
+        window.scrollTo(0, {{ scroll }});
+    {% endif %}
+
+</script>
 
 {% endblock %}
