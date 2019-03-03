@@ -1,9 +1,10 @@
 
 .recent {
     width: 100%;
-    padding-top: 110px;
-    padding-top: calc(110px + constant(safe-area-inset-top));
-    padding-top: calc(110px + env(safe-area-inset-top));
+    padding-top: 100px;
+    padding-top: calc(100px + constant(safe-area-inset-top));
+    padding-top: calc(100px + env(safe-area-inset-top));
+    padding-bottom: 30px;
 }
 
 .recent table {
@@ -21,10 +22,6 @@
 .recent a {
     text-decoration: none;
     color: black;
-}
-
-#show_more_button {
-    margin-bottom: 30px;
 }
 
 .time-ago {
