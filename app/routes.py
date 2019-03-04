@@ -81,6 +81,21 @@ def recent():
                            get_time_ago=get_time_ago_string, scroll=scroll)
 
 
+def get_number_suffix(number):
+    if 10 <= number % 100 <= 20:
+        suffix = 'th'
+    else:
+        suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(number % 10, 'th')
+    return suffix
+
+
+def add_rank_and_suffix(item, rank):
+    item = item._asdict()
+    item['rank'] = rank
+    item['suffix'] = get_number_suffix(rank)
+    return item
+
+
 @app.route('/statistics', methods=['GET'])
 @login_required
 def statistics():
@@ -105,6 +120,34 @@ def statistics():
         .filter(Record.username == current_user.username).scalar()
     counts.update({'total': {'count': total, 'description': 'movies since {}'
                   .format(start_date.strftime("%B, %Y"))}})
+
+    # Year applicable = this year if today > January 31st, else last year
+    year_applicable = (date.today() - timedelta(days=31)).year
+    if year_applicable == date.today().year:
+        total_applicable = this_year
+    else:
+        total_applicable = Record.query \
+            .filter_by(username=current_user.username) \
+            .filter(db.extract('year', Record.date) == year_applicable) \
+            .count()
+    # Query best and worst movies from applicable year
+    query = db.session \
+        .query(Record.username, Record.date, Record.tmdb_id, Record.grade,
+               Title.title, Title.year, Title.genres) \
+        .select_from(Record).join(Record.title) \
+        .filter(Record.username == current_user.username) \
+        .filter(db.extract('year', Record.date) == year_applicable)
+    best = query.order_by(Record.grade.desc(), Record.insert_datetime.desc()).limit(3).all()
+    worst = query.order_by(Record.grade, Record.insert_datetime.desc()).limit(3).all()
+    # Format the results (add rank and suffix) and reorder them if needed
+    best = [add_rank_and_suffix(best[i], i+1) for i in range(len(best))]
+    worst = [add_rank_and_suffix(worst[i], total_applicable - i - 1) for i in range(len(worst))]
+    worst = sorted(worst, key=lambda x: x['rank'])
+    # Create object to be used by Flask
+    movies = [
+        {'section': f'Best of {year_applicable}', 'movies': best, 'image': 'best.png'},
+        {'section': f'Worst of {year_applicable}', 'movies': worst, 'image': 'worst.png'}
+    ]
 
     tops = {}
     top_models = {
@@ -131,7 +174,8 @@ def statistics():
                 .all()[:top_models[top]['nb_elements']]
         tops.update({top: values})
 
-    return render_template('statistics.html', title='Statistics', counts=counts, tops=tops)
+    return render_template('statistics.html', title='Statistics', counts=counts, tops=tops,
+                           movies=movies, year=year_applicable)
 
 
 def add_movie_grade(result):

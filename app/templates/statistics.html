@@ -18,6 +18,26 @@
         </td>
     </tr>
 
+    {% for element in movies %}
+        <td class="icon"><img src="/static/images/statistics/{{ element['image'] }}"></td>
+        <td class="sideline"></td>
+        <td>
+            <p class="top-type">{{ element['section'] }}</p>
+            {% for item in element['movies'] %}
+
+            <p><span class="big-number">{{ item['rank'] }}</span>{{ item['suffix'] }}
+            <br/><span class="top-name">{{ item['title'] }} ({{ item['year'] }})</span>
+            <br/>{{ ', '.join(item['genres'].split(',')) }}
+            <br/>{{ [item['grade']|int, item['grade']]|max }}/10
+
+            {% endfor %}
+        </p>
+
+        </td>
+    </tr>
+    {% endfor %}
+
+
 {% for element in tops %}
 
     <tr>
