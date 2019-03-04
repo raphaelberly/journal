@@ -141,7 +141,7 @@ def statistics():
     worst = query.order_by(Record.grade, Record.insert_datetime.desc()).limit(3).all()
     # Format the results (add rank and suffix) and reorder them if needed
     best = [add_rank_and_suffix(best[i], i+1) for i in range(len(best))]
-    worst = [add_rank_and_suffix(worst[i], total_applicable - i - 1) for i in range(len(worst))]
+    worst = [add_rank_and_suffix(worst[i], total_applicable - i) for i in range(len(worst))]
     worst = sorted(worst, key=lambda x: x['rank'])
     # Create object to be used by Flask
     movies = [
