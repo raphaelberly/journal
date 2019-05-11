@@ -1,5 +1,7 @@
 import json
 import os
+import re
+
 import requests
 from functools import lru_cache
 
@@ -15,6 +17,7 @@ class Tmdb(object):
 
     @lru_cache(8)
     def search(self, query):
+        query = re.sub('[‘’′´`˙]+', "'", query)
         url = self._conf['url']['api_root'] + self._conf['url']['search']
         params = {'query': query, 'api_key': self._api_key}
         response = requests.get(url, params)
