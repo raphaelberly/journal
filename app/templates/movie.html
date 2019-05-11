@@ -6,6 +6,12 @@
 
 <table>
 
+    {% if mode == 'show_buttons' %}
+    <tr><td>
+        <p><a href="javascript:window.history.go(-1);">Back</a></p>
+    </td></tr>
+    {% endif %}
+
     <tr><td>
         <img src="{{ item.get('image') }}">
     </td></tr>
@@ -26,7 +32,6 @@
     </td></tr>
 
     {% if mode == 'show_slider' %}
-
     <tr><td>
     <form action="{{ url_for('movie', movie_id=item['tmdb_id']) }}" method="post">
 
@@ -38,22 +43,17 @@
 
     </form>
     </td></tr>
-
     {% endif %}
 
     {% if mode == 'show_add_or_edit_confirmation' %}
-
     <tr><td>
-
     <div class="mentions">
         <img src="/static/images/icon_check.png" width="20px">
         Movie successfully {{ action }}
     </div>
-
     {% endif %}
 
     {% if mode == 'show_buttons' %}
-
     </td></tr>
     <tr>
     <td>
@@ -69,26 +69,22 @@
         </tr></table>
     </td>
     </td></tr>
-
     {% endif %}
 
     {% if mode == 'show_remove_confirmation' %}
-
     <tr><td>
-
     <div class="mentions">
         <img src="/static/images/icon_uncheck.png" width="20px">
         Movie successfully removed
     </div>
-
     </td></tr>
-
     {% endif %}
 
 </table>
 
 </div>
 
+{% if mode == 'show_slider' %}
 <script type = "text/javascript">
         var slider = document.getElementById("gradeRange");
         var output = document.getElementById("gradeValue");
@@ -99,5 +95,6 @@
             output.innerHTML = parseFloat(this.value).toFixed(0);
         }
 </script>
+{% endif %}
 
 {% endblock %}

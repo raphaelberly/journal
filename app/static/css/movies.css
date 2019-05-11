@@ -36,3 +36,12 @@
     max-width: 180px;
     width: 55%;
 }
+
+.movies a {
+    color: #6caee0;
+    text-decoration: none;
+}
+
+p {
+    margin-bottom: 10px;
+}
