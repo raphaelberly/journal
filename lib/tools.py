@@ -15,7 +15,7 @@ def get_database_uri(**params):
 def read_config(path):
     with open(path, 'r') as stream:
         try:
-            config = yaml.load(stream)
+            config = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             sys.exit(exc)
     return config
