@@ -18,12 +18,6 @@ def get_post_result(key):
     return dict(request.form)[key][0]
 
 
-# HANDLE ACME CHALLENGE PROPERLY (FOR HTTPS CERT RENEWAL)
-@app.route('/.well-known/acme-challenge/<path:filename>')
-def certonly_check(filename):
-    return redirect(f'static/.well-known/acme-challenge/{filename}')
-
-
 # Redirect all auth failures to login page
 @login.unauthorized_handler
 def unauthorized_callback():
