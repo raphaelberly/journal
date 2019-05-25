@@ -112,8 +112,8 @@ def statistics():
     total = Record.query.filter_by(username=current_user.username).count()
     start_date = db.session.query(func.min(Record.date))\
         .filter(Record.username == current_user.username).scalar()
-    counts.update({'total': {'count': total, 'description': 'movies since {}'
-                  .format(start_date.strftime("%B, %Y"))}})
+    total_description = f'movies since {start_date.strftime("%B, %Y")}' if start_date else 'in total'  # no if >> crash
+    counts.update({'total': {'count': total, 'description': total_description}})
 
     # Year applicable = this year if today > January 31st, else last year
     year_applicable = (date.today() - timedelta(days=31)).year
