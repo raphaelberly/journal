@@ -33,6 +33,15 @@ body {
     margin-top: 20%;
 }
 
+.login a {
+    color: white;
+    text-decoration: none;
+}
+
+.login p {
+    margin-top: 15px;
+}
+
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
   color: #C3D9EF;
 }
