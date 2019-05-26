@@ -7,6 +7,7 @@ from werkzeug.utils import redirect
 
 from app import app
 from app import db, login
+from app.forms import RegistrationForm
 from app.models import Genre, Record, Title, Top, WatchlistItem, User
 from lib.tmdb import Tmdb
 from lib.tools import get_time_ago_string
@@ -39,6 +40,24 @@ def login():
             return redirect(url_for('search'))
 
     return render_template('login.html', title='Login')
+
+
+@app.route('/signin', methods=['GET', 'POST'])
+def signin():
+
+    if current_user.is_authenticated:
+        return redirect(url_for('search'))
+
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        login_user(user, remember=True, duration=timedelta(days=90))
+        return redirect(url_for('search'))
+
+    return render_template('signin.html', title='Sign in', form=form)
 
 
 @app.route('/logout')

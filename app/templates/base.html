@@ -20,11 +20,14 @@
     {% if title == 'Login' %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css')}}">
     {% endif %}
+    {% if title == 'Sign in' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signin.css')}}">
+    {% endif %}
 </head>
 
 <body ontouchstart="">
 
-    {% if title != 'Login' %}
+    {% if title not in ['Login', 'Sign in'] %}
 
     <div class="navbar"><table><tr>
         <td class="left">

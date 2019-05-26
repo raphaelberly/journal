@@ -8,6 +8,7 @@ colorlog==4.0.2
 Flask==1.0.2
 Flask-Login==0.4.1
 Flask-SQLAlchemy==2.4.0
+Flask-WTF==0.14.2
 gunicorn==19.9.0
 idna==2.8
 itsdangerous==1.1.0
@@ -36,3 +37,4 @@ virtualenv==16.5.0
 virtualenv-clone==0.5.3
 virtualenvwrapper==4.8.4
 Werkzeug==0.15.2
+WTForms==2.2.1
