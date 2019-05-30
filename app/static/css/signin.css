@@ -38,6 +38,15 @@ body {
     color: #E33A3A;
 }
 
+.signin a {
+    color: white;
+    text-decoration: none;
+}
+
+.signin p {
+    margin-top: 15px;
+}
+
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
   color: #C3D9EF;
 }
