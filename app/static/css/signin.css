@@ -1,6 +1,7 @@
 
 body {
     background-color: #6caee0;
+    overflow: hidden;
 }
 
 .signin {
