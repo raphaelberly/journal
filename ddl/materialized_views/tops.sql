@@ -19,6 +19,7 @@ INNER JOIN journal.records r
   ON p.movie = r.movie
 INNER JOIN journal.titles t
   ON p.movie = t.movie
+  AND NOT (t.genres LIKE '%Animation%' AND p.role IN ('actor', 'actress'))
 INNER JOIN journal.names n
   ON p.person = n.person
 INNER JOIN journal.ratings rt
