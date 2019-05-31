@@ -1,59 +1,50 @@
-
 CREATE MATERIALIZED VIEW journal.tops AS (
 
-WITH raw AS (
-
-SELECT
-  r.username,
-  p.person,
-  n.name,
-  p.role,
-  t.title,
-  t.year,
-  t.genres,
-  r.grade,
-  r.date,
-  rt.rating
-FROM journal.principals p
-INNER JOIN journal.records r
-  ON p.movie = r.movie
-INNER JOIN journal.titles t
-  ON p.movie = t.movie
-  AND NOT (t.genres LIKE '%Animation%' AND p.role IN ('actor', 'actress'))
-INNER JOIN journal.names n
-  ON p.person = n.person
-INNER JOIN journal.ratings rt
-  ON p.movie = rt.movie
-
+WITH
+thresholds AS (
+  SELECT * FROM (
+    VALUES ('actor', 5), ('actress', 4), ('composer', 4), ('director', 3), ('producer', 4), ('writer', 4), ('genre', 10)
+  ) t1 (role, threshold)
 ),
-
-persons_and_roles AS (
-
+tops AS (
+  SELECT p.*
+  FROM journal.persons p
+  UNION
   SELECT
-    r.username,
-    r.person,
-    r.name,
-    r.role,
-    array_agg(r.title ORDER BY r.grade DESC, r.rating DESC, r.date DESC)  AS titles,
-    array_agg(r.year ORDER BY r.grade DESC, r.rating DESC, r.date DESC)   AS titles_year,
-    avg(r.grade)                                                          AS grade,
-    avg(r.rating)                                                         AS rating,
-    count(*)                                                              AS count
-  FROM raw r
-  GROUP BY 1,2,3,4
-
+    g.username, g.name AS id, 'genre' AS role, g.name, g.top_3_movies, g.top_3_movies_year, g.grade, g.rating, g.count
+  FROM journal.genres g
+),
+tops_ranked AS (
+  SELECT
+    t.*,
+    row_number() OVER (PARTITION BY t.username, t.role ORDER BY t.count DESC
+      ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS rank
+  FROM tops t
+  ORDER BY t.role, t.count DESC
+),
+tops_ranked_enriched AS (
+  SELECT
+    r.*,
+    max(r.count * (r.rank = 10)::INT) OVER (PARTITION BY r.username, r.role ORDER BY r.count DESC
+      ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS value
+  FROM tops_ranked r
+  ORDER BY r.role, r.count DESC
 )
-
 SELECT
-  d.username,
-  d.person,
-  d.role,
-  d.name,
-  d.titles[1:3]       AS top_3_movies,
-  d.titles_year[1:3]  AS top_3_movies_year,
-  d.grade,
-  d.rating,
-  d.count
-FROM persons_and_roles d
+  t.username,
+  t.id,
+  t.role,
+  t.name,
+  t.top_3_movies,
+  t.top_3_movies_year,
+  t.grade,
+  t.rating,
+  t.count,
+  least(value, th.threshold) AS count_threshold
+FROM tops_ranked_enriched t
+INNER JOIN thresholds th
+USING(role)
+WHERE t.count >= least(value, th.threshold)
+ORDER BY t.role, t.grade DESC
 
 );
