@@ -102,7 +102,7 @@ class Record(db.Model):
 class Top(db.Model):
 
     username = db.Column(db.String(20), primary_key=True)
-    person = db.Column(db.String(9), primary_key=True)
+    id = db.Column(db.String(9), primary_key=True)  # For genres, the ID is the name
     role = db.Column(db.String(256), primary_key=True)
     name = db.Column(db.String(256))
     top_3_movies = db.Column(db.ARRAY(db.String(256)))
@@ -110,26 +110,10 @@ class Top(db.Model):
     grade = db.Column(db.Float)
     rating = db.Column(db.Float)
     count = db.Column(db.Integer)
+    count_threshold = db.Column(db.Integer)
 
     __tablename__ = "tops"
     __table_args__ = {"schema": "journal"}
 
     def __repr__(self):
         return '<Top {0}: {1}>'.format(self.role, self.name)
-
-
-class Genre(db.Model):
-
-    username = db.Column(db.String(20), primary_key=True)
-    name = db.Column(db.String(256), primary_key=True)
-    top_3_movies = db.Column(db.ARRAY(db.String(256)))
-    top_3_movies_year = db.Column(db.ARRAY(db.Integer))
-    grade = db.Column(db.Float)
-    rating = db.Column(db.Float)
-    count = db.Column(db.Integer)
-
-    __tablename__ = "genres"
-    __table_args__ = {"schema": "journal"}
-
-    def __repr__(self):
-        return '<Genre: {0}>'.format(self.name)

@@ -8,7 +8,7 @@ from werkzeug.utils import redirect
 from app import app
 from app import db, login
 from app.forms import RegistrationForm
-from app.models import Genre, Record, Title, Top, WatchlistItem, User
+from app.models import Record, Title, Top, WatchlistItem, User
 from lib.tmdb import Tmdb
 from lib.tools import get_time_ago_string
 
@@ -164,27 +164,18 @@ def statistics():
 
     tops = {}
     top_models = {
-        'directors': {'model': Top, 'role': 'director', 'min_movie_qty': 3, 'nb_elements': 5},
-        'actors': {'model': Top, 'role': 'actor', 'min_movie_qty': 5, 'nb_elements': 5},
-        'actresses': {'model': Top, 'role': 'actress', 'min_movie_qty': 4, 'nb_elements': 5},
-        'genres': {'model': Genre, 'min_movie_qty': 10, 'nb_elements': 5},
-        'composers': {'model': Top, 'role': 'composer', 'min_movie_qty': 4, 'nb_elements': 3}
+        'directors': {'role': 'director', 'nb_elements': 5},
+        'actors': {'role': 'actor', 'nb_elements': 5},
+        'actresses': {'role': 'actress', 'nb_elements': 5},
+        'genres': {'role': 'genre', 'nb_elements': 5},
+        'composers': {'role': 'composer', 'nb_elements': 3}
     }
     for top in top_models:
-        model = top_models[top]['model']
-        if 'role' in top_models[top].keys():
-            values = model.query \
-                .filter_by(username=current_user.username) \
-                .filter_by(role=top_models[top]['role']) \
-                .filter(model.count >= top_models[top]['min_movie_qty']) \
-                .order_by(model.grade.desc(), model.count.desc(), model.rating.desc()) \
-                .all()[:top_models[top]['nb_elements']]
-        else:
-            values = model.query \
-                .filter_by(username=current_user.username) \
-                .filter(model.count >= top_models[top]['min_movie_qty']) \
-                .order_by(model.grade.desc(), model.count.desc(), model.rating.desc()) \
-                .all()[:top_models[top]['nb_elements']]
+        values = Top.query \
+            .filter_by(username=current_user.username) \
+            .filter_by(role=top_models[top]['role']) \
+            .order_by(Top.grade.desc(), Top.count.desc(), Top.rating.desc()) \
+            .all()[:top_models[top]['nb_elements']]
         tops.update({top: values})
 
     return render_template('statistics.html', title='Statistics', counts=counts, tops=tops,
