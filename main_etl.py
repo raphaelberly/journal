@@ -19,12 +19,12 @@ parser.add_argument('--config', '-c', default='config')
 args = parser.parse_args()
 
 # Generate target_type type list
-type_list = yaml.load(open('{}/etl.yaml'.format(args.config)))['definitions'].keys()
+type_list = yaml.safe_load(open(f'{args.config}/etl.yaml'))['definitions'].keys()
 target_types = type_list if args.all else args.types
 
 # For each target_type type, run the ETL process
 for target_type in target_types:
-    assert target_type in type_list, 'Provided types must be in {}'.format(type_list)
+    assert target_type in type_list, f'Provided types must be in {type_list}'
     etl = ETL(target_type)
     etl.run()
 
