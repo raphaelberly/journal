@@ -1,10 +1,11 @@
 import json
 import os
 import re
-
-import requests
 from functools import lru_cache
 
+import requests
+
+from lib.langdetect import detect
 from lib.tools import read_config
 
 
@@ -45,7 +46,7 @@ class Tmdb(object):
         output = {
             'movie': result['imdb_id'],
             'tmdb_id': result['id'],
-            'title': result['original_title'],
+            'title': result['original_title'] if detect(result['original_title']) == 'fr' else result['title'],
             'year': result['release_date'][:4],
             'genres': [genre['name'] for genre in result.get('genres', [])[:3]],
             'cast': [item['name'] for item in result['credits'].get('cast', [])[:4]],
