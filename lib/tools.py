@@ -8,8 +8,12 @@ from datetime import date, timedelta
 from sqlalchemy import create_engine
 
 
-def get_database_uri(**params):
-    return '{type}://{user}:{password}@{host}:{port}/{db}'.format(**params)
+def get_db_uri(type, host, port, db, user, password, **kwargs):
+    return f'{type}://{user}:{password}@{host}:{port}/{db}'
+
+
+def get_db_connection_string(host, port, db, user, password, **kwargs):
+    return f"host='{host}' dbname='{db}' port={port} user='{user}' password='{password}'"
 
 
 def read_config(path):
@@ -65,7 +69,7 @@ def chunk_file(file_path, chunk_size=10**6, header=True):
 def df_to_table(df, schema, table, if_exists='append', config_folder='config'):
 
     credentials = read_config(os.path.join(config_folder, 'credentials.yaml'))
-    engine = create_engine(get_database_uri(**credentials['pi']))
+    engine = create_engine(get_db_uri(**credentials['db']))
     params = {'name': table, 'schema': schema, 'index': False}
 
     df.to_sql(con=engine, if_exists=if_exists, **params)
