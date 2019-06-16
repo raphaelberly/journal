@@ -6,21 +6,21 @@ definitions:
 
   titles:
     url: https://datasets.imdbws.com/title.basics.tsv.gz
-    columns:
-      tconst: movie
-      titleType: type
-      originalTitle: title
-      startYear: year
-      runtimeMinutes: duration
-      genres: genres
     filter:
-      type:
+      titleType:
         - short
         - movie
         - tvMovie
         - tvShort
         - tvSpecial
         - video
+    columns:
+      tconst: movie
+      titleType: type
+      primaryTitle: title
+      startYear: year
+      runtimeMinutes: duration
+      genres: genres
 
   ratings:
     url: https://datasets.imdbws.com/title.ratings.tsv.gz
@@ -45,15 +45,15 @@ definitions:
 
   principals:
     url: https://datasets.imdbws.com/title.principals.tsv.gz
-    columns:
-      tconst: movie
-      nconst: person
-      category: role
     filter:
-      role:
+      category:
         - writer
         - actress
         - actor
         - director
         - producer
         - composer
+    columns:
+      tconst: movie
+      nconst: person
+      category: role
