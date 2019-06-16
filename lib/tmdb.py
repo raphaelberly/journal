@@ -5,14 +5,14 @@ from functools import lru_cache
 
 import requests
 
-from lib.langdetect import detect
 from lib.tools import read_config
 
 
 class Tmdb(object):
 
-    def __init__(self, config_path='config'):
+    def __init__(self, language='fr', config_path='config'):
         credentials = read_config(os.path.join(config_path, 'credentials.yaml'))
+        self.language = language
         self._api_key = credentials['tmdb']['api_key']
         self._conf = read_config(os.path.join(config_path, 'tmdb.yaml'))
 
@@ -46,7 +46,7 @@ class Tmdb(object):
         output = {
             'movie': result['imdb_id'],
             'tmdb_id': result['id'],
-            'title': result['original_title'] if detect(result['original_title']) == 'fr' else result['title'],
+            'title': result['original_title'] if result['original_language'] == self.language else result['title'],
             'year': result['release_date'][:4],
             'genres': [genre['name'] for genre in result.get('genres', [])[:3]],
             'cast': [item['name'] for item in result['credits'].get('cast', [])[:4]],
