@@ -1,14 +1,15 @@
 import csv
+import gzip
 import logging
 import multiprocessing
 import os
-import gzip
 from csv import DictReader
 from functools import partial
-from toolz import partition_all
 
+import numpy as np
 import psycopg2
 import requests
+from toolz import partition_all
 from tqdm import tqdm
 
 from lib.langdetect import detect
@@ -30,16 +31,17 @@ class ETL:
     def extract(self):
         LOGGER.info(f'Downloading {self.target_type}...')
         # Download file
-        url = self.etl_config['url']
-        file_path = self.config['parameters']['file_path'].format(self.target_type)
-        return self._download_file(url, file_path)
+        # url = self.etl_config['url']
+        # file_path = self.config['parameters']['file_path'].format(self.target_type)
+        # return self._download_file(url, file_path)
+        return 'tmp/titles.tsv.gz'
 
     @staticmethod
     def _download_file(url, file_path, block_size=10**6):
         r = requests.get(url, stream=True)
         total_size = int(r.headers.get('content-length', 0))
         with open(file_path, 'wb') as f:
-            for chunk in tqdm(r.iter_content(block_size), total=total_size/block_size, unit='MB'):
+            for chunk in tqdm(r.iter_content(block_size), total=np.ceil(total_size/block_size), unit='MB'):
                 f.write(chunk)
         return file_path
 
@@ -55,7 +57,7 @@ class ETL:
                 rows = filter(lambda row: row[col_name] in col_values, rows)
         # Rename columns
         pool = multiprocessing.Pool(processes=4)
-        rows = pool.imap_unordered(self._rename_columns, rows)
+        rows = pool.imap_unordered(self._rename_columns, rows, chunksize=10)
         # Upload to db
         with psycopg2.connect(get_db_connection_string(**self._credentials['db'])) as conn:
             self.to_db(conn, rows, 100)
