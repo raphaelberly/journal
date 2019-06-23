@@ -1,4 +1,6 @@
+import csv
 import logging
+import multiprocessing
 import os
 import gzip
 from csv import DictReader
@@ -9,6 +11,7 @@ import psycopg2
 import requests
 from tqdm import tqdm
 
+from lib.langdetect import detect
 from lib.tools import read_config, get_db_connection_string
 
 logging.basicConfig(level='INFO')
@@ -45,24 +48,28 @@ class ETL:
         filepath = self.extract()
         # Process extracted data
         stream = gzip.open(filepath, 'rt')
-        rows = DictReader(stream, delimiter='\t')
+        rows = DictReader(stream, delimiter='\t', quoting=csv.QUOTE_NONE)
         # Apply filters when applicable
         if self.etl_config.get('filter'):
             for col_name, col_values in self.etl_config['filter'].items():
                 rows = filter(lambda row: row[col_name] in col_values, rows)
         # Rename columns
-        rows = self._rename_columns(rows)
+        pool = multiprocessing.Pool(processes=4)
+        rows = pool.imap_unordered(self._rename_columns, rows)
         # Upload to db
         with psycopg2.connect(get_db_connection_string(**self._credentials['db'])) as conn:
             self.to_db(conn, rows, 100)
 
-    def _rename_columns(self, rows):
-        for row in rows:
-            new_dict = {}
-            for colname, new_colname in self.etl_config['columns'].items():
-                if row[colname] != "\\N":
+    def _rename_columns(self, row):
+        new_dict = {}
+        for colname, new_colname in self.etl_config['columns'].items():
+            if row[colname] != "\\N":
+                if new_colname != 'title':
                     new_dict[new_colname] = row[colname]
-            yield new_dict
+                else:
+                    new_dict[new_colname] = row['originalTitle'] if detect(row['originalTitle']) == 'fr' \
+                        else row['primaryTitle']
+        return new_dict
 
     def _truncate_table(self, conn):
         cur = conn.cursor()
