@@ -89,7 +89,7 @@ class ETL:
         self._truncate_table(conn)
         # Take care of logging
         LOGGER.info('Uploading to database...')
-        tqdm_kwargs = {'desc': '> processed', 'unit': ' rows'}
+        tqdm_kwargs = {'desc': '> processed', 'unit': ' rows', 'mininterval': 1}
         tqdm_values_generator = tqdm(rows, **tqdm_kwargs)
         # Insert values by batch
         _get_insert_query = partial(self._get_insert_query, self.table_name)
