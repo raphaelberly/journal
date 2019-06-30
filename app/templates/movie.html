@@ -6,12 +6,6 @@
 
 <table>
 
-    {% if mode == 'show_buttons' %}
-    <tr><td>
-        <p><a href="javascript:window.history.go(-1);">Back</a></p>
-    </td></tr>
-    {% endif %}
-
     <tr><td>
         <img src="{{ item.get('image') }}">
     </td></tr>
@@ -33,7 +27,7 @@
 
     {% if mode == 'show_slider' %}
     <tr><td>
-    <form action="{{ url_for('movie', movie_id=item['tmdb_id']) }}" method="post">
+    <form action="{{ url_for('movie', movie_id=item['tmdb_id'], ref=referrer) }}" method="post">
 
         <div class="slidecontainer">
             <div class="mentions"><span id="gradeValue"></span>/10</div>
@@ -59,10 +53,10 @@
     <td>
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True)}}';" value="Edit">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True, ref=referrer)}}';" value="Edit">
         </td>
         <td class="right">
-            <form action="{{ url_for('movie', movie_id=item['tmdb_id']) }}" method="post">
+            <form action="{{ url_for('movie', movie_id=item['tmdb_id'], ref=referrer) }}" method="post">
                 <input class="styled-button empty" type="submit" name="remove" value="Remove">
             </form>
         </td>

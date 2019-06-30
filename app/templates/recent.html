@@ -17,7 +17,7 @@
     <td>
         <span class="time-ago">{{ get_time_ago(item.date) }}</span>
         <br/>
-        <b><a href="{{ url_for('movie', movie_id=item['tmdb_id']) }}">{{ item.title }} ({{ item.year }})</a></b>
+        <b><a href="{{ url_for('movie', movie_id=item['tmdb_id'], ref='recent') }}">{{ item.title }} ({{ item.year }})</a></b>
         <br/>
         {{ ', '.join(item.genres.split(',')) }}
         <br/>

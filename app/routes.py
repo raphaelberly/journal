@@ -288,8 +288,11 @@ def movie(movie_id):
     movie_id = int(movie_id)
     movie = add_movie_grade(tmdb.movie(movie_id))
 
+    # Get referrer if provided via GET params
+    referrer = request.args.get('ref')
+
     if request.method == 'GET' and request.args.get('show_slider'):
-        return render_template('movie.html', title='Movie', item=movie, mode='show_slider')
+        return render_template('movie.html', title='Movie', item=movie, mode='show_slider', referrer=referrer)
 
     if request.method == 'POST':
 
@@ -316,8 +319,8 @@ def movie(movie_id):
             # Remove from watchlist (if in it)
             remove_from_watchlist(movie['movie'])
 
-            return render_template('movie.html', title='Movie', item=movie,
-                                   mode='show_add_or_edit_confirmation', action=action)
+            return render_template('movie.html', title='Movie', item=movie, mode='show_add_or_edit_confirmation',
+                                   action=action, referrer=referrer)
 
         elif 'remove' in request.form:
             # Delete the movie from the database
@@ -325,7 +328,7 @@ def movie(movie_id):
             for record in to_delete:
                 db.session.delete(record)
             db.session.commit()
-            return render_template('movie.html', title='Movie', item=movie,
-                                   mode='show_remove_confirmation')
+            return render_template('movie.html', title='Movie', item=movie, mode='show_remove_confirmation',
+                                   referrer=referrer)
 
-    return render_template('movie.html', title='Movie', item=movie, mode='show_buttons')
+    return render_template('movie.html', title='Movie', item=movie, mode='show_buttons', referrer=referrer)
