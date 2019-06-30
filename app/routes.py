@@ -260,10 +260,10 @@ def watchlist():
     if request.method == 'POST':
 
         if 'add_to_watchlist' in request.form:
-            movie_id = int(get_post_result('add_to_watchlist'))
+            tmdb_movie_id = int(get_post_result('add_to_watchlist'))
             # Add to watchlist on database
             item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username,
-                                 **tmdb.movie(movie_id))
+                                 **tmdb.movie(tmdb_movie_id))
             db.session.add(item)
             db.session.commit()
             # Update watchlist
