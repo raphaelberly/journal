@@ -271,7 +271,7 @@ def watchlist():
             return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
 
         elif 'remove_from_watchlist' in request.form:
-            movie_id = request.args.get('remove')
+            movie_id = get_post_result('remove_from_watchlist')
             remove_from_watchlist(movie_id)
             watchlist_dict = get_watchlist()
             return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
