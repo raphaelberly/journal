@@ -66,8 +66,9 @@
                 <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True)}}';" value="Add">
             </td>
             <td class="right">
-                <form action="{{ url_for('watchlist', add=item['tmdb_id']) }}" method="post">
-                    <input class="styled-button empty" type="submit" name="add_to_watchlist" value="Watchlist">
+                <form action="{{ url_for('watchlist') }}" method="post">
+                    <input type="hidden" name="add_to_watchlist" value="{{ item['tmdb_id'] }}">
+                    <input class="styled-button empty" type="submit" value="Watchlist">
                 </form>
             </td>
             {% else %}
