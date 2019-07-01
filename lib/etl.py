@@ -31,10 +31,9 @@ class ETL:
     def extract(self):
         LOGGER.info(f'Downloading {self.target_type}...')
         # Download file
-        # url = self.etl_config['url']
-        # file_path = self.config['parameters']['file_path'].format(self.target_type)
-        # return self._download_file(url, file_path)
-        return 'tmp/titles.tsv.gz'
+        url = self.etl_config['url']
+        file_path = self.config['parameters']['file_path'].format(self.target_type)
+        return self._download_file(url, file_path)
 
     @staticmethod
     def _download_file(url, file_path, block_size=10**6):
