@@ -1,0 +1,26 @@
+<div class="navbar"><table><tr>
+    <td class="left">
+        {% if title == 'Movie' %}
+        <a href="{{ back_target }}"><img src="/static/images/icon_back.png"></a>
+        {% else %}
+        <a href="{{url_for('search')}}"><img src="/static/images/icon_logo.png"></a>
+        {% endif %}
+    </td>
+    <td>
+        <span style="cursor:pointer" onclick="topFunction()">{{title or 'Journal'}}</span>
+    </td>
+    <td class="right">
+        <span style="cursor:pointer" onclick="openNav()"><img src="/static/images/icon_open_menu.png" class="openbtn"></span>
+    </td>
+</tr></table></div>
+
+<div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" onclick="closeNav()"><img src="/static/images/icon_close_menu.png" class="closebtn"></a>
+    <a href="{{url_for('search')}}">Search</a>
+    <a href="{{url_for('recent')}}">Recent</a>
+    <a href="{{url_for('watchlist')}}">Watchlist</a>
+    <a href="{{url_for('statistics')}}">Statistics</a>
+    <a href="{{url_for('logout')}}">Logout</a>
+</div>
+
+<a href="javascript:void(0)" onclick="closeNav()"><div class="sidenavback" id="sidenavback"></div></a>
