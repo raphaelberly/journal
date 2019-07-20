@@ -1,6 +1,17 @@
-{% extends "base.html" %}
+<html>
 
-{% block content %}
+<head>
+    <title>Statistics</title>
+    {% include 'base/head.html' %}
+    <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/statistics.css')}}">
+</head>
+
+<body ontouchstart="">
+
+{% include 'base/menu.html' %}
 
 <div class="statistics">
 
@@ -69,4 +80,5 @@
 
 </div>
 
-{% endblock %}
+</body>
+</html>
