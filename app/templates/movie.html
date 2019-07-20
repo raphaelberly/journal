@@ -1,6 +1,19 @@
-{% extends "base.html" %}
+<html>
 
-{% block content %}
+<head>
+    <title>Movie</title>
+    {% include 'base/head.html' %}
+    <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
+</head>
+
+<body ontouchstart="">
+
+{% include 'base/menu.html' %}
 
 <div class="movies nobar">
 
@@ -79,16 +92,8 @@
 </div>
 
 {% if mode == 'show_slider' %}
-<script type = "text/javascript">
-        var slider = document.getElementById("gradeRange");
-        var output = document.getElementById("gradeValue");
-        output.innerHTML = slider.value;
-
-        slider.oninput = function() {
-            <!-- Set the toFixed value to 1 to have a fixed 1-decimal printed value -->
-            output.innerHTML = parseFloat(this.value).toFixed(0);
-        }
-</script>
+    <script type = "text/javascript" src="{{ url_for('static', filename='js/grade.js') }}"></script>
 {% endif %}
 
-{% endblock %}
+</body>
+</html>
