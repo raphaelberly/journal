@@ -1,7 +1,19 @@
+<html>
 
-{% extends "base.html" %}
+<head>
+    <title>Search</title>
+    {% include 'base/head.html' %}
+    <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
+</head>
 
-{% block content %}
+<body ontouchstart="">
+
+{% include 'base/menu.html' %}
 
 {% if not query %}
     {% set query = '' %}
@@ -95,6 +107,8 @@
 </table>
 {% endif %}
 
+</div>
+
 <script type = "text/javascript">
 
     var show_more_link = document.getElementById("show_more_link");
@@ -117,6 +131,5 @@
 
 </script>
 
-</div>
-
-{% endblock %}
+</body>
+</html>
