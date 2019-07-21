@@ -88,7 +88,7 @@ def recent():
 
     movies = query.all()
     show_button = nb_recent > len(movies)
-    scroll = int(request.args.get('scroll', 0))
+    scroll = int(request.args.get('ref_scroll', 0))
 
     return render_template('recent.html', title='Recent', movies=movies, show_button=show_button,
                            get_time_ago=get_time_ago_string, scroll=scroll)
@@ -214,7 +214,7 @@ def search():
         nb_results = int(request.args.get('nb_results', 1))
         results, show_more_button = tmdb.search_movies(query, nb_results)
         results = add_movies_grade(results)
-        scroll = int(request.args.get('scroll', 0))
+        scroll = int(request.args.get('ref_scroll', 0))
         return render_template('search.html', query=query, results=results, scroll=scroll,
                                show_more_button=show_more_button, watchlist=get_watchlist_ids())
 

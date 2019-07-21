@@ -4,6 +4,7 @@
     <title>Recent</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
@@ -29,7 +30,7 @@
     <td>
         <span class="time-ago">{{ get_time_ago(item.date) }}</span>
         <br/>
-        <b><a href="{{ url_for('movie', movie_id=item['tmdb_id'], ref='recent') }}">{{ item.title }} ({{ item.year }})</a></b>
+        <b><a href="#" onclick="javascript:add_referrer('{{ url_for('movie', movie_id=item['tmdb_id']) }}', 'recent')">{{ item.title }} ({{ item.year }})</a></b>
         <br/>
         {{ ', '.join(item.genres.split(',')) }}
         <br/>
@@ -41,32 +42,14 @@
 </table></center>
 
 {% if show_button %}
-<input class="styled-button full" type="button" id="more_button" onclick="javascript:get_more_button_url()" value="More">
+<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_referrer('{{ url_for('recent', show_all=True) }}', 'recent')" value="More">
 {% endif %}
 
 </div>
 
-<script type = "text/javascript">
-
-    var more_button = document.getElementById("more_button");
-    var more_button_root_url = "{{ url_for('recent', show_all=True, scroll='_scroll_placeholder') }}"
-
-    function decodeEntities(encodedString) {
-        var textArea = document.createElement('textarea');
-        textArea.innerHTML = encodedString;
-        return textArea.value;
-    }
-
-    get_more_button_url = function() {
-        console.log(decodeEntities(more_button_root_url.replace('_scroll_placeholder', window.scrollY)))
-        window.location.href = decodeEntities(more_button_root_url.replace('_scroll_placeholder', window.scrollY));
-    };
-
-    {% if scroll %}
-        window.scrollTo(0, {{ scroll }});
-    {% endif %}
-
-</script>
+{% if scroll %}
+<script type = "text/javascript"> window.scrollTo(0, {{ scroll }}); </script>
+{% endif %}
 
 </body>
 </html>

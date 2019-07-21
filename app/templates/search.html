@@ -4,6 +4,7 @@
     <title>Search</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
@@ -102,34 +103,16 @@
 {% if show_more_button %}
 <table>
     <tr><td>
-        <a id="show_more_link" href="javascript:get_show_more_url()">More results</a>
+        <a id="show_more_link" href="javascript:add_referrer('{{ url_for('search', query=query, nb_results=results|length*2+1) }}', 'search')">More results</a>
     </td></tr>
 </table>
 {% endif %}
 
 </div>
 
-<script type = "text/javascript">
-
-    var show_more_link = document.getElementById("show_more_link");
-    var show_more_root_url = "{{ url_for('search', query=query, nb_results=results|length*2+1, scroll='_scroll_placeholder') }}"
-
-    function decodeEntities(encodedString) {
-        var textArea = document.createElement('textarea');
-        textArea.innerHTML = encodedString;
-        return textArea.value;
-    }
-
-    get_show_more_url = function() {
-        show_more_link.href = decodeEntities(show_more_root_url.replace('_scroll_placeholder', window.scrollY));
-        show_more_link.click();
-    };
-
-    {% if scroll %}
-        window.scrollTo(0, {{ scroll }});
-    {% endif %}
-
-</script>
+{% if scroll %}
+<script type = "text/javascript"> window.scrollTo(0, {{ scroll }}); </script>
+{% endif %}
 
 </body>
 </html>
