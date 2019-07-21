@@ -39,7 +39,7 @@ def login():
             login_user(user, remember=True, duration=timedelta(days=90))
             return redirect(url_for('search'))
 
-    return render_template('login.html', title='Login')
+    return render_template('login.html')
 
 
 @app.route('/signin', methods=['GET', 'POST'])
@@ -57,7 +57,7 @@ def signin():
         login_user(user, remember=True, duration=timedelta(days=90))
         return redirect(url_for('search'))
 
-    return render_template('signin.html', title='Sign in', form=form)
+    return render_template('signin.html', form=form)
 
 
 @app.route('/logout')
@@ -215,7 +215,7 @@ def search():
         results, show_more_button = tmdb.search_movies(query, nb_results)
         results = add_movies_grade(results)
         scroll = int(request.args.get('ref_scroll', 0))
-        return render_template('search.html', query=query, results=results, scroll=scroll,
+        return render_template('search.html', title='Search', query=query, results=results, scroll=scroll,
                                show_more_button=show_more_button, watchlist=get_watchlist_ids())
 
     else:
