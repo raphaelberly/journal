@@ -8,7 +8,7 @@
             {% set back_target = 'javascript:window.history.go(-1);' %}
         {% endif %}
     {% elif mode in ['show_add_or_edit_confirmation', 'show_remove_confirmation'] %}
-        {% set back_target = url_for(referrer) %}
+        {% set back_target = url_for(referrer or 'search') %}
     {% endif %}
 {% endif %}
 
