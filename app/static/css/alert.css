@@ -1,0 +1,20 @@
+.alert {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    color: white;
+    background-color: #5f974f;
+
+    width: 100%;
+    position: fixed;
+    overflow: hidden;
+}
+
+.visible {
+    bottom:0;
+    transition: bottom 1s ease-in-out;
+}
+
+.hidden {
+    bottom:-100%;
+    transition: bottom 1s ease-in-out;
+}
