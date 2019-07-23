@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import date, datetime, timedelta
-from flask import render_template, request, url_for
+from flask import render_template, request, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy import func
 from werkzeug.utils import redirect
@@ -37,6 +37,7 @@ def login():
             if user is None or not user.check_password(get_post_result('password')):
                 return redirect(url_for('login'))
             login_user(user, remember=True, duration=timedelta(days=90))
+            flash(f'Welcome, {user.username}!')
             return redirect(url_for('search'))
 
     return render_template('login.html')
@@ -55,6 +56,7 @@ def signin():
         db.session.add(user)
         db.session.commit()
         login_user(user, remember=True, duration=timedelta(days=90))
+        flash(f'Welcome, {user.username}!')
         return redirect(url_for('search'))
 
     return render_template('signin.html', form=form)
@@ -63,6 +65,7 @@ def signin():
 @app.route('/logout')
 def logout():
     logout_user()
+    flash('You were successfully logged out')
     return redirect(url_for('login'))
 
 
@@ -266,6 +269,7 @@ def watchlist():
                                  **tmdb.movie(tmdb_movie_id))
             db.session.add(item)
             db.session.commit()
+            flash('Movie added to watchlist')
             # Update watchlist
             watchlist_dict = get_watchlist()
             return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
@@ -273,6 +277,7 @@ def watchlist():
         elif 'remove_from_watchlist' in request.form:
             movie_id = get_post_result('remove_from_watchlist')
             remove_from_watchlist(movie_id)
+            flash('Movie removed from watchlist')
             watchlist_dict = get_watchlist()
             return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
 
@@ -308,6 +313,7 @@ def movie(movie_id):
                     .filter_by(username=current_user.username, movie=movie['movie']) \
                     .update({'grade': grade})
                 db.session.commit()
+                flash('Movie successfully updated')
             else:
                 action = 'added'
                 # Add the movie to the records database
@@ -315,6 +321,7 @@ def movie(movie_id):
                                 tmdb_id=movie['tmdb_id'], grade=grade)
                 db.session.add(record)
                 db.session.commit()
+                flash('Movie successfully added')
 
             # Remove from watchlist (if in it)
             remove_from_watchlist(movie['movie'])
@@ -328,6 +335,7 @@ def movie(movie_id):
             for record in to_delete:
                 db.session.delete(record)
             db.session.commit()
+            flash('Movie successfully removed')
             return render_template('movie.html', title='Movie', item=movie, mode='show_remove_confirmation',
                                    referrer=referrer)
 
