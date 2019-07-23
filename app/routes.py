@@ -271,16 +271,14 @@ def remove_from_watchlist(movie_id):
 def watchlist():
 
     if request.method == 'POST':
-
         if 'remove_from_watchlist' in request.form:
             movie_id = get_post_result('remove_from_watchlist')
             remove_from_watchlist(movie_id)
             flash('Movie removed from watchlist')
-            watchlist_dict = get_watchlist()
-            return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
 
     watchlist_dict = get_watchlist()
-    return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
+    scroll = int(request.args.get('ref_scroll', 0))
+    return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict, scroll=scroll)
 
 
 @app.route('/movie/<movie_id>', methods=['GET', 'POST'])
