@@ -11,10 +11,10 @@
 
 .visible {
     bottom:0;
-    transition: bottom 1s ease-in-out;
+    transition: bottom 0.5s ease-out;
 }
 
 .hidden {
-    bottom:-100%;
-    transition: bottom 1s ease-in-out;
+    bottom:-25%;
+    transition: bottom 0.5s ease-in;
 }
