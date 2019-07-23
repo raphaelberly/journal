@@ -212,17 +212,27 @@ def add_movies_grade(results):
 @login_required
 def search():
 
-    if request.args.get('query'):
-        query = request.args['query']
-        nb_results = int(request.args.get('nb_results', 1))
-        results, show_more_button = tmdb.search_movies(query, nb_results)
-        results = add_movies_grade(results)
-        scroll = int(request.args.get('ref_scroll', 0))
-        return render_template('search.html', title='Search', query=query, results=results, scroll=scroll,
-                               show_more_button=show_more_button, watchlist=get_watchlist_ids())
-
-    else:
+    if not request.args.get('query'):
         return render_template('search.html', title='Search')
+
+    query = request.args['query']
+    nb_results = int(request.args.get('nb_results', 1))
+    results, show_more_button = tmdb.search_movies(query, nb_results)
+    results = add_movies_grade(results)
+    scroll = int(request.args.get('ref_scroll', 0))
+
+    if request.method == 'POST':
+        if 'add_to_watchlist' in request.form:
+            tmdb_movie_id = int(get_post_result('add_to_watchlist'))
+            # Add to watchlist on database
+            item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username,
+                                 **tmdb.movie(tmdb_movie_id))
+            db.session.add(item)
+            db.session.commit()
+            flash('Movie added to watchlist')
+
+    return render_template('search.html', title='Search', query=query, results=results, scroll=scroll,
+                           show_more_button=show_more_button, watchlist=get_watchlist_ids())
 
 
 def get_watchlist_ids():
@@ -262,19 +272,7 @@ def watchlist():
 
     if request.method == 'POST':
 
-        if 'add_to_watchlist' in request.form:
-            tmdb_movie_id = int(get_post_result('add_to_watchlist'))
-            # Add to watchlist on database
-            item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username,
-                                 **tmdb.movie(tmdb_movie_id))
-            db.session.add(item)
-            db.session.commit()
-            flash('Movie added to watchlist')
-            # Update watchlist
-            watchlist_dict = get_watchlist()
-            return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict)
-
-        elif 'remove_from_watchlist' in request.form:
+        if 'remove_from_watchlist' in request.form:
             movie_id = get_post_result('remove_from_watchlist')
             remove_from_watchlist(movie_id)
             flash('Movie removed from watchlist')
