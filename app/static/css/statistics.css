@@ -33,6 +33,11 @@
     line-height: 2;
 }
 
+.top-name a {
+    text-decoration: none;
+    color: black;
+}
+
 .top-movies {
     font-style: italic;
 }

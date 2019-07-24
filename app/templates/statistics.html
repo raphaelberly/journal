@@ -4,6 +4,7 @@
     <title>Statistics</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/statistics.css')}}">
 </head>
@@ -37,7 +38,7 @@
             {% for item in element['movies'] %}
 
             <p><span class="big-number">{{ item['rank'] }}</span>{{ item['suffix'] }}
-            <br/><span class="top-name">{{ item['title'] }} ({{ item['year'] }})</span>
+                <br/><span class="top-name"><a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item['tmdb_id']) }}', 'statistics')">{{ item['title'] }} ({{ item['year'] }})</a></span>
             <br/>{{ ', '.join(item['genres'].split(',')) }}
             <br/>{{ [item['grade']|int, item['grade']]|max }}/10
 
@@ -64,7 +65,6 @@
         <br/>Top {{ top.top_3_movies|length }} movies ({{ top.count }} in total):
 
         {% for title in top.top_3_movies %}
-
             <br/><span class="top-movies"> &bull; {{ title }}</span>
         {% endfor %}
         </p>
@@ -79,6 +79,10 @@
 </table></center>
 
 </div>
+
+{% if scroll %}
+<script type = "text/javascript"> window.scrollTo(0, {{ scroll }}); </script>
+{% endif %}
 
 </body>
 </html>
