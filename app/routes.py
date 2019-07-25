@@ -16,7 +16,7 @@ tmdb = Tmdb()
 
 
 def get_post_result(key):
-    return dict(request.form)[key][0]
+    return request.form.to_dict()[key]
 
 
 # Redirect all auth failures to login page
@@ -294,7 +294,7 @@ def movie(movie_id):
     movie = add_movie_grade(tmdb.movie(movie_id))
 
     # Get referrer if provided via GET params
-    args = dict(request.args)
+    args = request.args.to_dict()
     referrer = args.pop('ref', 'search')
     scroll = int(args.pop('ref_scroll', 0))
 
