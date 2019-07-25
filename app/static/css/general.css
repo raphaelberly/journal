@@ -52,6 +52,7 @@ td {
 
 .mentions {
 	font-weight: bold;
+    margin-bottom: 5px;
 }
 
 .mentions img {

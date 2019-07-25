@@ -35,24 +35,23 @@
 {% if results == [] %}
 <table>
     <tr><td>
-    <img id="img-no-results" src="static/images/fail.png">
+        <img id="img-no-results" src="static/images/fail.png">
     </td></tr>
     <tr><td>
-    Wops, no results were found
+        Wops, no results were found
     </td></tr>
 </table>
 {% endif %}
 
 
 {% for item in results %}
-
 <table>
     {% if item.get('image') %}
     <tr><td>
         {% if item.get('grade') %}
-        <a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item['tmdb_id']) }}', 'search')"><img src="{{ item.get('image') }}"></a>
+        <a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item['tmdb_id'], query=query, nb_results=results|length) }}', 'search')"><img src="{{ item.get('image') }}"></a>
         {% else %}
-        <a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True) }}', 'search')"><img src="{{ item.get('image') }}"></a>
+        <a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item['tmdb_id'], query=query, nb_results=results|length, show_slider=True) }}', 'search')"><img src="{{ item.get('image') }}"></a>
         {% endif %}
     </td></tr>
     {% endif %}
@@ -76,7 +75,7 @@
             {% if not item['movie'] in watchlist %}
             <table class="dual"><tr>
             <td class="left">
-                <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True, ref='search')}}';" value="Add">
+                <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], query=query, nb_results=results|length, show_slider=True, ref='search')}}';" value="Add">
             </td>
             <td class="right">
                 <form onsubmit="this.action=add_referrer('{{ url_for('search', query=query, nb_results=results|length) }}', 'search');" method="post">
@@ -84,10 +83,10 @@
                     <input class="styled-button empty" type="submit" value="Watchlist">
                 </form>
             </td>
-            {% else %}
-            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True, ref='search')}}';" value="Add">
-            {% endif %}
             </tr></table>
+            {% else %}
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], query=query, nb_results=results|length, show_slider=True, ref='search')}}';" value="Add">
+            {% endif %}
         {% else %}
         <div class="mentions">
             <img src="/static/images/icon_check.png">
@@ -95,9 +94,7 @@
         </div>
         {% endif %}
     </td></tr>
-
 </table>
-
 {% endfor %}
 
 {% if show_more_button %}

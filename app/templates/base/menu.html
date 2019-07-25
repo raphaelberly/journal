@@ -1,21 +1,8 @@
-{% if title == 'Movie' %}
-    {% if mode == 'show_buttons' %}
-        {% set back_target = 'javascript:window.history.go(-1);' %}
-    {% elif mode in 'show_slider' %}
-        {% if referrer == 'recent' %}
-            {% set back_target = 'javascript:window.history.go(-2);' %}
-        {% elif referrer in ['search', 'watchlist'] %}
-            {% set back_target = 'javascript:window.history.go(-1);' %}
-        {% endif %}
-    {% elif mode in ['show_add_or_edit_confirmation', 'show_remove_confirmation'] %}
-        {% set back_target = url_for(referrer or 'search') %}
-    {% endif %}
-{% endif %}
 
 <div class="navbar"><table><tr>
     <td class="left">
-        {% if title == 'Movie' %}
-        <a href="{{ back_target }}"><img src="/static/images/icon_back.png"></a>
+        {% if title == 'Movie' and referrer %}
+        <a href="{{ url_for(referrer, ref=referrer, ref_scroll=scroll or 0, **args) }}"><img src="/static/images/icon_back.png"></a>
         {% else %}
         <a href="{{url_for('search')}}"><img src="/static/images/icon_logo.png"></a>
         {% endif %}

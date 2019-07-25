@@ -181,8 +181,9 @@ def statistics():
             .all()[:top_models[top]['nb_elements']]
         tops.update({top: values})
 
-    return render_template('statistics.html', title='Statistics', counts=counts, tops=tops,
-                           movies=movies, year=year_applicable)
+    scroll = int(request.args.get('ref_scroll', 0))
+    return render_template('statistics.html', title='Statistics', counts=counts, tops=tops, movies=movies,
+                           year=year_applicable, scroll=scroll)
 
 
 def add_movie_grade(result):
@@ -223,12 +224,7 @@ def search():
 
     if request.method == 'POST':
         if 'add_to_watchlist' in request.form:
-            tmdb_movie_id = int(get_post_result('add_to_watchlist'))
-            # Add to watchlist on database
-            item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username,
-                                 **tmdb.movie(tmdb_movie_id))
-            db.session.add(item)
-            db.session.commit()
+            add_to_watchlist()
             flash('Movie added to watchlist')
 
     return render_template('search.html', title='Search', query=query, results=results, scroll=scroll,
@@ -256,6 +252,14 @@ def get_watchlist():
         watchlist.update({item.movie: item.__dict__})
     # Return
     return watchlist
+
+
+def add_to_watchlist():
+    tmdb_movie_id = int(get_post_result('add_to_watchlist'))
+    # Add to watchlist on database
+    item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username, **tmdb.movie(tmdb_movie_id))
+    db.session.add(item)
+    db.session.commit()
 
 
 def remove_from_watchlist(movie_id):
@@ -290,49 +294,53 @@ def movie(movie_id):
     movie = add_movie_grade(tmdb.movie(movie_id))
 
     # Get referrer if provided via GET params
-    referrer = request.args.get('ref')
+    args = dict(request.args)
+    referrer = args.pop('ref', 'search')
+    scroll = int(args.pop('ref_scroll', 0))
 
-    if request.method == 'GET' and request.args.get('show_slider'):
-        return render_template('movie.html', title='Movie', item=movie, mode='show_slider', referrer=referrer)
+    if request.method == 'GET' and args.pop('show_slider', False):
+        return render_template('movie.html', title='Movie', item=movie, mode='show_slider', referrer=referrer,
+                               scroll=scroll, args=args)
 
     if request.method == 'POST':
 
-        if 'gradeRange' in request.form:
+        if 'add_to_watchlist' in request.form:
+            add_to_watchlist()
+            flash('Movie added to watchlist')
 
-            # Get submitted grade
-            grade = float(get_post_result('gradeRange'))
-
-            if movie.get('grade'):
-                action = 'updated'
-                # Update the movie in the database
-                Record.query \
-                    .filter_by(username=current_user.username, movie=movie['movie']) \
-                    .update({'grade': grade})
-                db.session.commit()
-                flash('Movie successfully updated')
-            else:
-                action = 'added'
-                # Add the movie to the records database
-                record = Record(username=current_user.username, movie=movie['movie'],
-                                tmdb_id=movie['tmdb_id'], grade=grade)
-                db.session.add(record)
-                db.session.commit()
-                flash('Movie successfully added')
-
-            # Remove from watchlist (if in it)
-            remove_from_watchlist(movie['movie'])
-
-            return render_template('movie.html', title='Movie', item=movie, mode='show_add_or_edit_confirmation',
-                                   action=action, referrer=referrer)
-
-        elif 'remove' in request.form:
+        if 'remove' in request.form:
             # Delete the movie from the database
             to_delete = Record.query.filter_by(username=current_user.username, movie=movie['movie']).all()
             for record in to_delete:
                 db.session.delete(record)
             db.session.commit()
             flash('Movie successfully removed')
-            return render_template('movie.html', title='Movie', item=movie, mode='show_remove_confirmation',
-                                   referrer=referrer)
+            # Update movie element
+            movie.pop('grade')
 
-    return render_template('movie.html', title='Movie', item=movie, mode='show_buttons', referrer=referrer)
+        elif 'gradeRange' in request.form:
+            # Get submitted grade
+            grade = float(get_post_result('gradeRange'))
+            # If there is already a grade, then it's an update. Otherwise it's an addition
+            if movie.get('grade'):
+                action = 'updated'
+                # Update the movie in the database
+                Record.query \
+                    .filter_by(username=current_user.username, movie=movie['movie']) \
+                    .update({'grade': grade})
+            else:
+                action = 'added'
+                # Add the movie to the records database
+                record = Record(current_user.username, movie['movie'], movie['tmdb_id'], grade)
+                db.session.add(record)
+                # Remove from watchlist (if in it)
+                remove_from_watchlist(movie['movie'])
+            # Commit add/update changes
+            db.session.commit()
+            flash(f'Movie successfully {action}')
+            # Update movie element
+            movie['grade'] = grade
+
+    mode = 'show_add_buttons' if movie.get('grade') is None else 'show_edit_buttons'
+    return render_template('movie.html', title='Movie', item=movie, mode=mode, referrer=referrer, scroll=scroll,
+                           watchlist=get_watchlist_ids(), args=args)

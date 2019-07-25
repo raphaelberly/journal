@@ -4,6 +4,7 @@
     <title>Movie</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
@@ -40,7 +41,7 @@
 
     {% if mode == 'show_slider' %}
     <tr><td>
-    <form action="{{ url_for('movie', movie_id=item['tmdb_id'], ref=referrer) }}" method="post">
+    <form action="{{ url_for('movie', movie_id=item['tmdb_id'], ref=referrer, ref_scroll=scroll, **args) }}" method="post">
 
         <div class="slidecontainer">
             <div class="mentions"><span id="gradeValue"></span>/10</div>
@@ -52,38 +53,46 @@
     </td></tr>
     {% endif %}
 
-    {% if mode == 'show_add_or_edit_confirmation' %}
+    {% if mode == 'show_edit_buttons' %}
     <tr><td>
-    <div class="mentions">
-        <img src="/static/images/icon_check.png" width="20px">
-        Movie successfully {{ action }}
-    </div>
-    {% endif %}
-
-    {% if mode == 'show_buttons' %}
+        {% if item.get('grade') %}
+        <div class="mentions">
+            <img src="/static/images/icon_check.png">
+            Seen: {{ [item['grade']|int, item['grade']]|max }}/10
+        </div>
+        {% endif %}
     </td></tr>
-    <tr>
-    <td>
+    <tr><td>
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True, ref=referrer)}}';" value="Edit">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True, ref=referrer, ref_scroll=scroll, **args) }}';" value="Edit">
         </td>
         <td class="right">
-            <form action="{{ url_for('movie', movie_id=item['tmdb_id'], ref=referrer) }}" method="post">
+            <form action="{{ url_for('movie', movie_id=item['tmdb_id'], ref=referrer, ref_scroll=scroll, **args) }}" method="post">
                 <input class="styled-button empty" type="submit" name="remove" value="Remove">
+            </form>
+        </td></tr>
+        </table>
+    </td></tr>
+    {% endif %}
+
+    {% if mode == 'show_add_buttons' %}
+    <tr><td>
+        {% if not item['movie'] in watchlist %}
+        <table class="dual"><tr>
+        <td class="left">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True, ref=referrer, ref_scroll=scroll, **args) }}';" value="Add">
+        </td>
+        <td class="right">
+            <form action="{{ url_for('movie', movie_id=item['tmdb_id']) }}" method="post">
+                <input type="hidden" name="add_to_watchlist" value="{{ item['tmdb_id'] }}">
+                <input class="styled-button empty" type="submit" value="Watchlist">
             </form>
         </td>
         </tr></table>
-    </td>
-    </td></tr>
-    {% endif %}
-
-    {% if mode == 'show_remove_confirmation' %}
-    <tr><td>
-    <div class="mentions">
-        <img src="/static/images/icon_uncheck.png" width="20px">
-        Movie successfully removed
-    </div>
+        {% else %}
+        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True, ref=referrer, ref_scroll=scroll, **args)}} ';" value="Add">
+        {% endif %}
     </td></tr>
     {% endif %}
 
