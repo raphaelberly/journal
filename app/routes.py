@@ -314,6 +314,7 @@ def movie(movie_id):
             flash('Movie successfully removed')
             # Update movie element
             movie.pop('grade')
+            movie.pop('date')
 
         elif 'gradeRange' in request.form:
             # Get submitted grade
@@ -337,6 +338,7 @@ def movie(movie_id):
             flash(f'Movie successfully {action}')
             # Update movie element
             movie['grade'] = grade
+            movie['date'] = date.today()
 
     mode = 'show_add_buttons' if movie.get('grade') is None else 'show_edit_buttons'
     return render_template('movie.html', title='Movie', item=movie, mode=mode, referrer=referrer, scroll=scroll,
