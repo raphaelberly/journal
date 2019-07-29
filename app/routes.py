@@ -186,25 +186,16 @@ def statistics():
                            year=year_applicable, scroll=scroll)
 
 
-def add_movie_grade(result):
-    result = deepcopy(result)
-    # Add the grade to result when seen already
-    record = Record.query.with_entities(Record.grade) \
-        .filter(Record.username == current_user.username) \
-        .filter(Record.movie == result['movie']).first()
-    if record:
-        result.update({'grade': record[0]})
-    return result
-
-
-def add_movies_grade(results):
+def enrich_results(results):
     results = deepcopy(results)
     # Add the grade to each result when seen already
-    records = dict(Record.query.with_entities(Record.movie, Record.grade)
-                   .filter(Record.username == current_user.username).all())
+    records = Record.query.with_entities(Record.movie, Record.grade, Record.date) \
+        .filter(Record.username == current_user.username)  \
+        .filter(Record.movie.in_([result['movie'] for result in results])).all()
+    records = dict({_movie: {'grade': _grade, 'date': _date} for _movie, _grade, _date in records})
     for result in results:
         if records.get(result['movie']):
-            result.update({'grade': records[result['movie']]})
+            result.update(records[result['movie']])
     return results
 
 
@@ -219,7 +210,7 @@ def search():
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 1))
     results, show_more_button = tmdb.search_movies(query, nb_results)
-    results = add_movies_grade(results)
+    results = enrich_results(results)
     scroll = int(request.args.get('ref_scroll', 0))
 
     if request.method == 'POST':
@@ -291,7 +282,7 @@ def movie(movie_id):
 
     # Get movie item
     movie_id = int(movie_id)
-    movie = add_movie_grade(tmdb.movie(movie_id))
+    movie = enrich_results([tmdb.movie(movie_id)])[0]
 
     # Get referrer if provided via GET params
     args = request.args.to_dict()
