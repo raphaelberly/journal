@@ -19,6 +19,14 @@ def get_post_result(key):
     return request.form.to_dict()[key]
 
 
+# Load functions to be used in Jinja into Context processor
+@app.context_processor
+def utility_processor():
+    def format_date(dt):
+        return get_time_ago_string(dt)
+    return dict(format_date=format_date)
+
+
 # Redirect all auth failures to login page
 @login.unauthorized_handler
 def unauthorized_callback():
@@ -92,9 +100,7 @@ def recent():
     movies = query.all()
     show_button = nb_recent > len(movies)
     scroll = int(request.args.get('ref_scroll', 0))
-
-    return render_template('recent.html', title='Recent', movies=movies, show_button=show_button,
-                           get_time_ago=get_time_ago_string, scroll=scroll)
+    return render_template('recent.html', title='Recent', movies=movies, show_button=show_button, scroll=scroll)
 
 
 def get_number_suffix(number):

@@ -28,7 +28,7 @@
         <td class="timeline middle"></td>
     {% endif %}
     <td>
-        <span class="time-ago">{{ get_time_ago(item.date) }}</span>
+        <span class="time-ago">{{ format_date(item.date) }}</span>
         <br/>
         <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item['tmdb_id']) }}', 'recent')">{{ item.title }} ({{ item.year }})</a></b>
         <br/>
