@@ -1,7 +1,10 @@
-setTimeout(function(){
+function openAlert() {
     document.getElementsByClassName('alert hidden')[0].className = 'alert visible';
-}, 0);
+}
 
-setTimeout(function(){
+function closeAlert() {
     document.getElementsByClassName('alert visible')[0].className = 'alert hidden';
-}, 3500);
+}
+
+setTimeout(openAlert, 0);
+setTimeout(closeAlert, 3500);
