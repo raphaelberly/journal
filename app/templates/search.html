@@ -90,7 +90,7 @@
         {% else %}
         <div class="mentions">
             <img src="/static/images/icon_check.png">
-            Seen: {{ [item['grade']|int, item['grade']]|max }}/10
+            <b>{{ [item['grade']|int, item['grade']]|max }}/10</b>, rated {{ format_date(item['date'])|lower }}
         </div>
         {% endif %}
     </td></tr>
