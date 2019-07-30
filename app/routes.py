@@ -100,7 +100,7 @@ def recent():
     movies = query.all()
     show_button = nb_recent > len(movies)
     scroll = int(request.args.get('ref_scroll', 0))
-    return render_template('recent.html', title='Recent', movies=movies, show_button=show_button, scroll=scroll)
+    return render_template('recent.html', movies=movies, show_button=show_button, scroll=scroll)
 
 
 def get_number_suffix(number):
@@ -188,8 +188,8 @@ def statistics():
         tops.update({top: values})
 
     scroll = int(request.args.get('ref_scroll', 0))
-    return render_template('statistics.html', title='Statistics', counts=counts, tops=tops, movies=movies,
-                           year=year_applicable, scroll=scroll)
+    return render_template('statistics.html', counts=counts, tops=tops, movies=movies, year=year_applicable,
+                           scroll=scroll)
 
 
 def enrich_results(results):
@@ -211,7 +211,7 @@ def enrich_results(results):
 def search():
 
     if not request.args.get('query'):
-        return render_template('search.html', title='Search')
+        return render_template('search.html')
 
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 1))
@@ -224,7 +224,7 @@ def search():
             add_to_watchlist()
             flash('Movie added to watchlist')
 
-    return render_template('search.html', title='Search', query=query, results=results, scroll=scroll,
+    return render_template('search.html', query=query, results=results, scroll=scroll,
                            show_more_button=show_more_button, watchlist=get_watchlist_ids())
 
 
@@ -279,7 +279,7 @@ def watchlist():
 
     watchlist_dict = get_watchlist()
     scroll = int(request.args.get('ref_scroll', 0))
-    return render_template('watchlist.html', title='Watchlist', watchlist=watchlist_dict, scroll=scroll)
+    return render_template('watchlist.html', watchlist=watchlist_dict, scroll=scroll)
 
 
 @app.route('/movie/<movie_id>', methods=['GET', 'POST'])
@@ -296,8 +296,8 @@ def movie(movie_id):
     scroll = int(args.pop('ref_scroll', 0))
 
     if request.method == 'GET' and args.pop('show_slider', False):
-        return render_template('movie.html', title='Movie', item=movie, mode='show_slider', referrer=referrer,
-                               scroll=scroll, args=args)
+        return render_template('movie.html', item=movie, mode='show_slider', referrer=referrer, scroll=scroll,
+                               args=args)
 
     if request.method == 'POST':
 
@@ -341,5 +341,5 @@ def movie(movie_id):
             movie['date'] = date.today()
 
     mode = 'show_add_buttons' if movie.get('grade') is None else 'show_edit_buttons'
-    return render_template('movie.html', title='Movie', item=movie, mode=mode, referrer=referrer, scroll=scroll,
+    return render_template('movie.html', item=movie, mode=mode, referrer=referrer, scroll=scroll,
                            watchlist=get_watchlist_ids(), args=args)

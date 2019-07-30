@@ -1,7 +1,6 @@
 <html>
 
 <head>
-    <title>Search</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
@@ -13,7 +12,9 @@
 
 <body ontouchstart="">
 
-{% include 'base/menu.html' %}
+{% with title = 'Search' %}
+    {% include 'base/menu.html' %}
+{% endwith %}
 {% include 'base/alert.html' %}
 
 {% if not query %}
