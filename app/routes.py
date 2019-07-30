@@ -338,7 +338,9 @@ def movie(movie_id):
             flash(f'Movie successfully {action}')
             # Update movie element
             movie['grade'] = grade
-            movie['date'] = date.today()
+            movie['date'] = Record.query.with_entities(Record.date) \
+                .filter_by(username=current_user.username, movie=movie['movie']) \
+                .first()[0]
 
     mode = 'show_add_buttons' if movie.get('grade') is None else 'show_edit_buttons'
     return render_template('movie.html', item=movie, mode=mode, referrer=referrer, scroll=scroll,
