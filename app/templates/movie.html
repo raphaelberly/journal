@@ -70,7 +70,7 @@
         </td>
         <td class="right">
             <form action="{{ url_for('movie', movie_id=item['tmdb_id'], ref=referrer, ref_scroll=scroll, **args) }}" method="post">
-                <input class="styled-button empty" type="submit" name="remove" value="Remove">
+                <input class="styled-button empty" type="submit" name="remove" value="Remove" onclick="javascript:if (window.confirm('Remove from journal?')) {return true;} else {return false;}">
             </form>
         </td></tr>
         </table>

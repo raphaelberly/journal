@@ -63,7 +63,7 @@
         <td class="right">
             <form onsubmit="this.action=add_referrer('{{ url_for('watchlist') }}', 'watchlist');" method="post">
                 <input type="hidden" name="remove_from_watchlist" value="{{ item['movie'] }}">
-                <input class="styled-button empty" type="submit" value="Unlist">
+                <input class="styled-button empty" type="submit" value="Unlist" onclick="javascript:if (window.confirm('Remove from watchlist?')) {return true;} else {return false;}">
             </form>
         </td>
         </tr></table>
