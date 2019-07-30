@@ -31,7 +31,7 @@
     <td>
         <span class="time-ago">{{ format_date(item.date) }}</span>
         <br/>
-        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item['tmdb_id']) }}', 'recent')">{{ item.title }} ({{ item.year }})</a></b>
+        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item['tmdb_id'], nb_results=movies|length) }}', 'recent')">{{ item.title }} ({{ item.year }})</a></b>
         <br/>
         {{ ', '.join(item.genres.split(',')) }}
         <br/>
