@@ -45,7 +45,7 @@
     <form action="{{ url_for('movie', movie_id=item['tmdb_id'], ref=referrer, ref_scroll=scroll, **args) }}" method="post">
 
         <div class="slidecontainer">
-            <div class="mentions"><span id="gradeValue"></span>/10</div>
+            <div class="mentions"><b><span id="gradeValue"></span>/10</b></div>
             <input id="gradeRange" name="gradeRange" type="range" min="1" max="10" value="{{ item.get('grade', 6)|string }}" step="1" class="slider">
         </div>
         <input class="styled-button full" type="submit" value="{{ 'Update' if item.get('grade') else 'Add' }}">
