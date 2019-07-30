@@ -43,7 +43,7 @@
 </table></center>
 
 {% if show_button %}
-<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_referrer_and_load('{{ url_for('recent', show_all=True) }}', 'recent')" value="More">
+<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_referrer_and_load('{{ url_for('recent', nb_results=movies|length+20) }}', 'recent')" value="More">
 {% endif %}
 
 </div>

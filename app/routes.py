@@ -94,8 +94,8 @@ def recent():
         .filter(Record.recent == True) \
         .order_by(Record.date.desc(), Record.insert_datetime.desc())
 
-    if not request.args.get('show_all'):
-        query = query.limit(25)
+    nb_results = int(request.args.get('nb_results', 20))
+    query = query.limit(nb_results)
 
     movies = query.all()
     show_button = nb_recent > len(movies)
