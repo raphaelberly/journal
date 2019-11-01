@@ -1,7 +1,7 @@
 
 CREATE TABLE journal.records (
   insert_datetime TIMESTAMP DEFAULT now(),
-  movie           VARCHAR(9) NOT NULL,
+  movie           VARCHAR(12) NOT NULL,
   tmdb_id         INTEGER NOT NULL,
   date            DATE NOT NULL,
   grade           DOUBLE PRECISION NOT NULL,

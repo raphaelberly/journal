@@ -1,7 +1,7 @@
 CREATE TABLE journal.watchlist(
 
   insert_datetime TIMESTAMP DEFAULT NOW(),
-  movie VARCHAR(9) NOT NULL,
+  movie VARCHAR(12) NOT NULL,
   title TEXT NOT NULL,
   year INTEGER NOT NULL,
   genres TEXT[] NOT NULL,
