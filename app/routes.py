@@ -159,8 +159,8 @@ def statistics():
         .select_from(Record).join(Record.title) \
         .filter(Record.username == current_user.username) \
         .filter(db.extract('year', Record.date) == year_applicable)
-    best = query.order_by(Record.grade.desc(), Record.insert_datetime.desc()).limit(3).all()
-    worst = query.order_by(Record.grade, Record.insert_datetime.desc()).limit(3).all()
+    best = query.order_by(Record.grade.desc(), Record.insert_datetime.desc()).limit(5).all()
+    worst = query.order_by(Record.grade, Record.insert_datetime.desc()).limit(5).all()
     # Format the results (add rank and suffix) and reorder them if needed
     best = [add_rank_and_suffix(best[i], i+1) for i in range(len(best))]
     worst = [add_rank_and_suffix(worst[i], total_applicable - i) for i in range(len(worst))]
