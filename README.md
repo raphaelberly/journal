@@ -55,7 +55,7 @@ This page is the landing page of the web app. As its existence suggests, the app
 
 Once logged in, the user is redirected to the Search page. The "Remember Me" option is automatically set to True for a period of 90 days.
 
-**Note:** there is not yet a "Sign In" page. Users have to be manually entered in the users table.
+At the bottom of the Login page, there is a "Sign up" link leading to a page where the user can sign up if not done yet. 
 
 #### 2.2 Search page
 
@@ -75,7 +75,8 @@ The timeline was made using a combination of images, CSS styling and HTML table.
 
 #### 2.4 Watchlist page
 
-The watchlist page gathers the movies the user added to his or her watchlist, using the "Watchlist" button displayed on each search result.
+The watchlist page gathers the movies the user added to his or her watchlist, using the "Watchlist" button displayed on each search result.
+
 <div align="center" border="1px"><img src="img/watchlist_page.png" width="225px"/></div>
 
 Movies can be added to the journal directly from the watchlist, through the "Add" button. They can be removed from the watchlist with the "Unlist" button.
