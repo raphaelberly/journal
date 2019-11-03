@@ -51,8 +51,8 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/signin', methods=['GET', 'POST'])
-def signin():
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
 
     if current_user.is_authenticated:
         return redirect(url_for('search'))
@@ -67,7 +67,7 @@ def signin():
         flash(f'Welcome, {user.username}!')
         return redirect(url_for('search'))
 
-    return render_template('signin.html', form=form)
+    return render_template('signup.html', form=form)
 
 
 @app.route('/logout')

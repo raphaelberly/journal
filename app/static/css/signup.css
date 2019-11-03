@@ -4,14 +4,14 @@ body {
     overflow: hidden;
 }
 
-.signin {
+.signup {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
-.signin input{
+.signup input{
 
     border-radius: 2px;
     background-color:  #88B5DF;
@@ -26,11 +26,11 @@ body {
     color: #fff;
 }
 
-.signin td {
+.signup td {
     text-align: center;
 }
 
-.signin button {
+.signup button {
     margin-top: 20%;
 }
 
@@ -39,12 +39,12 @@ body {
     color: #E33A3A;
 }
 
-.signin a {
+.signup a {
     color: white;
     text-decoration: none;
 }
 
-.signin p {
+.signup p {
     margin-top: 15px;
 }
 

@@ -3,12 +3,12 @@
 <head>
     {% include 'base/head.html' %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/signin.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css')}}">
 </head>
 
 <body ontouchstart="">
 
-<div class="signin">
+<div class="signup">
 <table align="center">
 
     <form action="" method="post">
@@ -38,7 +38,7 @@
             {% endfor %}
         </td></tr>
         <tr><td>
-            <button class="styled-button empty" type="submit">Sign in</button>
+            <button class="styled-button empty" type="submit">Sign up</button>
         </td></tr>
         <tr><td>
             <p><a href="{{url_for('login')}}">Back</a></p>
