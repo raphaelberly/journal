@@ -99,7 +99,7 @@ def recent():
 
     movies = query.all()
     show_button = nb_recent > len(movies)
-    scroll = int(request.args.get('ref_scroll', 0))
+    scroll = int(float(request.args.get('ref_scroll', 0)))
     return render_template('recent.html', movies=movies, show_button=show_button, scroll=scroll)
 
 
@@ -187,7 +187,7 @@ def statistics():
             .all()[:top_models[top]['nb_elements']]
         tops.update({top: values})
 
-    scroll = int(request.args.get('ref_scroll', 0))
+    scroll = int(float(request.args.get('ref_scroll', 0)))
     return render_template('statistics.html', counts=counts, tops=tops, movies=movies, year=year_applicable,
                            scroll=scroll)
 
@@ -217,7 +217,7 @@ def search():
     nb_results = int(request.args.get('nb_results', 1))
     results, show_more_button = tmdb.search_movies(query, nb_results)
     results = enrich_results(results)
-    scroll = int(request.args.get('ref_scroll', 0))
+    scroll = int(float(request.args.get('ref_scroll', 0)))
 
     if request.method == 'POST':
         if 'add_to_watchlist' in request.form:
@@ -278,7 +278,7 @@ def watchlist():
             flash('Movie removed from watchlist')
 
     watchlist_dict = get_watchlist()
-    scroll = int(request.args.get('ref_scroll', 0))
+    scroll = int(float(request.args.get('ref_scroll', 0)))
     return render_template('watchlist.html', watchlist=watchlist_dict, scroll=scroll)
 
 
@@ -293,7 +293,7 @@ def movie(movie_id):
     # Get referrer if provided via GET params
     args = request.args.to_dict()
     referrer = args.pop('ref', 'search')
-    scroll = int(args.pop('ref_scroll', 0))
+    scroll = int(float(args.pop('ref_scroll', 0)))
 
     if request.method == 'GET' and args.pop('show_slider', False):
         return render_template('movie.html', item=movie, mode='show_slider', referrer=referrer, scroll=scroll,
