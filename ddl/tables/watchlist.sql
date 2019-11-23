@@ -9,8 +9,8 @@ CREATE TABLE journal.watchlist(
   "cast" TEXT[] NOT NULL,
   duration VARCHAR(10),
   image VARCHAR(1024),
-  username VARCHAR(20) NOT NULL
-
+  username VARCHAR(20) NOT NULL,
+  providers TEXT[] NOT NULL
 );
 
 ALTER TABLE journal.watchlist ADD CONSTRAINT "watchlist_pkey" PRIMARY KEY (username,movie);
