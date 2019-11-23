@@ -54,6 +54,18 @@
             <br/>{{ item['duration'] }}
         {% endif %}
     </td></tr>
+    {% if item.get('providers')|length > 0 %}
+    <tr><td>
+        <div class="providers">
+        {% if 'netflix' in item.get('providers') %}
+            <img src="{{ url_for('static', filename='images/providers/netflix.png') }}">
+        {% endif %}
+        {% if 'amazonprimevideo' in item.get('providers') %}
+            <img src="{{ url_for('static', filename='images/providers/amazonprimevideo.png') }}">
+        {% endif %}
+        </div>
+    </td></tr>
+    {% endif %}
     <tr><td>
         {% if not item.get('grade') %}
         <table class="dual"><tr>

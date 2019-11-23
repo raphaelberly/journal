@@ -9,6 +9,7 @@ from app import app
 from app import db, login
 from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User
+from lib.providers import Providers
 from lib.tmdb import Tmdb
 from lib.tools import get_time_ago_string
 
@@ -253,8 +254,9 @@ def get_watchlist():
 
 def add_to_watchlist():
     tmdb_movie_id = int(get_post_result('add_to_watchlist'))
-    # Add to watchlist on database
-    item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username, **tmdb.movie(tmdb_movie_id))
+    tmdb_movie = tmdb.movie(tmdb_movie_id)
+    providers = Providers().get_names(tmdb_movie['title'], tmdb_movie['movie'])
+    item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username, providers=providers, **tmdb_movie)
     db.session.add(item)
     db.session.commit()
 

@@ -61,6 +61,7 @@ class WatchlistItem(db.Model):
     cast = db.Column(db.ARRAY(db.String(256)))
     duration = db.Column(db.String(10))
     image = db.Column(db.String(1024))
+    providers = db.Column(db.ARRAY(db.String(1024)))
 
     __tablename__ = "watchlist"
     __table_args__ = {"schema": "journal"}
