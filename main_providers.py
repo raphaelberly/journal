@@ -20,7 +20,7 @@ i = 0
 providers = Providers(config_path=args.config)
 LOGGER.info('Update all watchlist items with outdated providers list')
 for item in tqdm(WatchlistItem.query.all()):
-    updated_providers = providers.get_names(item.title, item.movie)
+    updated_providers = providers.get_names(item.title, item.tmdb_id)
     if updated_providers != item.providers:
         item.providers = updated_providers
         i += 1

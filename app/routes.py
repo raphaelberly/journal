@@ -255,7 +255,7 @@ def get_watchlist():
 def add_to_watchlist():
     tmdb_movie_id = int(get_post_result('add_to_watchlist'))
     tmdb_movie = tmdb.movie(tmdb_movie_id)
-    providers = Providers().get_names(tmdb_movie['title'], tmdb_movie['movie'])
+    providers = Providers().get_names(tmdb_movie['title'], tmdb_movie_id)
     item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username, providers=providers, **tmdb_movie)
     db.session.add(item)
     db.session.commit()
