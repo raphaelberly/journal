@@ -10,6 +10,7 @@ from lib.providers import Providers
 
 
 LOGGER = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 # Create argument parser
 parser = argparse.ArgumentParser()
