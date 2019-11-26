@@ -4,9 +4,11 @@
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/filter.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/watchlist.css')}}">
 </head>
 
 <body ontouchstart="">
@@ -27,11 +29,21 @@
     Wops, no movies in watchlist.
     </td></tr>
 </table>
+{% else %}
+<div id="filterContainer" class="providers">
+    <a class="btn netflix OFF" onclick="switchFilterState('netflix')">
+        <img src="{{ url_for('static', filename='images/providers/netflix.png') }}">
+    </a>
+    <a class="btn amazonprimevideo OFF" onclick="switchFilterState('amazonprimevideo')">
+        <img src="{{ url_for('static', filename='images/providers/amazonprimevideo.png') }}">
+    </a>
+</div>
 {% endif %}
 
 
 {% for item in watchlist.values() %}
 
+<div class="filterDiv {{ ' '.join(item.get('providers')) }} show">
 <table>
 
     <tr><td>
@@ -83,6 +95,7 @@
     </td></tr>
 
 </table>
+</div>
 
 {% endfor %}
 

@@ -41,18 +41,3 @@
     color: #6caee0;
     text-decoration: none;
 }
-
-p {
-    margin-bottom: 10px;
-}
-
-.providers {
-    height: 20px;
-    margin-top: -5px;
-    margin-bottom: -2px;
-}
-
-.providers img {
-    height: 100%;
-    width: auto;
-}
