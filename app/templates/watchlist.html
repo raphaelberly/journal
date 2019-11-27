@@ -31,10 +31,10 @@
 </table>
 {% else %}
 <div id="filterContainer" class="providers">
-    <a class="btn netflix OFF" onclick="switchFilterState('netflix')">
+    <a href="javascript:void(0)" class="btn netflix OFF" onclick="switchFilterState('netflix')">
         <img src="{{ url_for('static', filename='images/providers/netflix.png') }}">
     </a>
-    <a class="btn amazonprimevideo OFF" onclick="switchFilterState('amazonprimevideo')">
+    <a href="javascript:void(0)" class="btn amazonprimevideo OFF" onclick="switchFilterState('amazonprimevideo')">
         <img src="{{ url_for('static', filename='images/providers/amazonprimevideo.png') }}">
     </a>
 </div>
