@@ -26,14 +26,16 @@ function getActivatedFilters() {
 
 // Filter out all elements not matching the activated filter(s)
 function filterSelection() {
-  var x, y, i, j;
+  var x, y, i, j, k;
   x = document.getElementsByClassName("filterDiv");
   y = getActivatedFilters()
   for (i = 0; i < x.length; i++) {
+    k = false
     addClass(x[i], "show");
     for (j = 0; j < y.length; j++) {
-      if (!x[i].className.includes(y[j])) removeClass(x[i], "show");
+      if (x[i].className.includes(y[j])) k = true;
     }
+    if (y.length > 0 & k == false) removeClass(x[i], "show");
   }
 };
 
