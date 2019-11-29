@@ -86,15 +86,15 @@ class Record(db.Model):
     __tablename__ = "records"
     __table_args__ = {"schema": "journal"}
 
-    def __init__(self, username, movie, tmdb_id, grade):
+    def __init__(self, username, movie, tmdb_id, grade, date=None, recent=True):
 
         self.username = username
         self.insert_datetime = datetime.now()
         self.movie = movie
         self.tmdb_id = tmdb_id
-        self.date = datetime.now().date()
         self.grade = grade
-        self.recent = True
+        self.date = datetime.now().date() or date
+        self.recent = recent
 
     def __repr__(self):
         return '<Movie {}>'.format(self.movie)
