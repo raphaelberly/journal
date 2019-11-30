@@ -3,15 +3,15 @@
 <head>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
-    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='js/filter.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/watchlist.css')}}">
 </head>
 
-<body ontouchstart="">
+<body ontouchstart="" onload="filterSelection();">
 
 {% with title = 'Watchlist' %}
     {% include 'base/menu.html' %}
@@ -31,12 +31,11 @@
 </table>
 {% else %}
 <div id="filterContainer" class="providers">
-    <a href="javascript:void(0)" class="btn netflix OFF" onclick="switchFilterState('netflix')">
-        <img src="{{ url_for('static', filename='images/providers/netflix.png') }}">
+    {% for provider in ['netflix', 'amazonprimevideo'] %}
+    <a href="javascript:void(0)" class="btn {{ provider }} {{ 'ON' if provider in providers else 'OFF' }}" onclick="switchFilterState('{{ provider }}')">
+        <img src="static/images/providers/{{ provider }}.png">
     </a>
-    <a href="javascript:void(0)" class="btn amazonprimevideo OFF" onclick="switchFilterState('amazonprimevideo')">
-        <img src="{{ url_for('static', filename='images/providers/amazonprimevideo.png') }}">
-    </a>
+    {% endfor %}
 </div>
 {% endif %}
 
@@ -69,12 +68,11 @@
     {% if item.get('providers')|length > 0 %}
     <tr><td>
         <div class="providers">
-        {% if 'netflix' in item.get('providers') %}
-            <img src="{{ url_for('static', filename='images/providers/netflix.png') }}">
-        {% endif %}
-        {% if 'amazonprimevideo' in item.get('providers') %}
-            <img src="{{ url_for('static', filename='images/providers/amazonprimevideo.png') }}">
-        {% endif %}
+        {% for provider in ['netflix', 'amazonprimevideo'] %}
+            {% if provider in item.get('providers') %}
+            <img src="static/images/providers/{{ provider }}.png">
+            {% endif %}
+        {% endfor %}
         </div>
     </td></tr>
     {% endif %}

@@ -280,7 +280,8 @@ def watchlist():
 
     watchlist_dict = get_watchlist()
     scroll = int(float(request.args.get('ref_scroll', 0)))
-    return render_template('watchlist.html', watchlist=watchlist_dict, scroll=scroll)
+    providers = request.args.get('providers').split(',') if request.args.get('providers') else []
+    return render_template('watchlist.html', watchlist=watchlist_dict, scroll=scroll, providers=providers)
 
 
 @app.route('/movie/<movie_id>', methods=['GET', 'POST'])
@@ -295,9 +296,9 @@ def movie(movie_id):
     args = request.args.to_dict()
     referrer = args.pop('ref', 'search')
     scroll = int(float(args.pop('ref_scroll', 0)))
-    grade_as_int = User.query.filter_by(username=current_user.username).first().grade_as_int
 
     if request.method == 'GET' and args.pop('show_slider', False):
+        grade_as_int = User.query.filter_by(username=current_user.username).first().grade_as_int
         return render_template('movie.html', item=movie, mode='show_slider', referrer=referrer, scroll=scroll,
                                grade_as_int=grade_as_int, args=args)
 
