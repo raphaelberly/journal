@@ -16,6 +16,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(30))
     password_hash = db.Column(db.String(100))
     email = db.Column(db.String(256))
+    grade_as_int = db.Column(db.Boolean)
 
     __tablename__ = "users"
     __table_args__ = {"schema": "journal"}
@@ -23,8 +24,11 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User {0}: {1}>'.format(self.id, self.username)
 
-    def set_password(self, password):
+    def __init__(self, username, password, email, grade_as_int=True):
+        self.username = username
         self.password_hash = generate_password_hash(password)
+        self.email = email
+        self.grade_as_int = grade_as_int
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -79,7 +83,7 @@ class Record(db.Model):
     date = db.Column(db.Date, nullable=False)
     grade = db.Column(db.Float, nullable=False)
     username = db.Column(db.String(20), nullable=False)
-    recent = db.Column(db.Boolean, nullable=True)
+    recent = db.Column(db.Boolean, nullable=False)
 
     title = db.relationship("Title", back_populates="record")
 

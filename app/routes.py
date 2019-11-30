@@ -60,8 +60,7 @@ def signup():
 
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
-        user.set_password(form.password.data)
+        user = User(form.username.data, form.password.data, form.email.data)
         db.session.add(user)
         db.session.commit()
         login_user(user, remember=True, duration=timedelta(days=90))
@@ -296,10 +295,11 @@ def movie(movie_id):
     args = request.args.to_dict()
     referrer = args.pop('ref', 'search')
     scroll = int(float(args.pop('ref_scroll', 0)))
+    grade_as_int = User.query.filter_by(username=current_user.username).first().grade_as_int
 
     if request.method == 'GET' and args.pop('show_slider', False):
         return render_template('movie.html', item=movie, mode='show_slider', referrer=referrer, scroll=scroll,
-                               args=args)
+                               grade_as_int=grade_as_int, args=args)
 
     if request.method == 'POST':
 

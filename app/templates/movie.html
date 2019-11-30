@@ -46,7 +46,7 @@
 
         <div class="slidecontainer">
             <div class="mentions"><b><span id="gradeValue"></span>/10</b></div>
-            <input id="gradeRange" name="gradeRange" type="range" min="1" max="10" value="{{ item.get('grade', 6)|string }}" step="1" class="slider">
+            <input id="gradeRange" name="gradeRange" type="range" min="{{ 1 if grade_as_int else 0 }}" max="10" value="{{ item.get('grade', 6 if grade_as_int else 6.5)|string }}" step="{{ 1 if grade_as_int else 0.5 }}" class="slider">
         </div>
         <input class="styled-button full" type="submit" value="{{ 'Update' if item.get('grade') else 'Add' }}">
 
@@ -102,7 +102,8 @@
 </div>
 
 {% if mode == 'show_slider' %}
-    <script type = "text/javascript" src="{{ url_for('static', filename='js/grade.js') }}"></script>
+    <script type="text/javascript">var gradePrecision = {{ 0 if grade_as_int else 1 }}</script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/grade.js') }}"></script>
 {% endif %}
 
 </body>
