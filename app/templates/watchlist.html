@@ -31,10 +31,10 @@
 </table>
 {% else %}
 <div id="filterContainer" class="providers">
-    {% for provider in ['netflix', 'amazonprimevideo'] %}
-    <a href="javascript:void(0)" class="btn {{ provider }} {{ 'ON' if provider in providers else 'OFF' }}" onclick="switchFilterState('{{ provider }}')">
-        <img src="static/images/providers/{{ provider }}.png">
-    </a>
+    {% for provider in ['cinema', 'netflix', 'amazonprimevideo'] %}
+        <a href="javascript:void(0)" class="btn {{ provider }} {{ 'ON' if provider in providers else 'OFF' }}" onclick="switchFilterState('{{ provider }}')">
+            <img src="static/images/providers/{{ provider }}.png">
+        </a>
     {% endfor %}
 </div>
 {% endif %}
@@ -68,7 +68,7 @@
     {% if item.get('providers')|length > 0 %}
     <tr><td>
         <div class="providers">
-        {% for provider in ['netflix', 'amazonprimevideo'] %}
+        {% for provider in ['cinema', 'netflix', 'amazonprimevideo'] %}
             {% if provider in item.get('providers') %}
             <img src="static/images/providers/{{ provider }}.png">
             {% endif %}

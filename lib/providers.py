@@ -16,7 +16,7 @@ class Providers(object):
 
     def _get_providers_id(self, supported_providers):
         providers_dict = self._client.get_providers()
-        output = {}
+        output = {104: 'cinema'}
         for item in providers_dict:
             if item['technical_name'] in supported_providers:
                 output.update({item['id']: item['technical_name']})
