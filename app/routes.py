@@ -11,7 +11,7 @@ from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User
 from lib.providers import Providers
 from lib.tmdb import Tmdb
-from lib.tools import get_time_ago_string
+from lib.tools import get_time_ago_string, get_time_spent_string
 
 tmdb = Tmdb()
 
@@ -23,9 +23,14 @@ def get_post_result(key):
 # Load functions to be used in Jinja into Context processor
 @app.context_processor
 def utility_processor():
+
     def format_date(dt):
         return get_time_ago_string(dt)
-    return dict(format_date=format_date)
+
+    def format_timespan(minutes):
+        return get_time_spent_string(minutes)
+
+    return dict(format_date=format_date, format_timespan=format_timespan)
 
 
 # Redirect all auth failures to login page

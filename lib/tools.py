@@ -75,6 +75,29 @@ def df_to_table(df, schema, table, if_exists='append', config_folder='config'):
     df.to_sql(con=engine, if_exists=if_exists, **params)
 
 
+def get_time_spent_string(minutes):
+
+    timespans = {
+        'year': minutes // (60 * 24 * 365),
+        'month': minutes % (60 * 24 * 365) // (60 * 24 * 30),
+        'day': minutes % (60 * 24 * 30) // (60 * 24),
+        'hour': minutes % (60 * 24) // 60,
+        'minute': minutes % 60,
+    }
+    timespans_iter = iter(timespans.items())
+
+    for unit, value in timespans_iter:
+        if value == 0:
+            continue
+        else:
+            output = f'{value} {unit}{"s" if value > 1 else ""}'
+            unit, value = next(timespans_iter)
+            if value > 0:
+                output += f', {value} {unit}{"s" if value > 1 else ""}'
+            return output
+    return '0 minutes'
+
+
 def get_time_ago_string(dt):
 
     def get_n_days_ago(n):
