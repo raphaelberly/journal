@@ -24,12 +24,10 @@ CREATE TABLE journal.ratings (
 );
 
 CREATE TABLE journal.titles (
-  year     bigint,
-  movie    TEXT NOT NULL
-    CONSTRAINT titles_pkey
-    PRIMARY KEY,
+  year     INTEGER,
+  movie    TEXT NOT NULL CONSTRAINT titles_pkey PRIMARY KEY,
   title    TEXT,
   genres   TEXT,
   type     TEXT,
-  duration TEXT
+  duration INTEGER
 );

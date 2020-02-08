@@ -41,7 +41,7 @@ class Title(db.Model):
     genres = db.Column(db.String(256))
     year = db.Column(db.Integer)
     type = db.Column(db.String(256))
-    duration = db.Column(db.String(256))
+    duration = db.Column(db.Integer)
 
     record = db.relationship("Record", uselist=False, back_populates="title")
 
