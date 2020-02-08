@@ -127,31 +127,34 @@ def add_rank_and_suffix(item, rank):
 @login_required
 def statistics():
 
-    counts = {}
-    # This month's total
-    this_month = Record.query \
-        .filter_by(username=current_user.username) \
+    activity = {}
+    activity_metrics = ['viewing activity', 'time spent']
+    agg = db.session.query(
+            func.count(Record.movie),
+            func.sum(Title.duration),
+        ) \
+        .select_from(Record).join(Record.title) \
+        .filter(Record.username == current_user.username)
+    # This month
+    this_month = agg \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
         .filter(db.extract('month', Record.date) == db.extract('month', date.today())) \
-        .count()
-    counts.update({'this_month': {'count': this_month, 'description': 'movies this month'}})
-    # This year's total
-    this_year = Record.query \
-        .filter_by(username=current_user.username) \
+        .first()
+    activity.update({'month': {'values': dict(zip(activity_metrics, this_month)), 'desc': 'this month'}})
+    # This year
+    this_year = agg \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
-        .count()
-    counts.update({'this_year': {'count': this_year, 'description': 'movies this year'}})
-    # Number of movies seen in total
-    total = Record.query.filter_by(username=current_user.username).count()
-    start_date = db.session.query(func.min(Record.date))\
-        .filter(Record.username == current_user.username).scalar()
-    total_description = f'movies since {start_date.strftime("%B, %Y")}' if start_date else 'in total'  # no if >> crash
-    counts.update({'total': {'count': total, 'description': total_description}})
+        .first()
+    activity.update({'year': {'values': dict(zip(activity_metrics, this_year)), 'desc': 'this year'}})
+    # Overall
+    start_date = db.session.query(func.min(Record.date)).filter(Record.username == current_user.username).scalar()
+    overall_desc = f'since {start_date.strftime("%B, %Y")}' if start_date else 'overall'  # crashes if there's no "if"
+    activity.update({'overall': {'values': dict(zip(activity_metrics, agg.first())), 'desc': overall_desc}})
 
     # Year applicable = this year if today > January 31st, else last year
     year_applicable = (date.today() - timedelta(days=31)).year
     if year_applicable == date.today().year:
-        total_applicable = this_year
+        total_applicable = this_year[0]
     else:
         total_applicable = Record.query \
             .filter_by(username=current_user.username) \
@@ -193,8 +196,8 @@ def statistics():
         tops.update({top: values})
 
     scroll = int(float(request.args.get('ref_scroll', 0)))
-    return render_template('statistics.html', counts=counts, tops=tops, movies=movies, year=year_applicable,
-                           scroll=scroll)
+    return render_template('statistics.html', activity=activity, activity_metrics=activity_metrics, tops=tops,
+                           movies=movies, year=year_applicable, scroll=scroll)
 
 
 def enrich_results(results):

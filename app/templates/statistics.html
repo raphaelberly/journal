@@ -20,13 +20,24 @@
 <center><table>
 
     <tr>
-        <td class="icon"><img src="/static/images/statistics/overall.png"></td>
+        <td class="icon"><img src="/static/images/statistics/activity.png"></td>
         <td class="sideline"></td>
         <td>
-            <p class="top-type">Overall</p>
-            {% for element in counts %}
-                <p><span class="big-number">{{ counts[element].count }}</span>
-                <br/>{{ counts[element].description }}</p>
+            <p class="top-type">Viewing activity</p>
+            {% for timespan in ['month', 'year', 'overall'] %}
+                <p><span class="big-number">{{ activity[timespan]['values']['viewing activity']|round(1) }}</span>
+                <br/>{{ activity[timespan].desc }}</p>
+            {% endfor %}
+        </td>
+    </tr>
+    <tr>
+        <td class="icon"><img src="/static/images/statistics/stopwatch.png"></td>
+        <td class="sideline"></td>
+        <td>
+            <p class="top-type">Time spent</p>
+            {% for timespan in ['month', 'year', 'overall'] %}
+                <p><span class="big-title">{{ format_timespan(activity[timespan]['values']['time spent']) }}</span>
+                <br/>{{ activity[timespan].desc }}</p>
             {% endfor %}
         </td>
     </tr>

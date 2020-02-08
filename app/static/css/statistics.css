@@ -48,3 +48,7 @@ td.sideline {
     background-size: 10px;
     background-repeat: repeat-y;
 }
+
+.big-title {
+    font: 26px Trebuchet MS, sans-serif;
+}
