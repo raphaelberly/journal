@@ -91,9 +91,12 @@ def get_time_spent_string(minutes):
             continue
         else:
             output = f'{value} {unit}{"s" if value > 1 else ""}'
-            unit, value = next(timespans_iter)
-            if value > 0:
-                output += f', {value} {unit}{"s" if value > 1 else ""}'
+            try:
+                unit, value = next(timespans_iter)
+                if value > 0:
+                    output += f', {value} {unit}{"s" if value > 1 else ""}'
+            except StopIteration:
+                pass
             return output
     return '0 minutes'
 
