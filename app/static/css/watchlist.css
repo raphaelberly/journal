@@ -40,6 +40,9 @@ p {
   width: auto;
 }
 
+.OFF.cinema img {
+  content:url('/static/images/providers/cinema_gray.png');
+}
 .OFF.netflix img {
   content:url('/static/images/providers/netflix_gray.png');
 }
