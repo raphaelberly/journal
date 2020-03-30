@@ -1,4 +1,5 @@
 import os
+from datetime import date
 
 from justwatch import JustWatch
 
@@ -8,15 +9,18 @@ from lib.tools import read_config
 class Providers(object):
 
     PRECISION = 5
+    DATE_FORMAT = '%Y-%m-%d'
 
     def __init__(self, config_path='config'):
-        self._config = read_config(os.path.join(config_path, 'providers.yaml'))
-        self._client = JustWatch(country='FR')
-        self.supported_providers = self._get_providers_id(self._config['supported_providers'])
+        config = read_config(os.path.join(config_path, 'providers.yaml'))
+        self.country = config['country']
+        self.main_city = config['main_city']
+        self._client = JustWatch(country=self.country)
+        self.supported_providers = self._get_providers_id(config['supported_providers'])
 
     def _get_providers_id(self, supported_providers):
         providers_dict = self._client.get_providers()
-        output = {104: 'cinema'}
+        output = {}
         for item in providers_dict:
             if item['technical_name'] in supported_providers:
                 output.update({item['id']: item['technical_name']})
@@ -39,5 +43,8 @@ class Providers(object):
                 for offer in result.get('offers', []):
                     if offer['provider_id'] in self.supported_providers.keys():
                         names.add(self.supported_providers[offer['provider_id']])
+                today = date.today().strftime(self.DATE_FORMAT)
+                if self._client.get_cinema_times(result['id'], date=today, **self.main_city):
+                    names.add('cinema')
                 break
         return list(names)
