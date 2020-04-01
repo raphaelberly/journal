@@ -130,8 +130,8 @@ def statistics():
     activity = {}
     activity_metrics = ['viewing activity', 'time spent']
     agg = db.session.query(
-            func.count(Record.movie),
-            func.sum(Title.duration),
+            func.coalesce(func.count(Record.movie), 0),
+            func.coalesce(func.sum(Title.duration), 0),
         ) \
         .select_from(Record).join(Record.title) \
         .filter(Record.username == current_user.username)
