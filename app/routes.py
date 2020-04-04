@@ -222,9 +222,10 @@ def search():
         return render_template('search.html')
 
     query = request.args['query']
-    nb_results = int(request.args.get('nb_results', 1))
-    results, show_more_button = tmdb.search_movies(query, nb_results)
-    results = enrich_results(results)
+    nb_results = int(request.args.get('nb_results', 3))
+    result_ids = tmdb.search(query)
+    show_more_button = nb_results < len(result_ids)
+    results = enrich_results(tmdb.movies(result_ids[:nb_results]))
     scroll = int(float(request.args.get('ref_scroll', 0)))
 
     if request.method == 'POST':
