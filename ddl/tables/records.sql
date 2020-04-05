@@ -1,13 +1,22 @@
-
-CREATE TABLE journal.records (
-  insert_datetime TIMESTAMP DEFAULT now(),
-  movie           VARCHAR(12) NOT NULL,
-  tmdb_id         INTEGER NOT NULL,
-  date            DATE NOT NULL,
-  grade           DOUBLE PRECISION NOT NULL,
-  id              SERIAL NOT NULL,
-  username        VARCHAR(20) NOT NULL,
-  recent          BOOLEAN NOT NULL DEFAULT TRUE
+CREATE TABLE journal.records(
+  id                    SERIAL,
+  insert_datetime_utc   TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc'),
+  username              VARCHAR(32) NOT NULL,
+  tmdb_id               INTEGER NOT NULL,
+  imdb_id               VARCHAR(32) NOT NULL,
+  grade                 DOUBLE PRECISION NOT NULL,
+  date                  DATE DEFAULT DATE(now() AT TIME ZONE 'utc'),
+  recent                BOOLEAN DEFAULT TRUE
 );
 
-ALTER TABLE journal.records ADD CONSTRAINT "records_pkey" PRIMARY KEY (username,movie);
+ALTER TABLE journal.records
+ADD CONSTRAINT "records_pkey"
+PRIMARY KEY (username,tmdb_id);
+
+ALTER TABLE journal.records
+ADD CONSTRAINT "records_fkey_users"
+FOREIGN KEY (username) REFERENCES journal.users (username);
+
+ALTER TABLE journal.records
+ADD CONSTRAINT "records_fkey_titles"
+FOREIGN KEY (tmdb_id) REFERENCES journal.titles (tmdb_id);

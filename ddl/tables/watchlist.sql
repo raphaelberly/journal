@@ -1,16 +1,19 @@
 CREATE TABLE journal.watchlist(
-
-  insert_datetime TIMESTAMP DEFAULT NOW(),
-  movie VARCHAR(12) NOT NULL,
-  title TEXT NOT NULL,
-  year INTEGER NOT NULL,
-  genres TEXT[] NOT NULL,
-  directors TEXT[] NOT NULL,
-  "cast" TEXT[] NOT NULL,
-  duration VARCHAR(10),
-  image VARCHAR(1024),
-  username VARCHAR(20) NOT NULL,
-  providers TEXT[] NOT NULL
+  id                    SERIAL,
+  insert_datetime_utc   TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc'),
+  username              VARCHAR(32) NOT NULL,
+  tmdb_id               INTEGER NOT NULL,
+  providers             VARCHAR(64)[] NOT NULL
 );
 
-ALTER TABLE journal.watchlist ADD CONSTRAINT "watchlist_pkey" PRIMARY KEY (username,movie);
+ALTER TABLE journal.watchlist
+ADD CONSTRAINT "watchlist_pkey"
+PRIMARY KEY (username,tmdb_id);
+
+ALTER TABLE journal.watchlist
+ADD CONSTRAINT "watchlist_fkey_users"
+FOREIGN KEY (username) REFERENCES journal.users (username);
+
+ALTER TABLE journal.watchlist
+ADD CONSTRAINT "watchlist_fkey_titles"
+FOREIGN KEY (tmdb_id) REFERENCES journal.titles (tmdb_id);
