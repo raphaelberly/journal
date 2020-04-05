@@ -1,8 +1,5 @@
 CREATE TABLE journal.titles (
-  id                    SERIAL,
-  insert_datetime_utc   TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc'),
-  update_datetime_utc   TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc'),
-  tmdb_id               INTEGER NOT NULL,
+  id                    INTEGER NOT NULL,
   imdb_id               VARCHAR(32) NOT NULL,
   title                 TEXT NOT NULL,
   release_date          DATE NOT NULL,
@@ -15,9 +12,11 @@ CREATE TABLE journal.titles (
   runtime               INTEGER,
   revenue               INTEGER,
   budget                INTEGER,
-  tagline               TEXT
+  tagline               TEXT,
+  insert_datetime_utc   TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc'),
+  update_datetime_utc   TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc')
 );
 
 ALTER TABLE journal.titles
 ADD CONSTRAINT "titles_pkey"
-PRIMARY KEY (tmdb_id);
+PRIMARY KEY (id);
