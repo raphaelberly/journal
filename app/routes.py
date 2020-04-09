@@ -87,25 +87,24 @@ def logout():
 def recent():
 
     nb_recent = Record.query \
-        .filter(Record.username == current_user.username) \
+        .filter(Record.user_id == current_user.id) \
         .filter(Record.recent == True) \
         .count()
 
     query = db.session \
-        .query(Record.username, Record.date, Record.tmdb_id, Record.insert_datetime, Record.grade,
-               Title.title, Title.year, Title.genres) \
-        .select_from(Record).join(Record.title) \
-        .filter(Record.username == current_user.username) \
+        .query(Record, Title) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
         .filter(Record.recent == True) \
-        .order_by(Record.date.desc(), Record.insert_datetime.desc())
+        .order_by(Record.date.desc(), Record.insert_datetime_utc.desc())
 
     nb_results = int(request.args.get('nb_results', 20))
     query = query.limit(nb_results)
 
-    movies = query.all()
-    show_button = nb_recent > len(movies)
+    payload = [(record.export(), title.export()) for record, title in query.all()]
+    show_button = nb_recent > len(payload)
     scroll = int(float(request.args.get('ref_scroll', 0)))
-    return render_template('recent.html', movies=movies, show_button=show_button, scroll=scroll)
+    return render_template('recent.html', payload=payload, show_button=show_button, scroll=scroll)
 
 
 def get_number_suffix(number):

@@ -15,9 +15,8 @@ class Tmdb(object):
     URL_SEARCH = 'https://api.themoviedb.org/3/search/movie'
     URL_MOVIE = 'https://api.themoviedb.org/3/movie/{title_id}'
 
-    def __init__(self, language: str = 'fr', config_path: str = 'config'):
+    def __init__(self, config_path: str = 'config'):
         credentials = read_config(os.path.join(config_path, 'credentials.yaml'))
-        self.language = language
         self._api_key = credentials['tmdb']['api_key']
 
     @lru_cache(24)

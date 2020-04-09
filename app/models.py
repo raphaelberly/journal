@@ -12,7 +12,17 @@ def load_user(id_):
     return User.query.get(id_)
 
 
-class User(UserMixin, db.Model):
+class JournalModel:
+
+    __table_args__ = {"schema": "journal"}
+
+    def export(self):
+        value = self.__dict__.copy()
+        value.pop('_sa_instance_state')
+        return value
+
+
+class User(UserMixin, db.Model, JournalModel):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), unique=True)
@@ -22,7 +32,6 @@ class User(UserMixin, db.Model):
     insert_datetime_utc = db.Column(db.DateTime)
 
     __tablename__ = "users"
-    __table_args__ = {"schema": "journal"}
 
     def __init__(self, username, password, email, grade_as_int=True):
         self.username = username
@@ -37,7 +46,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 
-class Title(db.Model):
+class Title(db.Model, JournalModel):
 
     id = db.Column(db.Integer, primary_key=True)
     imdb_id = db.Column(db.String(32))
@@ -57,10 +66,9 @@ class Title(db.Model):
     update_datetime_utc = db.Column(db.DateTime)
 
     __tablename__ = "titles"
-    __table_args__ = {"schema": "journal"}
 
     def __repr__(self):
-        return f'<Title {self.tmdb_id}: {self.title}>'
+        return f'<Title {self.id}: {self.title}>'
 
     @classmethod
     def from_tmdb(cls, item: dict):
@@ -74,7 +82,7 @@ class Title(db.Model):
             'directors': [item['name'] for item in item['credits'].get('crew', []) if item['job'] == 'Director'],
             'genres': [genre['name'] for genre in item.get('genres', [])],
             'top_cast': [item['name'] for item in item['credits'].get('cast', [])[:3]],
-            'poster_url': 'https://image.tmdb.org/t/p/w200' + item['poster_path'] if item.get('poster_path') else None,
+            'poster_url': item['poster_path'] if item.get('poster_path') else None,
             'runtime': item['runtime'],
             'revenue': item['revenue'],
             'budget': item['budget'],
@@ -89,8 +97,22 @@ class Title(db.Model):
         statement = insert(self.__class__).values(**value).on_conflict_do_update(constraint='titles_pkey', set_=value)
         db.session.execute(statement)
 
+    def export(self, language='fr'):
+        title = self.__dict__
+        output = {
+            'id': title['id'],
+            'title': title['original_title'] if title['original_language'] == language else title['title'],
+            'year': title['release_date'].year,
+            'genres': title['genres'][:3],
+            'cast': title['top_cast'],
+            'directors': title['directors'],
+            'duration': f'{title["runtime"] // 60}h {title["runtime"] % 60}min' if title.get('runtime') else None,
+            'image': 'https://image.tmdb.org/t/p/w200' + title['poster_path'] if title.get('poster_path') else None,
+        }
+        return output
 
-class WatchlistItem(db.Model):
+
+class WatchlistItem(db.Model, JournalModel):
 
     user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
@@ -98,7 +120,6 @@ class WatchlistItem(db.Model):
     insert_datetime_utc = db.Column(db.DateTime)
 
     __tablename__ = "watchlist"
-    __table_args__ = {"schema": "journal"}
 
     def __init__(self, user_id, tmdb_id, providers):
         self.user_id = user_id
@@ -109,7 +130,7 @@ class WatchlistItem(db.Model):
         return f'<Watchlist item: movie {self.tmdb_id} for user {self.user_id}>'
 
 
-class Record(db.Model):
+class Record(db.Model, JournalModel):
 
     user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
@@ -119,7 +140,6 @@ class Record(db.Model):
     insert_datetime_utc = db.Column(db.DateTime)
 
     __tablename__ = "records"
-    __table_args__ = {"schema": "journal"}
 
     def __init__(self, user_id, tmdb_id, grade, date=None, recent=True):
         self.user_id = user_id
@@ -132,7 +152,7 @@ class Record(db.Model):
         return f'<Record: user {self.user_id} watched movie {self.tmdb_id}>'
 
 
-class Top(db.Model):
+class Top(db.Model, JournalModel):
 
     username = db.Column(db.String(20), primary_key=True)
     id = db.Column(db.String(9), primary_key=True)  # For genres, the ID is the name
@@ -146,7 +166,6 @@ class Top(db.Model):
     count_threshold = db.Column(db.Integer)
 
     __tablename__ = "tops"
-    __table_args__ = {"schema": "journal"}
 
     def __repr__(self):
         return '<Top {0}: {1}>'.format(self.role, self.name)
