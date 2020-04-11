@@ -1,7 +1,7 @@
 import csv
 import gzip
 import logging
-import multiprocessing
+# import multiprocessing
 import os
 from csv import DictReader
 from functools import partial
@@ -55,11 +55,12 @@ class ETL:
             for col_name, col_values in self.etl_config['filter'].items():
                 rows = filter(lambda row: row[col_name] in col_values, rows)
         # Rename columns
-        pool = multiprocessing.Pool(processes=4)
-        rows = pool.imap_unordered(self._rename_columns, rows, chunksize=10)
+        # pool = multiprocessing.Pool(processes=4)
+        # rows = pool.imap_unordered(self._rename_columns, rows, chunksize=100)
+        rows = map(self._rename_columns, rows)
         # Upload to db
         with psycopg2.connect(get_db_connection_string(**self._credentials['db'])) as conn:
-            self.to_db(conn, rows, 100)
+            self.to_db(conn, rows, 1000)
 
     def _rename_columns(self, row):
         new_dict = {}
