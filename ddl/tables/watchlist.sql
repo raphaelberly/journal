@@ -4,6 +4,7 @@ CREATE TABLE journal.watchlist(
   movie VARCHAR(12) NOT NULL,
   title TEXT NOT NULL,
   year INTEGER NOT NULL,
+  tmdb_id INTEGER NOT NULL,
   genres TEXT[] NOT NULL,
   directors TEXT[] NOT NULL,
   "cast" TEXT[] NOT NULL,
