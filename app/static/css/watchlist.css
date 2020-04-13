@@ -49,3 +49,6 @@ p {
 .OFF.amazonprimevideo img {
   content:url('/static/images/providers/amazonprimevideo_gray.png');
 }
+.OFF.canalplayvod img {
+  content:url('/static/images/providers/canalplayvod_gray.png');
+}

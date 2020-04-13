@@ -2,6 +2,7 @@ supported_providers:
   - cinema
   - netflix
   - amazonprimevideo
+  - canalplayvod
 
 country: FR
 main_city:
