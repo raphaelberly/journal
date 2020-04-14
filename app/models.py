@@ -57,7 +57,7 @@ class Title(db.Model, JournalModel):
     directors = db.Column(db.ARRAY(db.String(256)))
     genres = db.Column(db.ARRAY(db.String(256)))
     top_cast = db.Column(db.ARRAY(db.String(256)))
-    poster_url = db.Column(db.String(1024))
+    poster_path = db.Column(db.String(1024))
     runtime = db.Column(db.Integer)
     revenue = db.Column(db.Integer)
     budget = db.Column(db.Integer)
@@ -82,11 +82,11 @@ class Title(db.Model, JournalModel):
             'directors': [item['name'] for item in item['credits'].get('crew', []) if item['job'] == 'Director'],
             'genres': [genre['name'] for genre in item.get('genres', [])],
             'top_cast': [item['name'] for item in item['credits'].get('cast', [])[:3]],
-            'poster_url': item['poster_path'] if item.get('poster_path') else None,
-            'runtime': item['runtime'],
-            'revenue': item['revenue'],
-            'budget': item['budget'],
-            'tagline': item['tagline'],
+            'poster_path': item.get('poster_path'),
+            'runtime': item.get('runtime'),
+            'revenue': item.get('revenue'),
+            'budget': item.get('budget'),
+            'tagline': item.get('tagline'),
         }
         return cls(**kwargs)
 
@@ -107,7 +107,7 @@ class Title(db.Model, JournalModel):
             'cast': title['top_cast'],
             'directors': title['directors'],
             'duration': f'{title["runtime"] // 60}h {title["runtime"] % 60}min' if title.get('runtime') else None,
-            'image': 'https://image.tmdb.org/t/p/w200' + title['poster_path'] if title.get('poster_path') else None,
+            'poster_url': 'https://image.tmdb.org/t/p/w200'+title['poster_path'] if title.get('poster_path') else None,
         }
         return output
 

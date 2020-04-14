@@ -47,12 +47,12 @@
 
 {% for item in payload %}
 <table>
-    {% if item.image %}
+    {% if item.poster_url %}
     <tr><td>
         {% if item.grade %}
-        <a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item.id, query=query, nb_results=payload|length) }}', 'search')"><img src="{{ item.image }}"></a>
+        <a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item.id, query=query, nb_results=payload|length) }}', 'search')"><img src="{{ item.poster_url }}"></a>
         {% else %}
-        <a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item.id, query=query, nb_results=payload|length, show_slider=True) }}', 'search')"><img src="{{ item.image }}"></a>
+        <a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item.id, query=query, nb_results=payload|length, show_slider=True) }}', 'search')"><img src="{{ item.poster_url }}"></a>
         {% endif %}
     </td></tr>
     {% endif %}
@@ -76,17 +76,17 @@
             {% if not item.in_watchlist %}
             <table class="dual"><tr>
             <td class="left">
-                <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item.tmdb_id, query=query, nb_results=payload|length, show_slider=True) }}', 'search');" value="Add">
+                <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item.id, query=query, nb_results=payload|length, show_slider=True) }}', 'search');" value="Add">
             </td>
             <td class="right">
                 <form onsubmit="this.action=add_referrer('{{ url_for('search', query=query, nb_results=payload|length) }}', 'search');" method="post">
-                    <input type="hidden" name="add_to_watchlist" value="{{ item.tmdb_id }}">
+                    <input type="hidden" name="add_to_watchlist" value="{{ item.id }}">
                     <input class="styled-button empty" type="submit" value="Watchlist">
                 </form>
             </td>
             </tr></table>
             {% else %}
-            <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item.tmdb_id, query=query, nb_results=payload|length, show_slider=True) }}', 'search');" value="Add">
+            <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item.id, query=query, nb_results=payload|length, show_slider=True) }}', 'search');" value="Add">
             {% endif %}
         {% else %}
         <div class="mentions">

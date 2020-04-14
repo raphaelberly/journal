@@ -210,7 +210,6 @@ def enrich_results(results):
     # Create output dict
     output = []
     for res in results:
-        record = records.get(res['id'])
         output.append({
             'id': res['id'],
             'imdb_id': res['imdb_id'],
@@ -220,7 +219,7 @@ def enrich_results(results):
             'cast': [item['name'] for item in res['credits'].get('cast', [])[:4]],
             'directors': [item['name'] for item in res['credits'].get('crew', []) if item['job'] == 'Director'],
             'duration': f'{res["runtime"] // 60}h {res["runtime"] % 60}min' if res.get('runtime') else None,
-            'image': 'https://image.tmdb.org/t/p/w200' + res['poster_path'] if res.get('poster_path') else None,
+            'poster_url': 'https://image.tmdb.org/t/p/w200' + res['poster_path'] if res.get('poster_path') else None,
             'grade': records.get(res['id'], {}).get('grade'),
             'date': records.get(res['id'], {}).get('date'),
             'in_watchlist': res['id'] in watchlist_ids,
@@ -236,6 +235,12 @@ def search():
     if not request.args.get('query'):
         return render_template('search.html')
 
+    if request.method == 'POST':
+        if 'add_to_watchlist' in request.form:
+            tmdb_id = int(get_post_result('add_to_watchlist'))
+            add_to_watchlist(tmdb_id)
+            flash('Movie added to watchlist')
+
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 3))
     result_ids = tmdb.search(query)
@@ -243,49 +248,28 @@ def search():
     payload = enrich_results(tmdb.get_bulk(result_ids[:nb_results]))
     scroll = int(float(request.args.get('ref_scroll', 0)))
 
-    if request.method == 'POST':
-        if 'add_to_watchlist' in request.form:
-            add_to_watchlist()
-            flash('Movie added to watchlist')
-
     return render_template('search.html', query=query, payload=payload, scroll=scroll, show_more_button=show_more_button)
 
 
 def get_watchlist_ids():
-    # Query watchlist on DB
-    watchlist = WatchlistItem.query.with_entities(WatchlistItem.tmdb_id) \
+    ids = WatchlistItem.query \
+        .with_entities(WatchlistItem.tmdb_id) \
         .filter(WatchlistItem.user_id == current_user.id) \
         .all()
-    return [item for item, in watchlist]
+    return [_id for _id, in ids]
 
 
-def get_watchlist():
-    # Query watchlist on DB
-    watchlist_items = WatchlistItem.query \
-        .filter_by(username=current_user.username) \
-        .order_by(WatchlistItem.insert_datetime.desc()) \
-        .all()
-    # Format results
-    watchlist = {}
-    for item in watchlist_items:
-        item.__dict__.pop('_sa_instance_state')
-        watchlist.update({item.movie: item.__dict__})
-    # Return
-    return watchlist
-
-
-def add_to_watchlist():
-    tmdb_movie_id = int(get_post_result('add_to_watchlist'))
-    tmdb_movie = tmdb.movie(tmdb_movie_id)
-    providers = Providers().get_names(tmdb_movie['title'], tmdb_movie_id)
-    item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username, providers=providers, **tmdb_movie)
+def add_to_watchlist(tmdb_id):
+    title = Title.from_tmdb(tmdb.get(tmdb_id))
+    title.upsert()
+    providers = Providers().get_names(title.title, tmdb_id)
+    item = WatchlistItem(user_id=current_user.id, tmdb_id=tmdb_id, providers=providers)
     db.session.add(item)
     db.session.commit()
 
 
-def remove_from_watchlist(movie_id):
-    # Remove from watchlist on database
-    to_delete = WatchlistItem.query.filter_by(movie=movie_id, username=current_user.username).all()
+def remove_from_watchlist(tmdb_id):
+    to_delete = WatchlistItem.query.filter_by(tmdb_id=tmdb_id, user_id=current_user.id).all()
     for record in to_delete:
         db.session.delete(record)
     db.session.commit()
@@ -297,14 +281,20 @@ def watchlist():
 
     if request.method == 'POST':
         if 'remove_from_watchlist' in request.form:
-            movie_id = get_post_result('remove_from_watchlist')
-            remove_from_watchlist(movie_id)
+            tmdb_id = get_post_result('remove_from_watchlist')
+            remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist')
 
-    watchlist_dict = get_watchlist()
+    query = db.session \
+        .query(Title) \
+        .select_from(WatchlistItem).join(Title) \
+        .filter(WatchlistItem.user_id == current_user.id) \
+        .order_by(WatchlistItem.insert_datetime_utc.desc())
+
+    payload = [title.export() for title in query.all()]
     scroll = int(float(request.args.get('ref_scroll', 0)))
     providers = request.args.get('providers').split(',') if request.args.get('providers') else []
-    return render_template('watchlist.html', watchlist=watchlist_dict, scroll=scroll, providers=providers)
+    return render_template('watchlist.html', payload=payload, scroll=scroll, providers=providers)
 
 
 @app.route('/movie/<movie_id>', methods=['GET', 'POST'])
@@ -328,7 +318,8 @@ def movie(movie_id):
     if request.method == 'POST':
 
         if 'add_to_watchlist' in request.form:
-            add_to_watchlist()
+            tmdb_id = int(get_post_result('add_to_watchlist'))
+            add_to_watchlist(tmdb_id)
             flash('Movie added to watchlist')
 
         if 'remove' in request.form:
