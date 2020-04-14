@@ -29,7 +29,7 @@ class User(UserMixin, db.Model, JournalModel):
     password_hash = db.Column(db.String(128))
     email = db.Column(db.String(256))
     grade_as_int = db.Column(db.Boolean)
-    insert_datetime_utc = db.Column(db.DateTime)
+    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
     __tablename__ = "users"
 
@@ -62,8 +62,8 @@ class Title(db.Model, JournalModel):
     revenue = db.Column(db.Integer)
     budget = db.Column(db.Integer)
     tagline = db.Column(db.String(1024))
-    insert_datetime_utc = db.Column(db.DateTime)
-    update_datetime_utc = db.Column(db.DateTime)
+    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
     __tablename__ = "titles"
 
@@ -117,7 +117,7 @@ class WatchlistItem(db.Model, JournalModel):
     user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
     providers = db.Column(db.ARRAY(db.String(64)))
-    insert_datetime_utc = db.Column(db.DateTime)
+    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
     __tablename__ = "watchlist"
 
@@ -137,7 +137,7 @@ class Record(db.Model, JournalModel):
     grade = db.Column(db.Float)
     date = db.Column(db.Date)
     recent = db.Column(db.Boolean)
-    insert_datetime_utc = db.Column(db.DateTime)
+    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
     __tablename__ = "records"
 

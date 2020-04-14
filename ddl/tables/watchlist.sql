@@ -1,8 +1,8 @@
 CREATE TABLE journal.watchlist(
-  user_id               INTEGER NOT NULL,
-  tmdb_id               INTEGER NOT NULL,
-  providers             VARCHAR(64)[] NOT NULL,
-  insert_datetime_utc   TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc')
+  user_id               INTEGER         NOT NULL,
+  tmdb_id               INTEGER         NOT NULL,
+  providers             VARCHAR(64)[]   NOT NULL,
+  insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );
 
 ALTER TABLE journal.watchlist
