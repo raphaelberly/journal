@@ -34,6 +34,8 @@ class Tmdb(object):
         return json.loads(response.content)
 
     def get_bulk(self, title_ids: List[int]) -> List[dict]:
+        if len(title_ids) == 0:
+            return []
         pool = ThreadPool(processes=len(title_ids))
         async_results = (pool.apply_async(self.get, (title_id,)) for title_id in title_ids)
         return [async_result.get() for async_result in async_results if async_result.get()]
