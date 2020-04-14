@@ -3,7 +3,7 @@ import os
 import re
 from functools import lru_cache
 from multiprocessing.pool import ThreadPool
-from typing import Generator, List
+from typing import List
 
 import requests
 
@@ -33,7 +33,7 @@ class Tmdb(object):
         response = requests.get(url, params)
         return json.loads(response.content)
 
-    def get_bulk(self, title_ids: List[int]) -> Generator[dict, None, None]:
+    def get_bulk(self, title_ids: List[int]) -> List[dict]:
         pool = ThreadPool(processes=len(title_ids))
         async_results = (pool.apply_async(self.get, (title_id,)) for title_id in title_ids)
-        return (async_result.get() for async_result in async_results if async_result.get())
+        return [async_result.get() for async_result in async_results if async_result.get()]

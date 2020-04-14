@@ -200,16 +200,32 @@ def statistics():
 
 
 def enrich_results(results):
-    results = deepcopy(results)
-    # Add the grade to each result when seen already
-    records = Record.query.with_entities(Record.movie, Record.grade, Record.date) \
-        .filter(Record.username == current_user.username)  \
-        .filter(Record.movie.in_([result['movie'] for result in results])).all()
-    records = dict({_movie: {'grade': _grade, 'date': _date} for _movie, _grade, _date in records})
-    for result in results:
-        if records.get(result['movie']):
-            result.update(records[result['movie']])
-    return results
+    # Query (tmdb_id, grade, date) of results which were already graded by user
+    records = Record.query.with_entities(Record.tmdb_id, Record.grade, Record.date) \
+        .filter(Record.user_id == current_user.id)  \
+        .filter(Record.tmdb_id.in_([result['id'] for result in results])).all()
+    records = dict({_id: {'grade': _grade, 'date': _date} for _id, _grade, _date in records})
+    # Query ids of movies in user's watchlist
+    watchlist_ids = get_watchlist_ids()
+    # Create output dict
+    output = []
+    for res in results:
+        record = records.get(res['id'])
+        output.append({
+            'id': res['id'],
+            'imdb_id': res['imdb_id'],
+            'title': res['original_title'] if res['original_language'] == 'fr' else res['title'],
+            'year': res['release_date'][:4],
+            'genres': [genre['name'] for genre in res.get('genres', [])[:3]],
+            'cast': [item['name'] for item in res['credits'].get('cast', [])[:4]],
+            'directors': [item['name'] for item in res['credits'].get('crew', []) if item['job'] == 'Director'],
+            'duration': f'{res["runtime"] // 60}h {res["runtime"] % 60}min' if res.get('runtime') else None,
+            'image': 'https://image.tmdb.org/t/p/w200' + res['poster_path'] if res.get('poster_path') else None,
+            'grade': records.get(res['id'], {}).get('grade'),
+            'date': records.get(res['id'], {}).get('date'),
+            'in_watchlist': res['id'] in watchlist_ids,
+        })
+    return output
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -224,7 +240,7 @@ def search():
     nb_results = int(request.args.get('nb_results', 3))
     result_ids = tmdb.search(query)
     show_more_button = nb_results < len(result_ids)
-    results = enrich_results(tmdb.movies(result_ids[:nb_results]))
+    payload = enrich_results(tmdb.get_bulk(result_ids[:nb_results]))
     scroll = int(float(request.args.get('ref_scroll', 0)))
 
     if request.method == 'POST':
@@ -232,14 +248,13 @@ def search():
             add_to_watchlist()
             flash('Movie added to watchlist')
 
-    return render_template('search.html', query=query, results=results, scroll=scroll,
-                           show_more_button=show_more_button, watchlist=get_watchlist_ids())
+    return render_template('search.html', query=query, payload=payload, scroll=scroll, show_more_button=show_more_button)
 
 
 def get_watchlist_ids():
     # Query watchlist on DB
-    watchlist = WatchlistItem.query.with_entities(WatchlistItem.movie) \
-        .filter(WatchlistItem.username == current_user.username) \
+    watchlist = WatchlistItem.query.with_entities(WatchlistItem.tmdb_id) \
+        .filter(WatchlistItem.user_id == current_user.id) \
         .all()
     return [item for item, in watchlist]
 
