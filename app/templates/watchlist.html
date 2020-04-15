@@ -40,9 +40,9 @@
 {% endif %}
 
 
-{% for title in payload %}
+{% for watchlist_item, title in payload %}
 
-<div class="filterDiv {{ ' '.join(title.providers) }} show">
+<div class="filterDiv {{ ' '.join(watchlist_item.providers) }} show">
 <table>
 
     <tr><td>
@@ -65,11 +65,11 @@
             <br/>{{ title.duration }}
         {% endif %}
     </td></tr>
-    {% if title.providers|length > 0 %}
+    {% if watchlist_item.providers|length > 0 %}
     <tr><td>
         <div class="providers">
         {% for provider in ['cinema', 'netflix', 'amazonprimevideo'] %}
-            {% if provider in title.providers %}
+            {% if provider in watchlist_item.providers %}
             <img src="static/images/providers/{{ provider }}.png">
             {% endif %}
         {% endfor %}

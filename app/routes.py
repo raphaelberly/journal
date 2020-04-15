@@ -286,12 +286,12 @@ def watchlist():
             flash('Movie removed from watchlist')
 
     query = db.session \
-        .query(Title) \
+        .query(WatchlistItem, Title) \
         .select_from(WatchlistItem).join(Title) \
         .filter(WatchlistItem.user_id == current_user.id) \
         .order_by(WatchlistItem.insert_datetime_utc.desc())
 
-    payload = [title.export() for title in query.all()]
+    payload = [(watchlist_item.export(), title.export()) for watchlist_item, title in query.all()]
     scroll = int(float(request.args.get('ref_scroll', 0)))
     providers = request.args.get('providers').split(',') if request.args.get('providers') else []
     return render_template('watchlist.html', payload=payload, scroll=scroll, providers=providers)
@@ -303,7 +303,8 @@ def movie(movie_id):
 
     # Get movie item
     movie_id = int(movie_id)
-    movie = enrich_results([tmdb.movie(movie_id)])[0]
+    title = tmdb.get(movie_id)
+    payload = enrich_results([title])[0]
 
     # Get referrer if provided via GET params
     args = request.args.to_dict()
@@ -311,8 +312,8 @@ def movie(movie_id):
     scroll = int(float(args.pop('ref_scroll', 0)))
 
     if request.method == 'GET' and args.pop('show_slider', False):
-        grade_as_int = User.query.filter_by(username=current_user.username).first().grade_as_int
-        return render_template('movie.html', item=movie, mode='show_slider', referrer=referrer, scroll=scroll,
+        grade_as_int = User.query.with_entities(User.grade_as_int).filter_by(id=current_user.id).first()[0]
+        return render_template('movie.html', payload=payload, mode='show_slider', referrer=referrer, scroll=scroll,
                                grade_as_int=grade_as_int, args=args)
 
     if request.method == 'POST':
@@ -322,43 +323,46 @@ def movie(movie_id):
             add_to_watchlist(tmdb_id)
             flash('Movie added to watchlist')
 
-        if 'remove' in request.form:
+        elif 'remove' in request.form:
             # Delete the movie from the database
-            to_delete = Record.query.filter_by(username=current_user.username, movie=movie['movie']).all()
+            to_delete = Record.query.filter_by(user_id=current_user.id, tmdb_id=movie_id).all()
             for record in to_delete:
                 db.session.delete(record)
             db.session.commit()
             flash('Movie successfully removed')
             # Update movie element
-            movie.pop('grade')
-            movie.pop('date')
+            payload.pop('grade')
+            payload.pop('date')
 
         elif 'gradeRange' in request.form:
             # Get submitted grade
             grade = float(get_post_result('gradeRange'))
             # If there is already a grade, then it's an update. Otherwise it's an addition
-            if movie.get('grade'):
+            if payload.get('grade'):
                 action = 'updated'
-                # Update the movie in the database
+                # Update the movie to the titles table
+                Title.from_tmdb(tmdb.get(movie_id)).upsert()
+                # Update the movie in the records table
                 Record.query \
-                    .filter_by(username=current_user.username, movie=movie['movie']) \
+                    .filter_by(user_id=current_user.id, tmdb_id=movie_id) \
                     .update({'grade': grade})
             else:
                 action = 'added'
-                # Add the movie to the records database
-                record = Record(current_user.username, movie['movie'], movie['tmdb_id'], grade)
+                # Add the movie to the titles table
+                Title.from_tmdb(tmdb.get(movie_id)).upsert()
+                # Add the movie to the records table
+                record = Record(current_user.id, movie_id, grade)
                 db.session.add(record)
+                # Update the title object
+                payload['date'] = datetime.utcnow().date()
                 # Remove from watchlist (if in it)
-                remove_from_watchlist(movie['movie'])
+                remove_from_watchlist(movie_id)
             # Commit add/update changes
             db.session.commit()
             flash(f'Movie successfully {action}')
             # Update movie element
-            movie['grade'] = grade
-            movie['date'] = Record.query.with_entities(Record.date) \
-                .filter_by(username=current_user.username, movie=movie['movie']) \
-                .first()[0]
+            payload['grade'] = grade
 
-    mode = 'show_add_buttons' if movie.get('grade') is None else 'show_edit_buttons'
-    return render_template('movie.html', item=movie, mode=mode, referrer=referrer, scroll=scroll,
-                           watchlist=get_watchlist_ids(), args=args)
+    payload['in_watchlist'] = movie_id in get_watchlist_ids()
+    mode = 'show_add_buttons' if payload.get('grade') is None else 'show_edit_buttons'
+    return render_template('movie.html', payload=payload, mode=mode, referrer=referrer, scroll=scroll, args=args)
