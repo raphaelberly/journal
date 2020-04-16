@@ -32,7 +32,7 @@
 {% else %}
 <div id="filterContainer" class="providers">
     {% for provider in ['cinema', 'netflix', 'amazonprimevideo'] %}
-        <a href="javascript:void(0)" class="btn {{ provider }} {{ 'ON' if provider in providers else 'OFF' }}" onclick="switchFilterState('{{ provider }}')">
+        <a href="javascript:void(0)" class="btn {{ provider }} {{ 'ON' if provider in metadata.filters else 'OFF' }}" onclick="switchFilterState('{{ provider }}')">
             <img src="static/images/providers/{{ provider }}.png">
         </a>
     {% endfor %}
@@ -46,7 +46,7 @@
 <table>
 
     <tr><td>
-        <a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=title.id, show_slider=True) }}', 'watchlist')">
+        <a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}', 'watchlist')">
             <img src="{{ title.poster_url }}">
         </a>
     </td></tr>
@@ -80,7 +80,7 @@
         {% if not title.grade %}
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button full" type="button" onclick="location.href=add_referrer('{{ url_for('movie', movie_id=title.id, show_slider=True) }}', 'watchlist')" value="Add">
+            <input class="styled-button full" type="button" onclick="location.href=add_referrer('{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}', 'watchlist')" value="Add">
         </td>
         <td class="right">
             <form onsubmit="this.action=add_referrer('{{ url_for('watchlist') }}', 'watchlist');" method="post">
@@ -99,8 +99,8 @@
 
 </div>
 
-{% if scroll %}
-<script type = "text/javascript"> window.scrollTo(0, {{ scroll }}); </script>
+{% if metadata.scroll %}
+<script type = "text/javascript"> window.scrollTo(0, {{ metadata.scroll }}); </script>
 {% endif %}
 
 </body>

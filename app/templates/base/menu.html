@@ -1,8 +1,8 @@
 
 <div class="navbar"><table><tr>
     <td class="left">
-        {% if page_title == 'Movie' and referrer %}
-        <a href="{{ url_for(referrer, ref=referrer, ref_scroll=scroll or 0, **args) }}"><img src="/static/images/icon_back.png"></a>
+        {% if page_title == 'Movie' and metadata.referrer %}
+        <a href="{{ url_for(metadata.referrer, ref=metadata.referrer, ref_scroll=metadata.scroll or 0, **metadata.args) }}"><img src="/static/images/icon_back.png"></a>
         {% else %}
         <a href="{{url_for('search')}}"><img src="/static/images/icon_logo.png"></a>
         {% endif %}

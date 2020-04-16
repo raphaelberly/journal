@@ -1,5 +1,5 @@
-from copy import deepcopy
 from datetime import date, datetime, timedelta
+
 from flask import render_template, request, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy import func
@@ -102,9 +102,11 @@ def recent():
     query = query.limit(nb_results)
 
     payload = [(record.export(), title.export()) for record, title in query.all()]
-    show_button = nb_recent > len(payload)
-    scroll = int(float(request.args.get('ref_scroll', 0)))
-    return render_template('recent.html', payload=payload, show_button=show_button, scroll=scroll)
+    metadata = {
+        'scroll': int(float(request.args.get('ref_scroll', 0))),
+        'show_more_button': nb_recent > len(payload),
+    }
+    return render_template('recent.html', payload=payload, metadata=metadata)
 
 
 def get_number_suffix(number):
@@ -233,7 +235,7 @@ def enrich_results(results):
 def search():
 
     if not request.args.get('query'):
-        return render_template('search.html')
+        return render_template('search.html', metadata={})
 
     if request.method == 'POST':
         if 'add_to_watchlist' in request.form:
@@ -244,11 +246,13 @@ def search():
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 3))
     result_ids = tmdb.search(query)
-    show_more_button = nb_results < len(result_ids)
     payload = enrich_results(tmdb.get_bulk(result_ids[:nb_results]))
-    scroll = int(float(request.args.get('ref_scroll', 0)))
-
-    return render_template('search.html', query=query, payload=payload, scroll=scroll, show_more_button=show_more_button)
+    metadata = {
+        'query': query,
+        'scroll': int(float(request.args.get('ref_scroll', 0))),
+        'show_more_button': nb_results < len(result_ids)
+    }
+    return render_template('search.html', payload=payload, metadata=metadata)
 
 
 def get_watchlist_ids():
@@ -292,19 +296,21 @@ def watchlist():
         .order_by(WatchlistItem.insert_datetime_utc.desc())
 
     payload = [(watchlist_item.export(), title.export()) for watchlist_item, title in query.all()]
-    scroll = int(float(request.args.get('ref_scroll', 0)))
-    providers = request.args.get('providers').split(',') if request.args.get('providers') else []
-    return render_template('watchlist.html', payload=payload, scroll=scroll, providers=providers)
+    metadata = {
+        'scroll': int(float(request.args.get('ref_scroll', 0))),
+        'filters': request.args.get('providers').split(',') if request.args.get('providers') else []
+    }
+    return render_template('watchlist.html', payload=payload, metadata=metadata)
 
 
-@app.route('/movie/<movie_id>', methods=['GET', 'POST'])
+@app.route('/movie/<tmdb_id>', methods=['GET', 'POST'])
 @login_required
-def movie(movie_id):
+def movie(tmdb_id):
 
     # Get movie item
-    movie_id = int(movie_id)
-    title = tmdb.get(movie_id)
-    payload = enrich_results([title])[0]
+    tmdb_id = int(tmdb_id)
+    title = tmdb.get(tmdb_id)
+    title = enrich_results([title])[0]
 
     # Get referrer if provided via GET params
     args = request.args.to_dict()
@@ -312,57 +318,64 @@ def movie(movie_id):
     scroll = int(float(args.pop('ref_scroll', 0)))
 
     if request.method == 'GET' and args.pop('show_slider', False):
-        grade_as_int = User.query.with_entities(User.grade_as_int).filter_by(id=current_user.id).first()[0]
-        return render_template('movie.html', payload=payload, mode='show_slider', referrer=referrer, scroll=scroll,
-                               grade_as_int=grade_as_int, args=args)
+        metadata = {
+            'mode': 'show_slider',
+            'referrer': referrer,
+            'scroll': scroll,
+            'grade_as_int': current_user.grade_as_int,
+            'args': args
+        }
+        return render_template('movie.html', payload=title, metadata=metadata)
 
     if request.method == 'POST':
 
         if 'add_to_watchlist' in request.form:
-            tmdb_id = int(get_post_result('add_to_watchlist'))
             add_to_watchlist(tmdb_id)
             flash('Movie added to watchlist')
 
         elif 'remove' in request.form:
             # Delete the movie from the database
-            to_delete = Record.query.filter_by(user_id=current_user.id, tmdb_id=movie_id).all()
+            to_delete = Record.query.filter_by(user_id=current_user.id, tmdb_id=tmdb_id).all()
             for record in to_delete:
                 db.session.delete(record)
             db.session.commit()
             flash('Movie successfully removed')
-            # Update movie element
-            payload.pop('grade')
-            payload.pop('date')
+            # Update title element
+            title.pop('grade')
+            title.pop('date')
 
         elif 'gradeRange' in request.form:
             # Get submitted grade
             grade = float(get_post_result('gradeRange'))
             # If there is already a grade, then it's an update. Otherwise it's an addition
-            if payload.get('grade'):
+            if title.get('grade') is not None:
                 action = 'updated'
-                # Update the movie to the titles table
-                Title.from_tmdb(tmdb.get(movie_id)).upsert()
                 # Update the movie in the records table
                 Record.query \
-                    .filter_by(user_id=current_user.id, tmdb_id=movie_id) \
+                    .filter_by(user_id=current_user.id, tmdb_id=tmdb_id) \
                     .update({'grade': grade})
             else:
                 action = 'added'
                 # Add the movie to the titles table
-                Title.from_tmdb(tmdb.get(movie_id)).upsert()
+                Title.from_tmdb(tmdb.get(tmdb_id)).upsert()
                 # Add the movie to the records table
-                record = Record(current_user.id, movie_id, grade)
+                record = Record(current_user.id, tmdb_id, grade)
                 db.session.add(record)
-                # Update the title object
-                payload['date'] = datetime.utcnow().date()
                 # Remove from watchlist (if in it)
-                remove_from_watchlist(movie_id)
+                remove_from_watchlist(tmdb_id)
+                # Update the title element
+                title['date'] = datetime.utcnow().date()
             # Commit add/update changes
             db.session.commit()
             flash(f'Movie successfully {action}')
-            # Update movie element
-            payload['grade'] = grade
+            # Update title element
+            title['grade'] = grade
 
-    payload['in_watchlist'] = movie_id in get_watchlist_ids()
-    mode = 'show_add_buttons' if payload.get('grade') is None else 'show_edit_buttons'
-    return render_template('movie.html', payload=payload, mode=mode, referrer=referrer, scroll=scroll, args=args)
+    title['in_watchlist'] = tmdb_id in get_watchlist_ids()
+    metadata = {
+        'mode': 'show_edit_buttons' if title.get('grade') is not None else 'show_add_buttons',
+        'referrer': referrer,
+        'scroll': scroll,
+        'args': args
+    }
+    return render_template('movie.html', payload=title, metadata=metadata)

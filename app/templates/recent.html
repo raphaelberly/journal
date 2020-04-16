@@ -30,7 +30,7 @@
     <td>
         <span class="time-ago">{{ format_date(record.date) }}</span>
         <br/>
-        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=title.id, nb_results=payload|length) }}', 'recent')">{{ title.title }} ({{ title.year }})</a></b>
+        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.id, nb_results=payload|length) }}', 'recent')">{{ title.title }} ({{ title.year }})</a></b>
         <br/>
         {{ ', '.join(title.genres) }}
         <br/>
@@ -41,7 +41,7 @@
 
 </table></center>
 
-{% if show_button %}
+{% if show_more_button %}
 <input class="styled-button full" type="button" id="more_button" onclick="javascript:add_referrer_and_load('{{ url_for('recent', nb_results=payload|length+20) }}', 'recent')" value="More">
 {% endif %}
 
