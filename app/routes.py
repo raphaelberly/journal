@@ -10,7 +10,7 @@ from app import db, login
 from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User
 from lib.providers import Providers
-from lib.tmdb import Tmdb
+from lib.tmdb import Tmdb, TmdbConverter
 from lib.tools import get_time_ago_string, get_time_spent_string
 
 tmdb = Tmdb()
@@ -213,15 +213,7 @@ def enrich_results(results):
     output = []
     for res in results:
         output.append({
-            'id': res['id'],
-            'imdb_id': res['imdb_id'],
-            'title': res['original_title'] if res['original_language'] == 'fr' else res['title'],
-            'year': res['release_date'][:4],
-            'genres': [genre['name'] for genre in res.get('genres', [])[:3]],
-            'cast': [item['name'] for item in res['credits'].get('cast', [])[:4]],
-            'directors': [item['name'] for item in res['credits'].get('crew', []) if item['job'] == 'Director'],
-            'duration': f'{res["runtime"] // 60}h {res["runtime"] % 60}min' if res.get('runtime') else None,
-            'poster_url': 'https://image.tmdb.org/t/p/w200' + res['poster_path'] if res.get('poster_path') else None,
+            **TmdbConverter.json_to_front(res),
             'grade': records.get(res['id'], {}).get('grade'),
             'date': records.get(res['id'], {}).get('date'),
             'in_watchlist': res['id'] in watchlist_ids,

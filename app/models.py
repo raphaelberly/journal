@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import insert
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db, login
+from lib.tmdb import TmdbConverter
 
 
 @login.user_loader
@@ -72,23 +73,7 @@ class Title(db.Model, JournalModel):
 
     @classmethod
     def from_tmdb(cls, item: dict):
-        kwargs = {
-            'id': item['id'],
-            'imdb_id': item['imdb_id'],
-            'title': item['title'],
-            'release_date': datetime.strptime(item['release_date'], '%Y-%m-%d'),
-            'original_title': item['original_title'],
-            'original_language': item['original_language'],
-            'directors': [item['name'] for item in item['credits'].get('crew', []) if item['job'] == 'Director'],
-            'genres': [genre['name'] for genre in item.get('genres', [])],
-            'top_cast': [item['name'] for item in item['credits'].get('cast', [])[:3]],
-            'poster_path': item.get('poster_path'),
-            'runtime': item.get('runtime'),
-            'revenue': item.get('revenue'),
-            'budget': item.get('budget'),
-            'tagline': item.get('tagline'),
-        }
-        return cls(**kwargs)
+        return cls(**TmdbConverter.json_to_table(item))
 
     def upsert(self):
         value = self.__dict__.copy()
@@ -98,18 +83,7 @@ class Title(db.Model, JournalModel):
         db.session.execute(statement)
 
     def export(self, language='fr'):
-        title = self.__dict__
-        output = {
-            'id': title['id'],
-            'title': title['original_title'] if title['original_language'] == language else title['title'],
-            'year': title['release_date'].year,
-            'genres': title['genres'][:3],
-            'cast': title['top_cast'],
-            'directors': title['directors'],
-            'duration': f'{title["runtime"] // 60}h {title["runtime"] % 60}min' if title.get('runtime') else None,
-            'poster_url': 'https://image.tmdb.org/t/p/w200'+title['poster_path'] if title.get('poster_path') else None,
-        }
-        return output
+        return TmdbConverter.table_to_front(self.__dict__, language)
 
 
 class WatchlistItem(db.Model, JournalModel):
