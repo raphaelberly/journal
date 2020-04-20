@@ -52,3 +52,6 @@ p {
 .OFF.canalplayvod img {
   content:url('/static/images/providers/canalplayvod_gray.png');
 }
+.OFF.disneyplus img {
+  content:url('/static/images/providers/disneyplus_gray.png');
+}

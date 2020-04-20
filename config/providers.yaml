@@ -1,8 +1,9 @@
 supported_providers:
-  - cinema
+#  - cinema
   - netflix
   - amazonprimevideo
-  - canalplayvod
+  - disneyplus
+#  - canalplayvod
 
 country: FR
 main_city:
