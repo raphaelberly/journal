@@ -8,9 +8,9 @@ from werkzeug.utils import redirect
 from app import app
 from app import db, login
 from app.forms import RegistrationForm
-from app.models import Record, Title, Top, WatchlistItem, User
+from app.models import Record, Title, Top, WatchlistItem, User, upsert_title_metadata
 from lib.providers import Providers
-from lib.tmdb import Tmdb, TmdbConverter
+from lib.tmdb import Tmdb, TitleConverter
 from lib.tools import get_time_ago_string, get_time_spent_string
 
 tmdb = Tmdb()
@@ -213,7 +213,7 @@ def enrich_results(results):
     output = []
     for res in results:
         output.append({
-            **TmdbConverter.json_to_front(res),
+            **TitleConverter.json_to_front(res),
             'grade': records.get(res['id'], {}).get('grade'),
             'date': records.get(res['id'], {}).get('date'),
             'in_watchlist': res['id'] in watchlist_ids,
@@ -256,9 +256,9 @@ def get_watchlist_ids():
 
 
 def add_to_watchlist(tmdb_id):
-    title = Title.from_tmdb(tmdb.get(tmdb_id))
-    title.upsert()
-    providers = Providers().get_names(title.title, tmdb_id)
+    title = tmdb.get(tmdb_id)
+    upsert_title_metadata(title)
+    providers = Providers().get_names(title['original_title'], tmdb_id)
     item = WatchlistItem(user_id=current_user.id, tmdb_id=tmdb_id, providers=providers)
     db.session.add(item)
     db.session.commit()
@@ -301,8 +301,8 @@ def movie(tmdb_id):
 
     # Get movie item
     tmdb_id = int(tmdb_id)
-    title = tmdb.get(tmdb_id)
-    title = enrich_results([title])[0]
+    _title = tmdb.get(tmdb_id)
+    title = enrich_results([_title])[0]
 
     # Get referrer if provided via GET params
     args = request.args.to_dict()
@@ -349,7 +349,7 @@ def movie(tmdb_id):
             else:
                 action = 'added'
                 # Add the movie to the titles table
-                Title.from_tmdb(tmdb.get(tmdb_id)).upsert()
+                upsert_title_metadata(_title)
                 # Add the movie to the records table
                 record = Record(current_user.id, tmdb_id, grade)
                 db.session.add(record)

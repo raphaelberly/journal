@@ -1,11 +1,14 @@
 from datetime import datetime
+from typing import List, Optional
 
 from flask_login import UserMixin
+from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.ext.declarative import DeclarativeMeta
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db, login
-from lib.tmdb import TmdbConverter
+from lib.tmdb import TitleConverter, CrewConverter
 
 
 @login.user_loader
@@ -13,17 +16,18 @@ def load_user(id_):
     return User.query.get(id_)
 
 
-class JournalModel:
+def upsert(table_model: DeclarativeMeta, records: List[dict], exclude: Optional[List[str]] = None):
+    # Get list of primary keys
+    primary_keys = [key.name for key in inspect(table_model).primary_key]
+    # Assemble upsert statement
+    statement = insert(table_model).values(records)
+    cols_to_update = {col.name: col for col in statement.excluded if (not col.primary_key and col.name not in exclude)}
+    upsert_statement = statement.on_conflict_do_update(index_elements=primary_keys, set_=cols_to_update)
+    # Execute statement
+    db.session.execute(upsert_statement)
 
-    __table_args__ = {"schema": "journal"}
 
-    def export(self):
-        value = self.__dict__.copy()
-        value.pop('_sa_instance_state')
-        return value
-
-
-class User(UserMixin, db.Model, JournalModel):
+class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), unique=True)
@@ -32,6 +36,7 @@ class User(UserMixin, db.Model, JournalModel):
     grade_as_int = db.Column(db.Boolean)
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
+    __table_args__ = {"schema": "journal"}
     __tablename__ = "users"
 
     def __init__(self, username, password, email, grade_as_int=True):
@@ -47,7 +52,7 @@ class User(UserMixin, db.Model, JournalModel):
         return check_password_hash(self.password_hash, password)
 
 
-class Title(db.Model, JournalModel):
+class Title(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     imdb_id = db.Column(db.String(32))
@@ -66,6 +71,7 @@ class Title(db.Model, JournalModel):
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
+    __table_args__ = {"schema": "journal"}
     __tablename__ = "titles"
 
     def __repr__(self):
@@ -73,26 +79,66 @@ class Title(db.Model, JournalModel):
 
     @classmethod
     def from_tmdb(cls, item: dict):
-        return cls(**TmdbConverter.json_to_table(item))
-
-    def upsert(self):
-        value = self.__dict__.copy()
-        value.pop('_sa_instance_state')
-        value.update({'update_datetime_utc': datetime.utcnow()})
-        statement = insert(self.__class__).values(**value).on_conflict_do_update(constraint='titles_pkey', set_=value)
-        db.session.execute(statement)
+        return cls(**TitleConverter.json_to_table(item))
 
     def export(self, language='fr'):
-        return TmdbConverter.table_to_front(self.__dict__, language)
+        return TitleConverter.table_to_front(self.__dict__, language)
 
 
-class WatchlistItem(db.Model, JournalModel):
+class Person(db.Model):
+
+    id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
+    name = db.Column(db.String(128))
+    gender = db.Column(db.Integer)
+    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = {"schema": "journal"}
+    __tablename__ = "persons"
+
+    def __repr__(self):
+        return f'<Person {self.id}: {self.name}>'
+
+
+class Credit(db.Model):
+
+    id = db.Column(db.String(128), primary_key=True)
+    tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id))
+    person_id = db.Column(db.Integer, db.ForeignKey(Person.id))
+    role = db.Column(db.String(128))
+    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = {"schema": "journal"}
+    __tablename__ = "credits"
+
+    def __repr__(self):
+        return f'<Credit: person {self.cast_id} in title {self.tmdb_id}>'
+
+
+def upsert_title_metadata(item):
+    # Parse title metadata and upsert to database
+    title = TitleConverter.json_to_table(item)
+    upsert(Title, [{**title, 'update_datetime_utc': datetime.utcnow()}], ['insert_datetime_utc'])
+    # Parse credits and persons metadata and upsert to database
+    persons, credits = [], []
+    for person, credit in CrewConverter.crew_generator(item):
+        persons.append({**person, 'update_datetime_utc': datetime.utcnow()})
+        credits.append({**credit, 'update_datetime_utc': datetime.utcnow()})
+    upsert(Person, persons, ['insert_datetime_utc'])
+    upsert(Credit, credits, ['insert_datetime_utc'])
+    # Commit changes
+    db.session.commit()
+
+
+class WatchlistItem(db.Model):
 
     user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
     providers = db.Column(db.ARRAY(db.String(64)))
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
+    __table_args__ = {"schema": "journal"}
     __tablename__ = "watchlist"
 
     def __init__(self, user_id, tmdb_id, providers):
@@ -103,8 +149,13 @@ class WatchlistItem(db.Model, JournalModel):
     def __repr__(self):
         return f'<Watchlist item: movie {self.tmdb_id} for user {self.user_id}>'
 
+    def export(self):
+        value = self.__dict__.copy()
+        value.pop('_sa_instance_state')
+        return value
 
-class Record(db.Model, JournalModel):
+
+class Record(db.Model):
 
     user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
@@ -113,6 +164,7 @@ class Record(db.Model, JournalModel):
     recent = db.Column(db.Boolean)
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
+    __table_args__ = {"schema": "journal"}
     __tablename__ = "records"
 
     def __init__(self, user_id, tmdb_id, grade, date=None, recent=True):
@@ -126,7 +178,7 @@ class Record(db.Model, JournalModel):
         return f'<Record: user {self.user_id} watched movie {self.tmdb_id}>'
 
 
-class Top(db.Model, JournalModel):
+class Top(db.Model):
 
     username = db.Column(db.String(20), primary_key=True)
     id = db.Column(db.String(9), primary_key=True)  # For genres, the ID is the name
@@ -139,6 +191,7 @@ class Top(db.Model, JournalModel):
     count = db.Column(db.Integer)
     count_threshold = db.Column(db.Integer)
 
+    __table_args__ = {"schema": "journal"}
     __tablename__ = "tops"
 
     def __repr__(self):

@@ -42,11 +42,11 @@ class Tmdb(object):
         return [async_result.get() for async_result in async_results if async_result.get()]
 
 
-class TmdbConverter(object):
+class TitleConverter(object):
 
     @staticmethod
     def json_to_table(item: dict) -> dict:
-        output = {
+        title = {
             'id': item['id'],
             'imdb_id': item['imdb_id'],
             'title': item['title'],
@@ -62,11 +62,11 @@ class TmdbConverter(object):
             'budget': item.get('budget'),
             'tagline': item.get('tagline'),
         }
-        return output
+        return title
 
     @staticmethod
     def table_to_front(item: dict, language: str = 'fr') -> dict:
-        output = {
+        title = {
             'id': item['id'],
             'title': item['original_title'] if item['original_language'] == language else item['title'],
             'year': item['release_date'].year,
@@ -76,11 +76,11 @@ class TmdbConverter(object):
             'duration': f'{item["runtime"] // 60}h {item["runtime"] % 60}min' if item.get('runtime') else None,
             'poster_url': 'https://image.tmdb.org/t/p/w200' + item['poster_path'] if item.get('poster_path') else None,
         }
-        return output
+        return title
 
     @staticmethod
     def json_to_front(item: dict, language: str = 'fr') -> dict:
-        output = {
+        title = {
             'id': item['id'],
             'imdb_id': item['imdb_id'],
             'title': item['original_title'] if item['original_language'] == language else item['title'],
@@ -91,4 +91,39 @@ class TmdbConverter(object):
             'duration': f'{item["runtime"] // 60}h {item["runtime"] % 60}min' if item.get('runtime') else None,
             'poster_url': 'https://image.tmdb.org/t/p/w200' + item['poster_path'] if item.get('poster_path') else None,
         }
-        return output
+        return title
+
+
+class CrewConverter:
+
+    MAX_NB_ACTORS = 15
+    SUPPORTED_ROLES = {
+        'Director': 'director',
+        'Original Music Composer': 'composer'
+    }
+
+    @classmethod
+    def crew_generator(cls, item):
+        for actor in item['credits'].get('cast', [])[:cls.MAX_NB_ACTORS]:
+            yield ({
+                'id': actor['id'],
+                'name': actor['name'],
+                'gender': actor['gender']
+            }, {
+                'id': actor['credit_id'],
+                'tmdb_id': item['id'],
+                'person_id': actor['id'],
+                'role': 'actor'
+            })
+        for crew_member in item['credits'].get('crew', [])[:15]:
+            if crew_member['job'] in cls.SUPPORTED_ROLES.keys():
+                yield ({
+                     'id': crew_member['id'],
+                     'name': crew_member['name'],
+                     'gender': crew_member['gender']
+                 }, {
+                     'id': crew_member['credit_id'],
+                     'tmdb_id': item['id'],
+                     'person_id': crew_member['id'],
+                     'role': cls.SUPPORTED_ROLES[crew_member['job']]
+                 })
