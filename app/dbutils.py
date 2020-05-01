@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Iterable
 
 from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
@@ -10,7 +10,7 @@ from app.models import Title, Person, Credit
 from lib.tmdb import TitleConverter, CrewConverter
 
 
-def _upsert(table_model: DeclarativeMeta, records: List[dict], exclude: Optional[List[str]] = None):
+def _upsert(table_model: DeclarativeMeta, records: Iterable[dict], exclude: Optional[List[str]] = None):
     # Get list of primary keys
     primary_keys = [key.name for key in inspect(table_model).primary_key]
     # Assemble upsert statement
@@ -25,7 +25,7 @@ def upsert(table_model: DeclarativeMeta, record: dict, exclude: Optional[List[st
     return _upsert(table_model, [record], exclude)
 
 
-def upsert_bulk(table_model: DeclarativeMeta, records: List[dict], exclude: Optional[List[str]] = None):
+def upsert_bulk(table_model: DeclarativeMeta, records: Iterable[dict], exclude: Optional[List[str]] = None):
     return _upsert(table_model, records, exclude)
 
 
@@ -34,11 +34,11 @@ def upsert_title_metadata(item):
     title = TitleConverter.json_to_table(item)
     upsert(Title, title, ['insert_datetime_utc'])
     # Parse credits and persons metadata and upsert to database
-    persons, credits = [], []
+    persons, credits = {}, {}
     for person, credit in CrewConverter.crew_generator(item):
-        persons.append(person)
-        credits.append(credit)
-    upsert_bulk(Person, persons, ['insert_datetime_utc'])
-    upsert_bulk(Credit, credits, ['insert_datetime_utc'])
+        persons[person['id']] = person
+        credits[credit['id']] = credit
+    upsert_bulk(Person, persons.values(), ['insert_datetime_utc'])
+    upsert_bulk(Credit, credits.values(), ['insert_datetime_utc'])
     # Commit changes
     db.session.commit()
