@@ -9,9 +9,9 @@ CREATE TABLE journal.titles (
   genres                VARCHAR(256)[],
   top_cast              VARCHAR(256)[],
   poster_path           TEXT,
-  runtime               INTEGER,
-  revenue               INTEGER,
-  budget                INTEGER,
+  runtime               SMALLINT,
+  revenue               BIGINT,
+  budget                BIGINT,
   tagline               TEXT,
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
