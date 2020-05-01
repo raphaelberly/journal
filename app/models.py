@@ -1,30 +1,15 @@
 from datetime import datetime
-from typing import List, Optional
 
 from flask_login import UserMixin
-from sqlalchemy import inspect
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.ext.declarative import DeclarativeMeta
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db, login
-from lib.tmdb import TitleConverter, CrewConverter
+from lib.tmdb import TitleConverter
 
 
 @login.user_loader
 def load_user(id_):
     return User.query.get(id_)
-
-
-def upsert(table_model: DeclarativeMeta, records: List[dict], exclude: Optional[List[str]] = None):
-    # Get list of primary keys
-    primary_keys = [key.name for key in inspect(table_model).primary_key]
-    # Assemble upsert statement
-    statement = insert(table_model).values(records)
-    cols_to_update = {col.name: col for col in statement.excluded if (not col.primary_key and col.name not in exclude)}
-    upsert_statement = statement.on_conflict_do_update(index_elements=primary_keys, set_=cols_to_update)
-    # Execute statement
-    db.session.execute(upsert_statement)
 
 
 class User(UserMixin, db.Model):
@@ -35,6 +20,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(256))
     grade_as_int = db.Column(db.Boolean)
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "users"
@@ -116,27 +102,13 @@ class Credit(db.Model):
         return f'<Credit: person {self.cast_id} in title {self.tmdb_id}>'
 
 
-def upsert_title_metadata(item):
-    # Parse title metadata and upsert to database
-    title = TitleConverter.json_to_table(item)
-    upsert(Title, [{**title, 'update_datetime_utc': datetime.utcnow()}], ['insert_datetime_utc'])
-    # Parse credits and persons metadata and upsert to database
-    persons, credits = [], []
-    for person, credit in CrewConverter.crew_generator(item):
-        persons.append({**person, 'update_datetime_utc': datetime.utcnow()})
-        credits.append({**credit, 'update_datetime_utc': datetime.utcnow()})
-    upsert(Person, persons, ['insert_datetime_utc'])
-    upsert(Credit, credits, ['insert_datetime_utc'])
-    # Commit changes
-    db.session.commit()
-
-
 class WatchlistItem(db.Model):
 
     user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
     providers = db.Column(db.ARRAY(db.String(64)))
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "watchlist"
@@ -163,6 +135,7 @@ class Record(db.Model):
     date = db.Column(db.Date)
     recent = db.Column(db.Boolean)
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "records"
@@ -176,6 +149,11 @@ class Record(db.Model):
 
     def __repr__(self):
         return f'<Record: user {self.user_id} watched movie {self.tmdb_id}>'
+
+    def export(self):
+        value = self.__dict__.copy()
+        value.pop('_sa_instance_state')
+        return value
 
 
 class Top(db.Model):

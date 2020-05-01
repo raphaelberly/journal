@@ -16,7 +16,7 @@ tmdb = Tmdb()
 start = time()
 search = tmdb.search(args.movie)
 print(search)
-movies = tmdb.movies(search[:3])
+movies = tmdb.get_bulk(search[:3])
 print(movies)
 
 print('Collecting results took: {:.2f} seconds'.format(time() - start))

@@ -4,7 +4,8 @@ CREATE TABLE journal.users (
   password_hash         VARCHAR(128)    NOT NULL,
   email                 VARCHAR(256)    NOT NULL,
   grade_as_int          BOOLEAN         NOT NULL DEFAULT TRUE,
-  insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
+  insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+  update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );
 
 ALTER TABLE journal.users

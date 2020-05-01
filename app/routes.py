@@ -7,8 +7,9 @@ from werkzeug.utils import redirect
 
 from app import app
 from app import db, login
+from app.dbutils import upsert_title_metadata
 from app.forms import RegistrationForm
-from app.models import Record, Title, Top, WatchlistItem, User, upsert_title_metadata
+from app.models import Record, Title, Top, WatchlistItem, User
 from lib.providers import Providers
 from lib.tmdb import Tmdb, TitleConverter
 from lib.tools import get_time_ago_string, get_time_spent_string
@@ -345,7 +346,7 @@ def movie(tmdb_id):
                 # Update the movie in the records table
                 Record.query \
                     .filter_by(user_id=current_user.id, tmdb_id=tmdb_id) \
-                    .update({'grade': grade})
+                    .update({'grade': grade, 'update_datetime_utc': datetime.utcnow()})
             else:
                 action = 'added'
                 # Add the movie to the titles table

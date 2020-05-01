@@ -4,7 +4,8 @@ CREATE TABLE journal.records(
   grade                 DOUBLE PRECISION    NOT NULL,
   date                  DATE                NOT NULL DEFAULT DATE(now() AT TIME ZONE 'utc'),
   recent                BOOLEAN             NOT NULL DEFAULT TRUE,
-  insert_datetime_utc   TIMESTAMP           NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
+  insert_datetime_utc   TIMESTAMP           NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+  update_datetime_utc   TIMESTAMP           NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );
 
 ALTER TABLE journal.records
