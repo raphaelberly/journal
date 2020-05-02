@@ -40,5 +40,3 @@ def upsert_title_metadata(item):
         credits[credit['id']] = credit
     upsert_bulk(Person, persons.values(), ['insert_datetime_utc'])
     upsert_bulk(Credit, credits.values(), ['insert_datetime_utc'])
-    # Commit changes
-    db.session.commit()

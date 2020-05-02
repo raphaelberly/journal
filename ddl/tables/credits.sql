@@ -3,6 +3,7 @@ CREATE TABLE journal.credits (
   tmdb_id               INTEGER         NOT NULL,
   person_id             INTEGER         NOT NULL,
   role                  VARCHAR(128)    NOT NULL,
+  cast_rank             SMALLINT        NULL,
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );

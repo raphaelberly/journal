@@ -96,27 +96,27 @@ class TitleConverter(object):
 
 class CrewConverter:
 
-    MAX_NB_ACTORS = 15
-    SUPPORTED_ROLES = {
+    CREW_ROLES = {
         'Director': 'director',
         'Original Music Composer': 'composer'
     }
 
     @classmethod
     def crew_generator(cls, item):
-        for actor in item['credits'].get('cast', [])[:cls.MAX_NB_ACTORS]:
+        for i, actor in enumerate(item['credits'].get('cast', [])):
             yield ({
                 'id': actor['id'],
                 'name': actor['name'],
-                'gender': actor['gender']
+                'gender': actor['gender'],
             }, {
                 'id': actor['credit_id'],
                 'tmdb_id': item['id'],
                 'person_id': actor['id'],
-                'role': 'actor'
+                'role': 'actress' if actor['gender'] == 1 else 'actor',
+                'cast_rank': i + 1,
             })
-        for crew_member in item['credits'].get('crew', [])[:15]:
-            if crew_member['job'] in cls.SUPPORTED_ROLES.keys():
+        for crew_member in item['credits'].get('crew', []):
+            if crew_member['job'] in cls.CREW_ROLES.keys():
                 yield ({
                      'id': crew_member['id'],
                      'name': crew_member['name'],
@@ -125,5 +125,6 @@ class CrewConverter:
                      'id': crew_member['credit_id'],
                      'tmdb_id': item['id'],
                      'person_id': crew_member['id'],
-                     'role': cls.SUPPORTED_ROLES[crew_member['job']]
-                 })
+                     'role': cls.CREW_ROLES[crew_member['job']],
+                     'cast_rank': None,
+                })

@@ -92,6 +92,7 @@ class Credit(db.Model):
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id))
     person_id = db.Column(db.Integer, db.ForeignKey(Person.id))
     role = db.Column(db.String(128))
+    cast_rank = db.Column(db.SmallInteger, nullable=True)
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
