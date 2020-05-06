@@ -1,5 +1,5 @@
 
-CREATE MATERIALIZED VIEW journal.genres AS (
+CREATE MATERIALIZED VIEW journal.top_genres AS (
 
 WITH
 

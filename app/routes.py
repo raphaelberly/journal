@@ -131,12 +131,9 @@ def statistics():
 
     activity = {}
     activity_metrics = ['viewing activity', 'time spent']
-    agg = db.session.query(
-            func.coalesce(func.count(Record.movie), 0),
-            func.coalesce(func.sum(Title.duration), 0),
-        ) \
-        .select_from(Record).join(Record.title) \
-        .filter(Record.username == current_user.username)
+    agg = db.session.query(func.coalesce(func.count(Title.title), 0), func.coalesce(func.sum(Title.runtime), 0),) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id)
     # This month
     this_month = agg \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
@@ -149,7 +146,7 @@ def statistics():
         .first()
     activity.update({'year': {'values': dict(zip(activity_metrics, this_year)), 'desc': 'this year'}})
     # Overall
-    start_date = db.session.query(func.min(Record.date)).filter(Record.username == current_user.username).scalar()
+    start_date = db.session.query(func.min(Record.date)).filter(Record.user_id == current_user.id).scalar()
     overall_desc = f'since {start_date.strftime("%B, %Y")}' if start_date else 'overall'  # crashes if there's no "if"
     activity.update({'overall': {'values': dict(zip(activity_metrics, agg.first())), 'desc': overall_desc}})
 
@@ -159,18 +156,18 @@ def statistics():
         total_applicable = this_year[0]
     else:
         total_applicable = Record.query \
-            .filter_by(username=current_user.username) \
+            .filter_by(user_id=current_user.id) \
             .filter(db.extract('year', Record.date) == year_applicable) \
             .count()
     # Query best and worst movies from applicable year
     query = db.session \
-        .query(Record.username, Record.date, Record.tmdb_id, Record.grade,
-               Title.title, Title.year, Title.genres) \
-        .select_from(Record).join(Record.title) \
-        .filter(Record.username == current_user.username) \
+        .query(Record.date, Record.tmdb_id, Record.grade,
+               Title.title, db.cast(db.extract('year', Title.release_date), db.Integer).label('year'), Title.genres) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
         .filter(db.extract('year', Record.date) == year_applicable)
-    best = query.order_by(Record.grade.desc(), Record.insert_datetime.desc()).limit(5).all()
-    worst = query.order_by(Record.grade, Record.insert_datetime.desc()).limit(5).all()
+    best = query.order_by(Record.grade.desc(), Record.insert_datetime_utc.desc()).limit(5).all()
+    worst = query.order_by(Record.grade, Record.insert_datetime_utc.desc()).limit(5).all()
     # Format the results (add rank and suffix) and reorder them if needed
     best = [add_rank_and_suffix(best[i], i+1) for i in range(len(best))]
     worst = [add_rank_and_suffix(worst[i], total_applicable - i) for i in range(len(worst))]
@@ -191,15 +188,21 @@ def statistics():
     }
     for top in top_models:
         values = Top.query \
-            .filter_by(username=current_user.username) \
+            .filter_by(user_id=current_user.id) \
             .filter_by(role=top_models[top]['role']) \
-            .order_by(Top.grade.desc(), Top.count.desc(), Top.rating.desc()) \
+            .order_by(Top.grade.desc(), Top.count.desc()) \
             .all()[:top_models[top]['nb_elements']]
         tops.update({top: values})
 
-    scroll = int(float(request.args.get('ref_scroll', 0)))
-    return render_template('statistics.html', activity=activity, activity_metrics=activity_metrics, tops=tops,
-                           movies=movies, year=year_applicable, scroll=scroll)
+    payload = {
+        'activity': activity,
+        'activity_metrics': activity_metrics,
+        'tops': tops,
+        'movies': movies,
+        'year_applicable': year_applicable
+    }
+    metadata = {'scroll': int(float(request.args.get('ref_scroll', 0)))}
+    return render_template('statistics.html', payload=payload, metadata=metadata)
 
 
 def enrich_results(results):

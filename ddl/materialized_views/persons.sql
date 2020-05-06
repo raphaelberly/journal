@@ -30,7 +30,7 @@ persons_and_roles AS (
     array_agg(c.year ORDER BY r.grade DESC, r.date DESC)                        AS titles_year,
     max(r.date)                                                                 AS last_added,
     count(*)                                                                    AS count,
-    sum(CASE WHEN c.principal THEN 1 ELSE 0 END)                                AS count_principal,
+    sum(c.principal::INTEGER)                                                   AS count_principal,
     sum(CASE WHEN coalesce(c.principal, TRUE) THEN 1 ELSE 0.5 END * r.grade)
       / sum(CASE WHEN coalesce(c.principal, TRUE) THEN 1 ELSE 0.5 END)          AS grade
   FROM journal.records r
