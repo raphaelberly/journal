@@ -10,7 +10,7 @@
 
 <body ontouchstart="">
 
-{% with title = 'Statistics' %}
+{% with page_title = 'Statistics' %}
     {% include 'base/menu.html' %}
 {% endwith %}
 {% include 'base/alert.html' %}
@@ -25,8 +25,8 @@
         <td>
             <p class="top-type">Viewing activity</p>
             {% for timespan in ['month', 'year', 'overall'] %}
-                <p><span class="big-number">{{ activity[timespan]['values']['viewing activity']|round(1) }}</span>
-                <br/>{{ activity[timespan].desc }}</p>
+                <p><span class="big-number">{{ payload.activity[timespan]['values']['viewing activity']|round(1) }}</span>
+                <br/>{{ payload.activity[timespan].desc }}</p>
             {% endfor %}
         </td>
     </tr>
@@ -36,13 +36,13 @@
         <td>
             <p class="top-type">Time spent</p>
             {% for timespan in ['month', 'year', 'overall'] %}
-                <p><span class="big-title">{{ format_timespan(activity[timespan]['values']['time spent']) }}</span>
-                <br/>{{ activity[timespan].desc }}</p>
+                <p><span class="big-title">{{ format_timespan(payload.activity[timespan]['values']['time spent']) }}</span>
+                <br/>{{ payload.activity[timespan].desc }}</p>
             {% endfor %}
         </td>
     </tr>
 
-    {% for element in movies %}
+    {% for element in payload.movies %}
         <td class="icon"><img src="/static/images/statistics/{{ element['image'] }}"></td>
         <td class="sideline"></td>
         <td>
@@ -50,8 +50,8 @@
             {% for item in element['movies'] %}
 
             <p><span class="big-number">{{ item['rank'] }}</span>{{ item['suffix'] }}
-                <br/><span class="top-name"><a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item['tmdb_id']) }}', 'statistics')">{{ item['title'] }} ({{ item['year'] }})</a></span>
-            <br/>{{ ', '.join(item['genres'].split(',')) }}
+                <br/><span class="top-name"><a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item['tmdb_id']) }}', 'statistics')">{{ item['title'] }} ({{ item['year'] }})</a></span>
+            <br/>{{ ', '.join(item['genres']) }}
             <br/>{{ [item['grade']|int, item['grade']]|max }}/10
 
             {% endfor %}
@@ -62,7 +62,7 @@
     {% endfor %}
 
 
-{% for element in tops %}
+{% for element in payload.tops %}
 
     <tr>
     <td class="icon"><img src="/static/images/statistics/{{ element }}.png"></td>
@@ -70,7 +70,7 @@
     <td>
     <p class="top-type">Top {{ element }}</p>
 
-    {% for top in tops[element] %}
+    {% for top in payload.tops[element] %}
 
         <p><span class="big-number">{{ "%.1f"|format(top.grade) }}</span>
         <br/><span class="top-name">{{ top.name }}</span>
@@ -92,7 +92,7 @@
 
 </div>
 
-{% if scroll %}
+{% if metadata.scroll %}
 <script type = "text/javascript"> window.scrollTo(0, {{ scroll }}); </script>
 {% endif %}
 

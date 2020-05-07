@@ -1,10 +1,13 @@
 CREATE TABLE journal.users (
-
-  insert_datetime TIMESTAMP DEFAULT now(),
-  id SERIAL NOT NULL CONSTRAINT users_pkey PRIMARY KEY,
-  username VARCHAR(20) NOT NULL,
-  password_hash VARCHAR(100) NOT NULL,
-  email TEXT NOT NULL,
-  grade_as_int BOOLEAN DEFAULT TRUE NOT NULL
-
+  id                    SERIAL          NOT NULL,
+  username              VARCHAR(32)     NOT NULL UNIQUE,
+  password_hash         VARCHAR(128)    NOT NULL,
+  email                 VARCHAR(256)    NOT NULL,
+  grade_as_int          BOOLEAN         NOT NULL DEFAULT TRUE,
+  insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+  update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );
+
+ALTER TABLE journal.users
+ADD CONSTRAINT "users_pkey"
+PRIMARY KEY (id);

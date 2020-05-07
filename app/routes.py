@@ -1,5 +1,5 @@
-from copy import deepcopy
 from datetime import date, datetime, timedelta
+
 from flask import render_template, request, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy import func
@@ -7,10 +7,11 @@ from werkzeug.utils import redirect
 
 from app import app
 from app import db, login
+from app.dbutils import upsert_title_metadata
 from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User
 from lib.providers import Providers
-from lib.tmdb import Tmdb
+from lib.tmdb import Tmdb, TitleConverter
 from lib.tools import get_time_ago_string, get_time_spent_string
 
 tmdb = Tmdb()
@@ -87,25 +88,26 @@ def logout():
 def recent():
 
     nb_recent = Record.query \
-        .filter(Record.username == current_user.username) \
+        .filter(Record.user_id == current_user.id) \
         .filter(Record.recent == True) \
         .count()
 
     query = db.session \
-        .query(Record.username, Record.date, Record.tmdb_id, Record.insert_datetime, Record.grade,
-               Title.title, Title.year, Title.genres) \
-        .select_from(Record).join(Record.title) \
-        .filter(Record.username == current_user.username) \
+        .query(Record, Title) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
         .filter(Record.recent == True) \
-        .order_by(Record.date.desc(), Record.insert_datetime.desc())
+        .order_by(Record.date.desc(), Record.insert_datetime_utc.desc())
 
     nb_results = int(request.args.get('nb_results', 20))
     query = query.limit(nb_results)
 
-    movies = query.all()
-    show_button = nb_recent > len(movies)
-    scroll = int(float(request.args.get('ref_scroll', 0)))
-    return render_template('recent.html', movies=movies, show_button=show_button, scroll=scroll)
+    payload = [(record.export(), title.export()) for record, title in query.all()]
+    metadata = {
+        'scroll': int(float(request.args.get('ref_scroll', 0))),
+        'show_more_button': nb_recent > len(payload),
+    }
+    return render_template('recent.html', payload=payload, metadata=metadata)
 
 
 def get_number_suffix(number):
@@ -129,12 +131,9 @@ def statistics():
 
     activity = {}
     activity_metrics = ['viewing activity', 'time spent']
-    agg = db.session.query(
-            func.coalesce(func.count(Record.movie), 0),
-            func.coalesce(func.sum(Title.duration), 0),
-        ) \
-        .select_from(Record).join(Record.title) \
-        .filter(Record.username == current_user.username)
+    agg = db.session.query(func.coalesce(func.count(Title.title), 0), func.coalesce(func.sum(Title.runtime), 0),) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id)
     # This month
     this_month = agg \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
@@ -147,7 +146,7 @@ def statistics():
         .first()
     activity.update({'year': {'values': dict(zip(activity_metrics, this_year)), 'desc': 'this year'}})
     # Overall
-    start_date = db.session.query(func.min(Record.date)).filter(Record.username == current_user.username).scalar()
+    start_date = db.session.query(func.min(Record.date)).filter(Record.user_id == current_user.id).scalar()
     overall_desc = f'since {start_date.strftime("%B, %Y")}' if start_date else 'overall'  # crashes if there's no "if"
     activity.update({'overall': {'values': dict(zip(activity_metrics, agg.first())), 'desc': overall_desc}})
 
@@ -157,18 +156,18 @@ def statistics():
         total_applicable = this_year[0]
     else:
         total_applicable = Record.query \
-            .filter_by(username=current_user.username) \
+            .filter_by(user_id=current_user.id) \
             .filter(db.extract('year', Record.date) == year_applicable) \
             .count()
     # Query best and worst movies from applicable year
     query = db.session \
-        .query(Record.username, Record.date, Record.tmdb_id, Record.grade,
-               Title.title, Title.year, Title.genres) \
-        .select_from(Record).join(Record.title) \
-        .filter(Record.username == current_user.username) \
+        .query(Record.date, Record.tmdb_id, Record.grade,
+               Title.title, db.cast(db.extract('year', Title.release_date), db.Integer).label('year'), Title.genres) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
         .filter(db.extract('year', Record.date) == year_applicable)
-    best = query.order_by(Record.grade.desc(), Record.insert_datetime.desc()).limit(5).all()
-    worst = query.order_by(Record.grade, Record.insert_datetime.desc()).limit(5).all()
+    best = query.order_by(Record.grade.desc(), Record.insert_datetime_utc.desc()).limit(5).all()
+    worst = query.order_by(Record.grade, Record.insert_datetime_utc.desc()).limit(5).all()
     # Format the results (add rank and suffix) and reorder them if needed
     best = [add_rank_and_suffix(best[i], i+1) for i in range(len(best))]
     worst = [add_rank_and_suffix(worst[i], total_applicable - i) for i in range(len(worst))]
@@ -189,28 +188,41 @@ def statistics():
     }
     for top in top_models:
         values = Top.query \
-            .filter_by(username=current_user.username) \
+            .filter_by(user_id=current_user.id) \
             .filter_by(role=top_models[top]['role']) \
-            .order_by(Top.grade.desc(), Top.count.desc(), Top.rating.desc()) \
+            .order_by(Top.grade.desc(), Top.count.desc()) \
             .all()[:top_models[top]['nb_elements']]
         tops.update({top: values})
 
-    scroll = int(float(request.args.get('ref_scroll', 0)))
-    return render_template('statistics.html', activity=activity, activity_metrics=activity_metrics, tops=tops,
-                           movies=movies, year=year_applicable, scroll=scroll)
+    payload = {
+        'activity': activity,
+        'activity_metrics': activity_metrics,
+        'tops': tops,
+        'movies': movies,
+        'year_applicable': year_applicable
+    }
+    metadata = {'scroll': int(float(request.args.get('ref_scroll', 0)))}
+    return render_template('statistics.html', payload=payload, metadata=metadata)
 
 
 def enrich_results(results):
-    results = deepcopy(results)
-    # Add the grade to each result when seen already
-    records = Record.query.with_entities(Record.movie, Record.grade, Record.date) \
-        .filter(Record.username == current_user.username)  \
-        .filter(Record.movie.in_([result['movie'] for result in results])).all()
-    records = dict({_movie: {'grade': _grade, 'date': _date} for _movie, _grade, _date in records})
-    for result in results:
-        if records.get(result['movie']):
-            result.update(records[result['movie']])
-    return results
+    # Query (tmdb_id, grade, date) of results which were already graded by user
+    records = Record.query.with_entities(Record.tmdb_id, Record.grade, Record.date) \
+        .filter(Record.user_id == current_user.id)  \
+        .filter(Record.tmdb_id.in_([result['id'] for result in results])).all()
+    records = dict({_id: {'grade': _grade, 'date': _date} for _id, _grade, _date in records})
+    # Query ids of movies in user's watchlist
+    watchlist_ids = get_watchlist_ids()
+    # Create output dict
+    output = []
+    for res in results:
+        output.append({
+            **TitleConverter.json_to_front(res),
+            'grade': records.get(res['id'], {}).get('grade'),
+            'date': records.get(res['id'], {}).get('date'),
+            'in_watchlist': res['id'] in watchlist_ids,
+        })
+    return output
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -219,59 +231,45 @@ def enrich_results(results):
 def search():
 
     if not request.args.get('query'):
-        return render_template('search.html')
+        return render_template('search.html', metadata={})
+
+    if request.method == 'POST':
+        if 'add_to_watchlist' in request.form:
+            tmdb_id = int(get_post_result('add_to_watchlist'))
+            add_to_watchlist(tmdb_id)
+            flash('Movie added to watchlist')
 
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 3))
     result_ids = tmdb.search(query)
-    show_more_button = nb_results < len(result_ids)
-    results = enrich_results(tmdb.movies(result_ids[:nb_results]))
-    scroll = int(float(request.args.get('ref_scroll', 0)))
-
-    if request.method == 'POST':
-        if 'add_to_watchlist' in request.form:
-            add_to_watchlist()
-            flash('Movie added to watchlist')
-
-    return render_template('search.html', query=query, results=results, scroll=scroll,
-                           show_more_button=show_more_button, watchlist=get_watchlist_ids())
+    payload = enrich_results(tmdb.get_bulk(result_ids[:nb_results]))
+    metadata = {
+        'query': query,
+        'scroll': int(float(request.args.get('ref_scroll', 0))),
+        'show_more_button': nb_results < len(result_ids)
+    }
+    return render_template('search.html', payload=payload, metadata=metadata)
 
 
 def get_watchlist_ids():
-    # Query watchlist on DB
-    watchlist = WatchlistItem.query.with_entities(WatchlistItem.movie) \
-        .filter(WatchlistItem.username == current_user.username) \
+    ids = WatchlistItem.query \
+        .with_entities(WatchlistItem.tmdb_id) \
+        .filter(WatchlistItem.user_id == current_user.id) \
         .all()
-    return [item for item, in watchlist]
+    return [_id for _id, in ids]
 
 
-def get_watchlist():
-    # Query watchlist on DB
-    watchlist_items = WatchlistItem.query \
-        .filter_by(username=current_user.username) \
-        .order_by(WatchlistItem.insert_datetime.desc()) \
-        .all()
-    # Format results
-    watchlist = {}
-    for item in watchlist_items:
-        item.__dict__.pop('_sa_instance_state')
-        watchlist.update({item.movie: item.__dict__})
-    # Return
-    return watchlist
-
-
-def add_to_watchlist():
-    tmdb_movie_id = int(get_post_result('add_to_watchlist'))
-    tmdb_movie = tmdb.movie(tmdb_movie_id)
-    providers = Providers().get_names(tmdb_movie['title'], tmdb_movie_id)
-    item = WatchlistItem(insert_datetime=datetime.now(), username=current_user.username, providers=providers, **tmdb_movie)
+def add_to_watchlist(tmdb_id):
+    title = tmdb.get(tmdb_id)
+    upsert_title_metadata(title)
+    providers = Providers().get_names(title['original_title'], tmdb_id)
+    item = WatchlistItem(user_id=current_user.id, tmdb_id=tmdb_id, providers=providers)
     db.session.add(item)
     db.session.commit()
 
 
-def remove_from_watchlist(movie_id):
-    # Remove from watchlist on database
-    to_delete = WatchlistItem.query.filter_by(movie=movie_id, username=current_user.username).all()
+def remove_from_watchlist(tmdb_id):
+    to_delete = WatchlistItem.query.filter_by(tmdb_id=tmdb_id, user_id=current_user.id).all()
     for record in to_delete:
         db.session.delete(record)
     db.session.commit()
@@ -283,23 +281,32 @@ def watchlist():
 
     if request.method == 'POST':
         if 'remove_from_watchlist' in request.form:
-            movie_id = get_post_result('remove_from_watchlist')
-            remove_from_watchlist(movie_id)
+            tmdb_id = get_post_result('remove_from_watchlist')
+            remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist')
 
-    watchlist_dict = get_watchlist()
-    scroll = int(float(request.args.get('ref_scroll', 0)))
-    providers = request.args.get('providers').split(',') if request.args.get('providers') else []
-    return render_template('watchlist.html', watchlist=watchlist_dict, scroll=scroll, providers=providers)
+    query = db.session \
+        .query(WatchlistItem, Title) \
+        .select_from(WatchlistItem).join(Title) \
+        .filter(WatchlistItem.user_id == current_user.id) \
+        .order_by(WatchlistItem.insert_datetime_utc.desc())
+
+    payload = [(watchlist_item.export(), title.export()) for watchlist_item, title in query.all()]
+    metadata = {
+        'scroll': int(float(request.args.get('ref_scroll', 0))),
+        'filters': request.args.get('providers').split(',') if request.args.get('providers') else []
+    }
+    return render_template('watchlist.html', payload=payload, metadata=metadata)
 
 
-@app.route('/movie/<movie_id>', methods=['GET', 'POST'])
+@app.route('/movie/<tmdb_id>', methods=['GET', 'POST'])
 @login_required
-def movie(movie_id):
+def movie(tmdb_id):
 
     # Get movie item
-    movie_id = int(movie_id)
-    movie = enrich_results([tmdb.movie(movie_id)])[0]
+    tmdb_id = int(tmdb_id)
+    _title = tmdb.get(tmdb_id)
+    title = enrich_results([_title])[0]
 
     # Get referrer if provided via GET params
     args = request.args.to_dict()
@@ -307,53 +314,64 @@ def movie(movie_id):
     scroll = int(float(args.pop('ref_scroll', 0)))
 
     if request.method == 'GET' and args.pop('show_slider', False):
-        grade_as_int = User.query.filter_by(username=current_user.username).first().grade_as_int
-        return render_template('movie.html', item=movie, mode='show_slider', referrer=referrer, scroll=scroll,
-                               grade_as_int=grade_as_int, args=args)
+        metadata = {
+            'mode': 'show_slider',
+            'referrer': referrer,
+            'scroll': scroll,
+            'grade_as_int': current_user.grade_as_int,
+            'args': args
+        }
+        return render_template('movie.html', payload=title, metadata=metadata)
 
     if request.method == 'POST':
 
         if 'add_to_watchlist' in request.form:
-            add_to_watchlist()
+            add_to_watchlist(tmdb_id)
             flash('Movie added to watchlist')
 
-        if 'remove' in request.form:
+        elif 'remove' in request.form:
             # Delete the movie from the database
-            to_delete = Record.query.filter_by(username=current_user.username, movie=movie['movie']).all()
+            to_delete = Record.query.filter_by(user_id=current_user.id, tmdb_id=tmdb_id).all()
             for record in to_delete:
                 db.session.delete(record)
             db.session.commit()
             flash('Movie successfully removed')
-            # Update movie element
-            movie.pop('grade')
-            movie.pop('date')
+            # Update title element
+            title.pop('grade')
+            title.pop('date')
 
         elif 'gradeRange' in request.form:
             # Get submitted grade
             grade = float(get_post_result('gradeRange'))
             # If there is already a grade, then it's an update. Otherwise it's an addition
-            if movie.get('grade'):
+            if title.get('grade') is not None:
                 action = 'updated'
-                # Update the movie in the database
+                # Update the movie in the records table
                 Record.query \
-                    .filter_by(username=current_user.username, movie=movie['movie']) \
-                    .update({'grade': grade})
+                    .filter_by(user_id=current_user.id, tmdb_id=tmdb_id) \
+                    .update({'grade': grade, 'update_datetime_utc': datetime.utcnow()})
             else:
                 action = 'added'
-                # Add the movie to the records database
-                record = Record(current_user.username, movie['movie'], movie['tmdb_id'], grade)
+                # Add the movie to the titles table
+                upsert_title_metadata(_title)
+                # Add the movie to the records table
+                record = Record(current_user.id, tmdb_id, grade)
                 db.session.add(record)
                 # Remove from watchlist (if in it)
-                remove_from_watchlist(movie['movie'])
+                remove_from_watchlist(tmdb_id)
+                # Update the title element
+                title['date'] = datetime.utcnow().date()
             # Commit add/update changes
             db.session.commit()
             flash(f'Movie successfully {action}')
-            # Update movie element
-            movie['grade'] = grade
-            movie['date'] = Record.query.with_entities(Record.date) \
-                .filter_by(username=current_user.username, movie=movie['movie']) \
-                .first()[0]
+            # Update title element
+            title['grade'] = grade
 
-    mode = 'show_add_buttons' if movie.get('grade') is None else 'show_edit_buttons'
-    return render_template('movie.html', item=movie, mode=mode, referrer=referrer, scroll=scroll,
-                           watchlist=get_watchlist_ids(), args=args)
+    title['in_watchlist'] = tmdb_id in get_watchlist_ids()
+    metadata = {
+        'mode': 'show_edit_buttons' if title.get('grade') is not None else 'show_add_buttons',
+        'referrer': referrer,
+        'scroll': scroll,
+        'args': args
+    }
+    return render_template('movie.html', payload=title, metadata=metadata)

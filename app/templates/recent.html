@@ -11,7 +11,7 @@
 
 <body ontouchstart="">
 
-{% with title = 'Recent' %}
+{% with page_title = 'Recent' %}
     {% include 'base/menu.html' %}
 {% endwith %}
 {% include 'base/alert.html' %}
@@ -20,36 +20,35 @@
 
 <center><table>
 
-{% for i in range(movies|length) %}
-{% set item = movies[i] %}
+{% for record, title in payload %}
 <tr>
-    {% if i == 0 %}
+    {% if loop.index0 == 0 %}
         <td class="timeline top"></td>
     {% else %}
         <td class="timeline middle"></td>
     {% endif %}
     <td>
-        <span class="time-ago">{{ format_date(item.date) }}</span>
+        <span class="time-ago">{{ format_date(record.date) }}</span>
         <br/>
-        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', movie_id=item['tmdb_id'], nb_results=movies|length) }}', 'recent')">{{ item.title }} ({{ item.year }})</a></b>
+        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.id, nb_results=payload|length) }}', 'recent')">{{ title.title }} ({{ title.year }})</a></b>
         <br/>
-        {{ ', '.join(item.genres.split(',')) }}
+        {{ ', '.join(title.genres) }}
         <br/>
-        {{ [item.grade|int, item.grade]|max }}/10
+        {{ [record.grade|int, record.grade]|max }}/10
     </td>
 </tr>
 {% endfor %}
 
 </table></center>
 
-{% if show_button %}
-<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_referrer_and_load('{{ url_for('recent', nb_results=movies|length+20) }}', 'recent')" value="More">
+{% if metadata.show_more_button %}
+<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_referrer_and_load('{{ url_for('recent', nb_results=payload|length+20) }}', 'recent')" value="More">
 {% endif %}
 
 </div>
 
-{% if scroll %}
-<script type = "text/javascript"> window.scrollTo(0, {{ scroll }}); </script>
+{% if metadata.scroll %}
+<script type = "text/javascript"> window.scrollTo(0, {{ metadata.scroll }}); </script>
 {% endif %}
 
 </body>

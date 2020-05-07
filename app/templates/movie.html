@@ -12,64 +12,66 @@
 
 <body ontouchstart="">
 
-{% with title = 'Movie' %}
+{% with page_title = 'Movie' %}
     {% include 'base/menu.html' %}
 {% endwith %}
 {% include 'base/alert.html' %}
+
+{% set title = payload %}
 
 <div class="movies nobar">
 
 <table>
 
     <tr><td>
-        <img src="{{ item.get('image') }}">
+        <img src="{{ title.poster_url }}">
     </td></tr>
     <tr><td>
-        <b>{{ item.get('title') }}{% if item.get('year') %} ({{ item['year'] }}){% endif %}</b>
-        {% if item.get('genres') %}
-            <br/>{{ ', '.join(item['genres']) }}
+        <b>{{ title.title }}{% if title.year %} ({{ title.year }}){% endif %}</b>
+        {% if title.genres %}
+            <br/>{{ ', '.join(title.genres) }}
         {% endif %}
-        {% if item.get('directors') %}
-            <br/>By {{ ' and '.join(item['directors']) }}
+        {% if title.directors %}
+            <br/>By {{ ' and '.join(title.directors) }}
         {% endif %}
-        {% if item.get('cast') %}
-            <br/>With {{ ', '.join(item['cast']) }}
+        {% if title.cast %}
+            <br/>With {{ ', '.join(title.cast) }}
         {% endif %}
-        {% if item.get('duration') %}
-            <br/>{{ item['duration'] }}
+        {% if title.duration %}
+            <br/>{{ title.duration }}
         {% endif %}
     </td></tr>
 
-    {% if mode == 'show_slider' %}
+    {% if metadata.mode == 'show_slider' %}
     <tr><td>
-    <form action="{{ url_for('movie', movie_id=item['tmdb_id'], ref=referrer, ref_scroll=scroll, **args) }}" method="post">
+    <form action="{{ url_for('movie', tmdb_id=title.id, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args) }}" method="post">
 
         <div class="slidecontainer">
             <div class="mentions"><b><span id="gradeValue"></span>/10</b></div>
-            <input id="gradeRange" name="gradeRange" type="range" min="{{ 1 if grade_as_int else 0 }}" max="10" value="{{ item.get('grade', 6 if grade_as_int else 6.5)|string }}" step="{{ 1 if grade_as_int else 0.5 }}" class="slider">
+            <input id="gradeRange" name="gradeRange" type="range" min="{{ 1 if metadata.grade_as_int else 0 }}" max="10" value="{{ title.get('grade', 6 if metadata.grade_as_int else 6.5)|string }}" step="{{ 1 if metadata.grade_as_int else 0.5 }}" class="slider">
         </div>
-        <input class="styled-button full" type="submit" value="{{ 'Update' if item.get('grade') else 'Add' }}">
+        <input class="styled-button full" type="submit" value="{{ 'Update' if title.grade else 'Add' }}">
 
     </form>
     </td></tr>
     {% endif %}
 
-    {% if mode == 'show_edit_buttons' %}
+    {% if metadata.mode == 'show_edit_buttons' %}
     <tr><td>
-        {% if item.get('grade') %}
+        {% if title.grade %}
         <div class="mentions">
             <img src="/static/images/icon_check.png">
-            <b>{{ [item['grade']|int, item['grade']]|max }}/10</b>, added {{ format_date(item['date'])|lower }}
+            <b>{{ [title.grade|int, title.grade]|max }}/10</b>, added {{ format_date(title.date)|lower }}
         </div>
         {% endif %}
     </td></tr>
     <tr><td>
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True, ref=referrer, ref_scroll=scroll, **args) }}';" value="Edit">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args) }}';" value="Edit">
         </td>
         <td class="right">
-            <form action="{{ url_for('movie', movie_id=item['tmdb_id'], ref=referrer, ref_scroll=scroll, **args) }}" method="post">
+            <form action="{{ url_for('movie', tmdb_id=title.id, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args) }}" method="post">
                 <input class="styled-button empty" type="submit" name="remove" value="Remove" onclick="javascript:if (window.confirm('Remove from journal?')) {return true;} else {return false;}">
             </form>
         </td></tr>
@@ -77,22 +79,22 @@
     </td></tr>
     {% endif %}
 
-    {% if mode == 'show_add_buttons' %}
+    {% if metadata.mode == 'show_add_buttons' %}
     <tr><td>
-        {% if not item['movie'] in watchlist %}
+        {% if not title.movie in watchlist %}
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True, ref=referrer, ref_scroll=scroll, **args) }}';" value="Add">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args) }}';" value="Add">
         </td>
         <td class="right">
-            <form action="{{ url_for('movie', movie_id=item['tmdb_id']) }}" method="post">
-                <input type="hidden" name="add_to_watchlist" value="{{ item['tmdb_id'] }}">
+            <form action="{{ url_for('movie', tmdb_id=title.id) }}" method="post">
+                <input type="hidden" name="add_to_watchlist" value="{{ title.id }}">
                 <input class="styled-button empty" type="submit" value="Watchlist">
             </form>
         </td>
         </tr></table>
         {% else %}
-        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', movie_id=item['tmdb_id'], show_slider=True, ref=referrer, ref_scroll=scroll, **args)}} ';" value="Add">
+        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args)}} ';" value="Add">
         {% endif %}
     </td></tr>
     {% endif %}
@@ -101,8 +103,8 @@
 
 </div>
 
-{% if mode == 'show_slider' %}
-    <script type="text/javascript">var gradePrecision = {{ 0 if grade_as_int else 1 }}</script>
+{% if metadata.mode == 'show_slider' %}
+    <script type="text/javascript">var gradePrecision = {{ 0 if metadata.grade_as_int else 1 }}</script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/grade.js') }}"></script>
 {% endif %}
 
