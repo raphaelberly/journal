@@ -29,7 +29,6 @@ CREATE TABLE imdb.principals (
   title_id  VARCHAR(32) NOT NULL,
   person_id VARCHAR(32) NOT NULL,
   role      TEXT        NOT NULL,
-  UNIQUE (person_id, title_id, role)
 );
 
 CREATE TABLE imdb.ratings (
