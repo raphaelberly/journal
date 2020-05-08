@@ -1,7 +1,6 @@
 import csv
 import gzip
 import logging
-# import multiprocessing
 import os
 from csv import DictReader
 from functools import partial
@@ -12,7 +11,6 @@ import requests
 from toolz import partition_all
 from tqdm import tqdm
 
-from lib.langdetect import detect
 from lib.tools import read_config, get_db_connection_string
 
 logging.basicConfig(level='INFO')
@@ -25,7 +23,7 @@ class ETL:
         self.config = read_config(os.path.join(config_folder, 'etl.yaml'))
         self._credentials = read_config(os.path.join(config_folder, 'credentials.yaml'))
         self.target_type = target_type
-        self.table_name = f'{self._credentials["db"]["schema"]}.{target_type}'
+        self.table_name = f'imdb.{target_type}'
         self.etl_config = self.config['definitions'][target_type]
 
     def extract(self):
@@ -54,9 +52,6 @@ class ETL:
         if self.etl_config.get('filter'):
             for col_name, col_values in self.etl_config['filter'].items():
                 rows = filter(lambda row: row[col_name] in col_values, rows)
-        # Rename columns
-        # pool = multiprocessing.Pool(processes=4)
-        # rows = pool.imap_unordered(self._rename_columns, rows, chunksize=100)
         rows = map(self._rename_columns, rows)
         # Upload to db
         with psycopg2.connect(get_db_connection_string(**self._credentials['db'])) as conn:
@@ -66,11 +61,7 @@ class ETL:
         new_dict = {}
         for colname, new_colname in self.etl_config['columns'].items():
             if row[colname] != "\\N":
-                if new_colname != 'title':
-                    new_dict[new_colname] = row[colname]
-                else:
-                    new_dict[new_colname] = row['originalTitle'] if detect(row['originalTitle']) == 'fr' \
-                        else row['primaryTitle']
+                new_dict[new_colname] = row[colname]
         return new_dict
 
     def _truncate_table(self, conn):

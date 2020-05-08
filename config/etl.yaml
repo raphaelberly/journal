@@ -1,4 +1,3 @@
-
 parameters:
   file_path: tmp/{0}.tsv.gz
 
@@ -15,9 +14,10 @@ definitions:
         - tvSpecial
         - video
     columns:
-      tconst: movie
+      tconst: id
       titleType: type
       primaryTitle: title
+      originalTitle: original_title
       startYear: year
       runtimeMinutes: duration
       genres: genres
@@ -25,21 +25,21 @@ definitions:
   ratings:
     url: https://datasets.imdbws.com/title.ratings.tsv.gz
     columns:
-      tconst: movie
+      tconst: title_id
       averageRating: rating
       numVotes: votes
 
-  names:
+  persons:
     url: https://datasets.imdbws.com/name.basics.tsv.gz
     columns:
-      nconst: person
+      nconst: id
       primaryName: name
       knownForTitles: major_titles
 
   crew:
     url: https://datasets.imdbws.com/title.crew.tsv.gz
     columns:
-      tconst: movie
+      tconst: title_id
       directors: directors
       writers: writers
 
@@ -47,13 +47,11 @@ definitions:
     url: https://datasets.imdbws.com/title.principals.tsv.gz
     filter:
       category:
-        - writer
         - actress
         - actor
         - director
-        - producer
         - composer
     columns:
-      tconst: movie
-      nconst: person
+      tconst: title_id
+      nconst: person_id
       category: role
