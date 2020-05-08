@@ -1,11 +1,12 @@
 import argparse
 import logging
+from datetime import datetime
 from time import sleep
 
 from tqdm import tqdm
 
 from app import db
-from app.models import WatchlistItem
+from app.models import WatchlistItem, Title
 from lib.providers import Providers
 
 
@@ -20,10 +21,15 @@ args = parser.parse_args()
 i = 0
 providers = Providers(config_path=args.config)
 LOGGER.info('Update all watchlist items with outdated providers list')
-for item in tqdm(WatchlistItem.query.all()):
-    updated_providers = providers.get_names(item.title, item.tmdb_id)
+
+query = db.session.query(WatchlistItem, Title.title, Title.id) \
+    .select_from(WatchlistItem).join(Title)
+
+for item, title, tmdb_id in tqdm(query.all()):
+    updated_providers = providers.get_names(title, tmdb_id)
     if updated_providers != item.providers:
         item.providers = updated_providers
+        item.update_datetime_utc = datetime.utcnow()
         i += 1
     sleep(1)
 
