@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-import sys
-
 import os
 import shutil
-import yaml
+import sys
 from datetime import date, timedelta
-from sqlalchemy import create_engine
+
+import yaml
 
 
 def get_db_uri(type, host, port, db, user, password, **kwargs):
@@ -64,15 +63,6 @@ def chunk_file(file_path, chunk_size=10**6, header=True):
         i += 1
 
     return folder
-
-
-def df_to_table(df, schema, table, if_exists='append', config_folder='config'):
-
-    credentials = read_config(os.path.join(config_folder, 'credentials.yaml'))
-    engine = create_engine(get_db_uri(**credentials['db']))
-    params = {'name': table, 'schema': schema, 'index': False}
-
-    df.to_sql(con=engine, if_exists=if_exists, **params)
 
 
 def get_time_spent_string(minutes):
