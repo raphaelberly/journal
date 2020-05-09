@@ -12,6 +12,7 @@ target = parser.add_mutually_exclusive_group(required=True)
 target.add_argument('--all', '-a', action='store_true', default=False)
 target.add_argument('--types', '-t', nargs='*')
 parser.add_argument('--config', '-c', default='config')
+parser.add_argument('--use-cache', action='store_true', default=False)
 
 # Parse args
 args = parser.parse_args()
@@ -24,6 +25,6 @@ target_types = type_list if args.all else args.types
 for target_type in target_types:
     assert target_type in type_list, f'Provided types must be in {type_list}'
     etl = ETL(target_type)
-    etl.run()
+    etl.run(use_cache=args.use_cache)
 
 LOGGER.info('Done.')

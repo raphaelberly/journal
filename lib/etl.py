@@ -26,12 +26,15 @@ class ETL:
         self.table_name = f'imdb.{target_type}'
         self.etl_config = self.config['definitions'][target_type]
 
-    def extract(self):
-        LOGGER.info(f'Downloading {self.target_type}...')
-        # Download file
-        url = self.etl_config['url']
+    def extract(self, use_cache=False):
         file_path = self.config['parameters']['file_path'].format(self.target_type)
-        return self._download_file(url, file_path)
+        if use_cache and os.path.exists(file_path):
+            LOGGER.info(f'Using cached file: {file_path}...')
+        else:
+            LOGGER.info(f'Downloading {self.target_type}...')
+            url = self.etl_config['url']
+            self._download_file(url, file_path)
+        return file_path
 
     @staticmethod
     def _download_file(url, file_path, block_size=10**6):
@@ -40,11 +43,10 @@ class ETL:
         with open(file_path, 'wb') as f:
             for chunk in tqdm(r.iter_content(block_size), total=np.ceil(total_size/block_size), unit='MB'):
                 f.write(chunk)
-        return file_path
 
-    def run(self):
+    def run(self, use_cache=False):
         # Extract data
-        filepath = self.extract()
+        filepath = self.extract(use_cache=use_cache)
         # Process extracted data
         stream = gzip.open(filepath, 'rt')
         rows = DictReader(stream, delimiter='\t', quoting=csv.QUOTE_NONE)
