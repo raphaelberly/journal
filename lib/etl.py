@@ -28,13 +28,15 @@ class ETL:
 
     def extract(self, use_cache=False):
         file_path = self.config['parameters']['file_path'].format(self.target_type)
-        if use_cache and os.path.exists(file_path):
-            LOGGER.info(f'Using cached file: {file_path}...')
+        cache_path = file_path + '.cache'
+        if use_cache and os.path.exists(cache_path):
+            LOGGER.info(f'Using cached file: {cache_path}...')
+            return cache_path
         else:
             LOGGER.info(f'Downloading {self.target_type}...')
             url = self.etl_config['url']
             self._download_file(url, file_path)
-        return file_path
+            return file_path
 
     @staticmethod
     def _download_file(url, file_path, block_size=10**6):
@@ -58,6 +60,9 @@ class ETL:
         # Upload to db
         with psycopg2.connect(get_db_connection_string(**self._credentials['db'])) as conn:
             self.to_db(conn, rows, 1000)
+        # If a new file was downloaded and nothing went wrong, cache it
+        if not filepath.endswith('.cache'):
+            os.rename(filepath, filepath + '.cache')
 
     def _rename_columns(self, row):
         new_dict = {}
