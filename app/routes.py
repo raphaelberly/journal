@@ -1,3 +1,5 @@
+import os
+import re
 from datetime import date, datetime, timedelta
 
 from flask import render_template, request, url_for, flash
@@ -13,6 +15,8 @@ from app.models import Record, Title, Top, WatchlistItem, User
 from lib.providers import Providers
 from lib.tmdb import Tmdb, TitleConverter
 from lib.tools import get_time_ago_string, get_time_spent_string
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 tmdb = Tmdb()
 
@@ -375,3 +379,28 @@ def movie(tmdb_id):
         'args': args
     }
     return render_template('movie.html', payload=title, metadata=metadata)
+
+
+@app.route('/people', methods=['GET', 'POST'])
+@login_required
+def people():
+
+    if not request.args.get('query'):
+        return render_template('people.html', metadata={})
+
+    # Clean people query
+    query = request.args['query']
+    clean_query = "&".join([word for word in re.sub(r"[\W]", " ", query).split(" ") if len(word) > 0])
+    # Generate SQL request
+    with open(os.path.join(CURRENT_DIR, 'queries/people_search.sql')) as f:
+        sql = f.read().format(query=clean_query, user_id=current_user.id)
+    # Execute SQL request
+    with db.engine.connect() as conn:
+        response = conn.execute(sql)
+    # Parse query response
+    payload = [{k: v for k, v in zip(response._metadata.keys, row)} for row in response]
+    metadata = {
+        'query': query,
+        'scroll': int(float(request.args.get('ref_scroll', 0))),
+    }
+    return render_template('people.html', payload=payload, metadata=metadata)

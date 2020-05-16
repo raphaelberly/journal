@@ -1,0 +1,7 @@
+.recent {
+    width: 100%;
+    padding-top: 165px;
+    padding-top: calc(165px + constant(safe-area-inset-top));
+    padding-top: calc(165px + env(safe-area-inset-top));
+    padding-bottom: 30px;
+}

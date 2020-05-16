@@ -1,0 +1,26 @@
+
+.notfound {
+    width: 100%;
+    padding-top: 155px;
+    padding-top: calc(155px + constant(safe-area-inset-top));
+    padding-top: calc(155px + env(safe-area-inset-top));
+    padding-bottom: 30px;
+}
+
+.notfound table {
+    width: 100%;
+    text-align: center;
+}
+
+.notfound td {
+    width: 100%;
+    text-align: center;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.notfound img {
+    width: 30px;
+    padding-top: 8px;
+    padding-bottom: 14px;
+}

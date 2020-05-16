@@ -1,0 +1,76 @@
+<html>
+
+<head>
+    {% include 'base/head.html' %}
+    <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recent.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notfound.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/people.css')}}">
+</head>
+
+<body ontouchstart="">
+
+{% with page_title = 'People' %}
+    {% include 'base/menu.html' %}
+{% endwith %}
+{% include 'base/alert.html' %}
+
+<div class="form-search">
+
+<form method="get" action="{{ url_for('people') }}">
+    <input name="query" placeholder="Type a name here..." type="text" value="{{ metadata.query or '' }}">
+    <button type="submit">Go</button>
+</form>
+
+</div>
+
+{% if payload == [] %}
+<div class="notfound">
+<table>
+    <tr><td>
+        <img src="static/images/fail.png">
+    </td></tr>
+    <tr><td>
+        Sorry, we could not find an actor named "{{metadata.query}}" you have seen movies from.
+    </td></tr>
+</table>
+</div>
+{% endif %}
+
+
+<div class="recent">
+<center><table>
+
+{% for title in payload %}
+<tr>
+    {% if loop.index0 == 0 %}
+        <td class="timeline top"></td>
+    {% else %}
+        <td class="timeline middle"></td>
+    {% endif %}
+    <td>
+        <span class="time-ago">{{ format_date(title.date) }}</span>
+        <br/>
+        {{ ', '.join(title.roles)|title }}
+        <br/>
+        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.tmdb_id, query=metadata.query) }}', 'people')">{{ title.title }} ({{ title.year }})</a></b>
+        <br/>
+        {{ ', '.join(title.genres) }}
+        <br/>
+        {{ [title.grade|int, title.grade]|max }}/10
+    </td>
+</tr>
+{% endfor %}
+
+</table></center>
+</div>
+
+{% if metadata.scroll %}
+<script type = "text/javascript"> window.scrollTo(0, {{ metadata.scroll }}); </script>
+{% endif %}
+
+</body>
+</html>

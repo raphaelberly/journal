@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notfound.css')}}">
 </head>
 
 <body ontouchstart="">
@@ -26,20 +27,20 @@
 
 </div>
 
-
-<div class="movies bar">
-
 {% if payload == [] %}
+<div class="notfound">
 <table>
     <tr><td>
         <img id="img-no-results" src="static/images/fail.png">
     </td></tr>
     <tr><td>
-        Wops, no results were found
+        Wops, no results were found.
     </td></tr>
 </table>
+</div>
 {% endif %}
 
+<div class="movies bar">
 
 {% for item in payload %}
 <table>
