@@ -6,6 +6,8 @@ WITH credits_enriched AS (
   SELECT
     c.*,
     t.title,
+    t.original_title,
+    t.original_language,
     date_part('year', t.release_date)::INT AS year,
     CASE
       WHEN c.role NOT IN ('actress', 'actor') THEN NULL
@@ -26,13 +28,16 @@ persons_and_roles AS (
     c.role,
     c.person_id,
     p.name,
-    array_agg(c.title ORDER BY r.grade DESC, r.date DESC)                       AS titles,
-    array_agg(c.year ORDER BY r.grade DESC, r.date DESC)                        AS titles_year,
-    max(r.date)                                                                 AS last_added,
-    count(*)                                                                    AS count,
-    sum(c.principal::INTEGER)                                                   AS count_principal,
+    array_agg(
+      CASE WHEN t.original_language = u.language THEN t.original_title ELSE t.title END
+      ORDER BY r.grade DESC, r.date DESC
+    )                                                                                   AS titles,
+    array_agg(c.year ORDER BY r.grade DESC, r.date DESC)                                AS titles_year,
+    max(r.date)                                                                         AS last_added,
+    count(*)                                                                            AS count,
+    sum(c.principal::INTEGER)                                                           AS count_principal,
     sum(CASE WHEN coalesce(c.principal, TRUE) THEN 1 ELSE 0.5 END * r.grade)
-      / sum(CASE WHEN coalesce(c.principal, TRUE) THEN 1 ELSE 0.5 END)          AS grade
+      / sum(CASE WHEN coalesce(c.principal, TRUE) THEN 1 ELSE 0.5 END)                  AS grade
   FROM journal.records r
   INNER JOIN credits_enriched c
     ON r.tmdb_id = c.tmdb_id

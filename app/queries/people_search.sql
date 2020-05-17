@@ -25,7 +25,7 @@ SELECT
   s.name,
   c.roles,
   c.tmdb_id,
-  CASE WHEN t.original_language = 'fr' THEN t.original_title ELSE t.title END AS title,
+  CASE WHEN t.original_language = u.language THEN t.original_title ELSE t.title END AS title,
   date_part('year', t.release_date)::INT AS year,
   t.genres[:3] AS genres,
   r.grade,
@@ -37,7 +37,9 @@ INNER JOIN journal.records r
   ON c.tmdb_id = r.tmdb_id
 INNER JOIN journal.titles t
   ON r.tmdb_id = t.id
-WHERE r.user_id = {user_id}
-  AND s.rank = 1
+INNER JOIN journal.users u
+  ON r.user_id = u.id
+  AND u.id = {user_id}
+WHERE s.rank = 1
 ORDER BY r.date DESC, r.grade DESC
 ;

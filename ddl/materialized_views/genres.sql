@@ -11,11 +11,13 @@ movies_with_genre AS (
     r.tmdb_id,
     r.grade,
     r.date,
-    t.title,
+    CASE WHEN t.original_language = u.language THEN t.original_title ELSE t.title END AS title,
     date_part('year', t.release_date)::INT AS year
   FROM journal.records r
   INNER JOIN journal.titles t
     ON r.tmdb_id = t.id
+  INNER JOIN journal.users u
+    ON r.user_id = u.id
 
 ),
 

@@ -111,7 +111,7 @@ def recent():
     nb_results = int(request.args.get('nb_results', 20))
     query = query.limit(nb_results)
 
-    payload = [(record.export(), title.export()) for record, title in query.all()]
+    payload = [(record.export(), title.export(current_user.language)) for record, title in query.all()]
     metadata = {
         'scroll': int(float(request.args.get('ref_scroll', 0))),
         'show_more_button': nb_recent > len(payload),
@@ -226,7 +226,7 @@ def enrich_results(results):
     output = []
     for res in results:
         output.append({
-            **TitleConverter.json_to_front(res),
+            **TitleConverter.json_to_front(res, current_user.language),
             'grade': records.get(res['id'], {}).get('grade'),
             'date': records.get(res['id'], {}).get('date'),
             'in_watchlist': res['id'] in watchlist_ids,
@@ -300,7 +300,7 @@ def watchlist():
         .filter(WatchlistItem.user_id == current_user.id) \
         .order_by(WatchlistItem.insert_datetime_utc.desc())
 
-    payload = [(watchlist_item.export(), title.export()) for watchlist_item, title in query.all()]
+    payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     metadata = {
         'scroll': int(float(request.args.get('ref_scroll', 0))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else []
