@@ -51,7 +51,7 @@
 
             <p><span class="big-number">{{ item['rank'] }}</span>{{ item['suffix'] }}
                 <br/><span class="top-name"><a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item['tmdb_id']) }}', 'statistics')">{{ item['title'] }} ({{ item['year'] }})</a></span>
-            <br/>{{ ', '.join(item['genres']) }}
+            <br/>{{ ', '.join(item['genres'][:3]) }}
             <br/>{{ [item['grade']|int, item['grade']]|max }}/10
 
             {% endfor %}
