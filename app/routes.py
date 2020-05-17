@@ -1,8 +1,8 @@
-import os
 import re
 from datetime import date, datetime, timedelta
+from os import path
 
-from flask import render_template, request, url_for, flash
+from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy import func
 from werkzeug.utils import redirect
@@ -23,6 +23,11 @@ tmdb = Tmdb()
 
 def get_post_result(key):
     return request.form.to_dict()[key]
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(path.join(app.root_path, 'static'), 'images/favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 # Load functions to be used in Jinja into Context processor
@@ -392,7 +397,7 @@ def people():
     query = request.args['query']
     clean_query = "&".join([word for word in re.sub(r"[\W]", " ", query).split(" ") if len(word) > 0])
     # Generate SQL request
-    with open(os.path.join(CURRENT_DIR, 'queries/people_search.sql')) as f:
+    with open(path.join(CURRENT_DIR, 'queries/people_search.sql')) as f:
         sql = f.read().format(query=clean_query, user_id=current_user.id)
     # Execute SQL request
     with db.engine.connect() as conn:
