@@ -1,0 +1,3 @@
+REFRESH MATERIALIZED VIEW journal.top_genres;
+REFRESH MATERIALIZED VIEW journal.top_persons;
+REFRESH MATERIALIZED VIEW journal.tops;

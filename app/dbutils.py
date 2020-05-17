@@ -1,4 +1,5 @@
 from datetime import datetime
+from threading import Thread
 from typing import List, Optional, Iterable
 
 from sqlalchemy import inspect
@@ -8,6 +9,17 @@ from sqlalchemy.ext.declarative import DeclarativeMeta
 from app import db
 from app.models import Title, Person, Credit
 from lib.tmdb import TitleConverter, CrewConverter
+
+
+def _execute_in_thread(conn, query):
+    conn.execute(query)
+    conn.close()
+
+
+def async_execute(query):
+    conn = db.engine.connect()
+    thread = Thread(target=_execute_in_thread, args=(conn, query,))
+    thread.start()
 
 
 def _upsert(table_model: DeclarativeMeta, records: Iterable[dict], exclude: Optional[List[str]] = None):

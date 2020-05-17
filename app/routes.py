@@ -9,14 +9,14 @@ from werkzeug.utils import redirect
 
 from app import app
 from app import db, login
-from app.dbutils import upsert_title_metadata
+from app.dbutils import upsert_title_metadata, async_execute
 from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User
 from lib.providers import Providers
 from lib.tmdb import Tmdb, TitleConverter
 from lib.tools import get_time_ago_string, get_time_spent_string
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+CURRENT_DIR = path.dirname(path.abspath(__file__))
 
 tmdb = Tmdb()
 
@@ -308,6 +308,14 @@ def watchlist():
     return render_template('watchlist.html', payload=payload, metadata=metadata)
 
 
+def refresh_materialized_views():
+    # Generate SQL request
+    with open(path.join(CURRENT_DIR, 'queries/refresh_materialized_views.sql')) as f:
+        sql = f.read()
+    # Asynchronous execution of materialized views refresh
+    async_execute(sql)
+
+
 @app.route('/movie/<tmdb_id>', methods=['GET', 'POST'])
 @login_required
 def movie(tmdb_id):
@@ -348,6 +356,8 @@ def movie(tmdb_id):
             # Update title element
             title.pop('grade')
             title.pop('date')
+            # Start statistics refresh
+            refresh_materialized_views()
 
         elif 'gradeRange' in request.form:
             # Get submitted grade
@@ -375,6 +385,8 @@ def movie(tmdb_id):
             flash(f'Movie successfully {action}')
             # Update title element
             title['grade'] = grade
+            # Start statistics refresh
+            refresh_materialized_views()
 
     title['in_watchlist'] = tmdb_id in get_watchlist_ids()
     metadata = {
