@@ -21,7 +21,7 @@
 <div class="form-search">
 
 <form method="get" action="{{ url_for('people') }}">
-    <input name="query" placeholder="Type a name here..." type="text" value="{{ metadata.query or '' }}">
+    <input name="query" placeholder="Look for an actor, director..." type="text" value="{{ metadata.query or '' }}">
     <button type="submit">Go</button>
 </form>
 
