@@ -25,7 +25,7 @@ SELECT
   s.name,
   c.roles,
   c.tmdb_id,
-  t.title,
+  CASE WHEN t.original_language = 'fr' THEN t.original_title ELSE t.title END AS title,
   date_part('year', t.release_date)::INT AS year,
   t.genres[:3] AS genres,
   r.grade,
