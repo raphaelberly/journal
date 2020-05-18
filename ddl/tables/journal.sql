@@ -24,6 +24,7 @@ CREATE TABLE imdb.persons (
   id                    INTEGER         NOT NULL,
   name                  VARCHAR(128)    NOT NULL,
   gender                SMALLINT        NULL,
+  profile_path          TEXT            NULL,
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   CONSTRAINT "persons_pkey" PRIMARY KEY (id)

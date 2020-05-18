@@ -108,6 +108,7 @@ class CrewConverter:
                 'id': actor['id'],
                 'name': actor['name'],
                 'gender': actor['gender'],
+                'profile_path': actor['profile_path'],
             }, {
                 'id': actor['credit_id'],
                 'tmdb_id': item['id'],
@@ -118,10 +119,11 @@ class CrewConverter:
         for crew_member in item['credits'].get('crew', []):
             if crew_member['job'] in cls.CREW_ROLES.keys():
                 yield ({
-                     'id': crew_member['id'],
-                     'name': crew_member['name'],
-                     'gender': crew_member['gender']
-                 }, {
+                    'id': crew_member['id'],
+                    'name': crew_member['name'],
+                    'gender': crew_member['gender'],
+                    'profile_path': crew_member['profile_path'],
+                }, {
                      'id': crew_member['credit_id'],
                      'tmdb_id': item['id'],
                      'person_id': crew_member['id'],

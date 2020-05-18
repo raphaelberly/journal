@@ -78,6 +78,7 @@ class Person(db.Model):
     id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     name = db.Column(db.String(128))
     gender = db.Column(db.Integer)
+    profile_path = db.Column(db.String(1024))
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
