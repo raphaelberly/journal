@@ -8,6 +8,8 @@
 }
 
 .recent table {
+    width: 100%;
+    max-width: 400px;
     border-spacing: 0;
     padding-right: 30px;
     padding-left: 30px;

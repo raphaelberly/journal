@@ -27,24 +27,44 @@
 
 </div>
 
-{% if payload == [] %}
+{% if payload.titles == [] %}
 <div class="notfound">
 <table>
     <tr><td>
         <img src="static/images/fail.png">
     </td></tr>
     <tr><td>
-        Sorry, we could not find an actor named "{{metadata.query}}" you have seen movies from.
+        Sorry, we could not find <b>"{{ metadata.query|title }}"</b> in any of your movies.
     </td></tr>
 </table>
 </div>
 {% endif %}
 
+{% if payload %}
 
 <div class="recent">
+
+<div class="card">
+<center><table>
+<tr>
+    {% if payload.person.image %}
+    <td class="profile">
+        <img src="{{ payload.person.image }}" class="rounded">
+    </td>
+    {% endif %}
+    <td>
+        <b>{{ payload.person.name }}</b>
+        {% for role, count in payload.person.roles.items() %}
+        <br/> {{ role|capitalize }} ({{ count }} movie{{ 's' if count > 1 else '' }})
+        {% endfor %}
+    </td>
+</tr>
+</table></center>
+</div>
+
 <center><table>
 
-{% for title in payload %}
+{% for title in payload.titles %}
 <tr>
     {% if loop.index0 == 0 %}
         <td class="timeline top"></td>
@@ -70,6 +90,8 @@
 
 {% if metadata.scroll %}
 <script type = "text/javascript"> window.scrollTo(0, {{ metadata.scroll }}); </script>
+{% endif %}
+
 {% endif %}
 
 </body>

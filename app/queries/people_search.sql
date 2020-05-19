@@ -2,7 +2,6 @@ WITH
 search AS (
   SELECT
     p.id AS person_id,
-    p.name,
     round(ts_rank(to_tsvector(p.name), to_tsquery('{query}'))::NUMERIC, 5) AS score
   FROM journal.persons p
 ),
@@ -22,7 +21,7 @@ credits AS (
   GROUP BY 1,2
 )
 SELECT
-  s.name,
+  s.person_id,
   c.roles,
   c.tmdb_id,
   CASE WHEN t.original_language = u.language THEN t.original_title ELSE t.title END AS title,

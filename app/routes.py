@@ -11,7 +11,7 @@ from app import app
 from app import db, login
 from app.dbutils import upsert_title_metadata, async_execute
 from app.forms import RegistrationForm
-from app.models import Record, Title, Top, WatchlistItem, User
+from app.models import Record, Title, Top, WatchlistItem, User, Person
 from lib.providers import Providers
 from lib.tmdb import Tmdb, TitleConverter
 from lib.tools import get_time_ago_string, get_time_spent_string
@@ -403,7 +403,7 @@ def movie(tmdb_id):
 def people():
 
     if not request.args.get('query'):
-        return render_template('people.html', metadata={})
+        return render_template('people.html', payload={}, metadata={})
 
     # Clean people query
     query = request.args['query']
@@ -415,7 +415,17 @@ def people():
     with db.engine.connect() as conn:
         response = conn.execute(sql)
     # Parse query response
-    payload = [{k: v for k, v in zip(response._metadata.keys, row)} for row in response]
+    payload = {'titles': [], 'person': {'roles': {}}}
+    for i, row in enumerate(response):
+        if i == 0:
+            person = Person.query.filter_by(id=row['person_id']).first()
+            payload['person']['name'] = person.name
+            if person.profile_path:
+                payload['person']['image'] = 'https://image.tmdb.org/t/p/w92' + person.profile_path
+        title = {k: v for k, v in zip(response._metadata.keys, row)}
+        for role in title['roles']:
+            payload['person']['roles'][role] = payload['person']['roles'].get(role, 0) + 1
+        payload['titles'].append(title)
     metadata = {
         'query': query,
         'scroll': int(float(request.args.get('ref_scroll', 0))),

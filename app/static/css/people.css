@@ -5,3 +5,20 @@
     padding-top: calc(165px + env(safe-area-inset-top));
     padding-bottom: 30px;
 }
+
+.card td {
+    padding-left: 10px;
+    vertical-align: middle;
+}
+
+td.profile {
+    padding-left: 2px;
+    width: 80px;
+}
+
+img.rounded {
+  object-fit: cover;
+  border-radius: 50%;
+  height: 80px;
+  width: 80px;
+}
