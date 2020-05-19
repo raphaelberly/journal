@@ -1,13 +1,14 @@
 .recent {
     width: 100%;
-    padding-top: 165px;
-    padding-top: calc(165px + constant(safe-area-inset-top));
-    padding-top: calc(165px + env(safe-area-inset-top));
+    padding-top: 160px;
+    padding-top: calc(160px + constant(safe-area-inset-top));
+    padding-top: calc(160px + env(safe-area-inset-top));
     padding-bottom: 30px;
 }
 
 .card td {
     padding-left: 10px;
+    padding-bottom: 18px;
     vertical-align: middle;
 }
 
@@ -18,7 +19,10 @@ td.profile {
 
 img.rounded {
   object-fit: cover;
+  object-position: 0 35%;
   border-radius: 50%;
   height: 80px;
   width: 80px;
+  border: 1px solid #fff;
+  box-shadow: 0 0 0 1pt #6caee0;
 }
