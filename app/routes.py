@@ -1,4 +1,5 @@
 import re
+import sys
 from datetime import date, datetime, timedelta
 from os import path
 
@@ -19,6 +20,13 @@ from lib.tools import get_time_ago_string, get_time_spent_string
 CURRENT_DIR = path.dirname(path.abspath(__file__))
 
 tmdb = Tmdb()
+
+
+@app.errorhandler(Exception)
+def handle_exceptions(e):
+    flash('Wops, something went wrong', category='error')
+    sys.stderr.write(str(e))  # To be replaced by logging
+    return redirect(request.referrer)
 
 
 def get_post_result(key):
