@@ -81,7 +81,7 @@
 
     {% if metadata.mode == 'show_add_buttons' %}
     <tr><td>
-        {% if not title.movie in watchlist %}
+        {% if not title.in_watchlist %}
         <table class="dual"><tr>
         <td class="left">
             <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args) }}';" value="Add">
