@@ -2,12 +2,19 @@
     padding-top: 20px;
     padding-bottom: 20px;
     color: white;
-    background-color: #5f974f;
     cursor: pointer;
 
     width: 100%;
     position: fixed;
     overflow: hidden;
+}
+
+.error {
+    background-color: #BE6C6B;
+}
+
+.success {
+    background-color: #5f974f;
 }
 
 .visible {

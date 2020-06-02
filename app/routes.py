@@ -61,7 +61,7 @@ def login():
             if user is None or not user.check_password(get_post_result('password')):
                 return redirect(url_for('login'))
             login_user(user, remember=True, duration=timedelta(days=90))
-            flash(f'Welcome, {user.username}!')
+            flash(f'Welcome, {user.username}!', category='success')
             return redirect(url_for('search'))
 
     return render_template('login.html')
@@ -79,7 +79,7 @@ def signup():
         db.session.add(user)
         db.session.commit()
         login_user(user, remember=True, duration=timedelta(days=90))
-        flash(f'Welcome, {user.username}!')
+        flash(f'Welcome, {user.username}!', category='success')
         return redirect(url_for('search'))
 
     return render_template('signup.html', form=form)
@@ -88,7 +88,7 @@ def signup():
 @app.route('/logout')
 def logout():
     logout_user()
-    flash('You were successfully logged out')
+    flash('You were successfully logged out', category='success')
     return redirect(url_for('login'))
 
 
@@ -246,7 +246,7 @@ def search():
         if 'add_to_watchlist' in request.form:
             tmdb_id = int(get_post_result('add_to_watchlist'))
             add_to_watchlist(tmdb_id)
-            flash('Movie added to watchlist')
+            flash('Movie added to watchlist', category='success')
 
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 3))
@@ -292,7 +292,7 @@ def watchlist():
         if 'remove_from_watchlist' in request.form:
             tmdb_id = get_post_result('remove_from_watchlist')
             remove_from_watchlist(tmdb_id)
-            flash('Movie removed from watchlist')
+            flash('Movie removed from watchlist', category='success')
 
     query = db.session \
         .query(WatchlistItem, Title) \
@@ -344,7 +344,7 @@ def movie(tmdb_id):
 
         if 'add_to_watchlist' in request.form:
             add_to_watchlist(tmdb_id)
-            flash('Movie added to watchlist')
+            flash('Movie added to watchlist', category='success')
 
         elif 'remove' in request.form:
             # Delete the movie from the database
@@ -352,7 +352,7 @@ def movie(tmdb_id):
             for record in to_delete:
                 db.session.delete(record)
             db.session.commit()
-            flash('Movie successfully removed')
+            flash('Movie successfully removed', category='success')
             # Update title element
             title.pop('grade')
             title.pop('date')
@@ -382,7 +382,7 @@ def movie(tmdb_id):
                 title['date'] = datetime.utcnow().date()
             # Commit add/update changes
             db.session.commit()
-            flash(f'Movie successfully {action}')
+            flash(f'Movie successfully {action}', category='success')
             # Update title element
             title['grade'] = grade
             # Start statistics refresh

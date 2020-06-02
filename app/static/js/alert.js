@@ -1,9 +1,11 @@
 function openAlert() {
-    document.getElementsByClassName('alert hidden')[0].className = 'alert visible';
+    element = document.getElementsByClassName('alert hidden')[0]
+    element.className = element.className.replace('hidden', 'visible');
 }
 
 function closeAlert() {
-    document.getElementsByClassName('alert visible')[0].className = 'alert hidden';
+    element = document.getElementsByClassName('alert visible')[0]
+    element.className = element.className.replace('visible', 'hidden');
 }
 
 setTimeout(openAlert, 0);

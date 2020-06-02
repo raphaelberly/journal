@@ -1,6 +1,6 @@
-{% with messages = get_flashed_messages() %}
+{% with messages = get_flashed_messages(with_categories=True) %}
     {% if messages %}
     <script type=text/javascript src="{{ url_for('static', filename='js/alert.js') }}"></script>
-    <div class="alert hidden" onclick="javascript:closeAlert()"> {{ messages[0] }} </div>
+    <div class="alert hidden {{ messages[0][0] }}" onclick="javascript:closeAlert()">{{ messages[0][1] }}</div>
     {% endif %}
 {% endwith %}
