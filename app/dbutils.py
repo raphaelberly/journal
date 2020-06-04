@@ -12,8 +12,10 @@ from lib.tmdb import TitleConverter, CrewConverter
 
 
 def _execute_in_thread(conn, query):
-    conn.execute(query)
-    conn.close()
+    try:
+        conn.execute(query)
+    finally:
+        conn.close()
 
 
 def async_execute(query):
