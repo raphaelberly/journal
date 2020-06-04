@@ -27,7 +27,7 @@ query = db.session.query(WatchlistItem, Title.title, Title.id) \
 
 for item, title, tmdb_id in tqdm(query.all()):
     updated_providers = providers.get_names(title, tmdb_id)
-    if updated_providers != item.providers:
+    if set(updated_providers) != set(item.providers):
         item.providers = updated_providers
         item.update_datetime_utc = datetime.utcnow()
         i += 1
