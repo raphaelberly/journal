@@ -1,7 +1,9 @@
 import os
 from datetime import date
+from time import sleep
 
 from justwatch import JustWatch
+from requests import HTTPError
 
 from lib.tools import read_config
 
@@ -36,9 +38,18 @@ class Providers(object):
 
     def get_names(self, movie_title, movie_tmdb_id):
         names = set()
-        results = self._client.search_for_item(query=movie_title, providers=list(self.supported_providers.values()),
-                                               content_types=['movie'], page_size=self.PRECISION)['items']
-        for result in results:
+        kwargs = {
+            'query': movie_title,
+            'providers': list(self.supported_providers.values()),
+            'content_types': ['movie'],
+            'page_size': self.PRECISION,
+        }
+        try:
+            response = self._client.search_for_item(**kwargs)
+        except HTTPError:
+            sleep(0.1)
+            response = self._client.search_for_item(**kwargs)
+        for result in response['items']:
             if self._check_tmdb_id(result['scoring'], movie_tmdb_id):
                 for offer in result.get('offers', []):
                     if offer['provider_id'] in self.supported_providers.keys():

@@ -31,7 +31,7 @@ for item, title, tmdb_id in tqdm(query.all()):
         item.providers = updated_providers
         item.update_datetime_utc = datetime.utcnow()
         i += 1
-    sleep(1)
+    sleep(0.5)
 
 LOGGER.info(f'Apply {i} changes to the database')
 db.session.commit()
