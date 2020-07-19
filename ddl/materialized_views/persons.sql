@@ -39,6 +39,10 @@ persons_and_roles AS (
     sum(CASE WHEN coalesce(c.principal, TRUE) THEN 1 ELSE 0.5 END * r.grade)
       / sum(CASE WHEN coalesce(c.principal, TRUE) THEN 1 ELSE 0.5 END)                  AS grade
   FROM journal.records r
+  INNER JOIN journal.titles t
+    ON r.tmdb_id = t.id
+  INNER JOIN journal.users u
+    ON r.user_id = u.id
   INNER JOIN credits_enriched c
     ON r.tmdb_id = c.tmdb_id
   INNER JOIN journal.persons p
