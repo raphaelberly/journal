@@ -1,7 +1,19 @@
 
 CREATE MATERIALIZED VIEW journal.top_persons AS (
 
-WITH credits_enriched AS (
+WITH credits AS (
+
+  SELECT
+    c.person_id,
+    c.tmdb_id,
+    c.role,
+    c.cast_rank,
+    row_number() OVER (PARTITION BY c.person_id, c.tmdb_id, c.role ORDER BY update_datetime_utc DESC) AS row_nb
+  FROM journal.credits c
+
+),
+
+credits_enriched AS (
 
   SELECT
     c.*,
@@ -15,7 +27,9 @@ WITH credits_enriched AS (
       WHEN c.cast_rank <= 5 THEN TRUE
       WHEN ntile(10) OVER (PARTITION BY c.tmdb_id ORDER BY c.cast_rank) = 1 AND c.cast_rank <= 12 THEN TRUE
     ELSE FALSE END AS principal
-  FROM journal.credits c
+  FROM (
+    SELECT * FROM credits WHERE row_nb = 1
+  ) c
   INNER JOIN journal.titles t
     ON c.tmdb_id = t.id
 
