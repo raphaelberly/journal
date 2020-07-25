@@ -106,14 +106,14 @@ def recent():
 
     nb_recent = Record.query \
         .filter(Record.user_id == current_user.id) \
-        .filter(Record.recent == True) \
+        .filter(Record.include_in_recent == True) \
         .count()
 
     query = db.session \
         .query(Record, Title) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
-        .filter(Record.recent == True) \
+        .filter(Record.include_in_recent == True) \
         .order_by(Record.date.desc(), Record.insert_datetime_utc.desc())
 
     nb_results = int(request.args.get('nb_results', 20))

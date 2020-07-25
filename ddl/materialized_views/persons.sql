@@ -47,6 +47,7 @@ persons_and_roles AS (
     ON r.tmdb_id = c.tmdb_id
   INNER JOIN journal.persons p
     ON c.person_id = p.id
+  WHERE r.include_in_top_persons IS TRUE
   GROUP BY 1,2,3,4
 
 )

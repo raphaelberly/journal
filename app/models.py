@@ -137,19 +137,21 @@ class Record(db.Model):
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
     grade = db.Column(db.Float)
     date = db.Column(db.Date)
-    recent = db.Column(db.Boolean)
+    include_in_recent = db.Column(db.Boolean)
+    include_in_top_persons = db.Column(db.Boolean)
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "records"
 
-    def __init__(self, user_id, tmdb_id, grade, date=None, recent=True):
+    def __init__(self, user_id, tmdb_id, grade, date=None, include_in_recent=True, include_in_top_persons=True):
         self.user_id = user_id
         self.tmdb_id = tmdb_id
         self.grade = grade
         self.date = date or datetime.now().date()
-        self.recent = recent
+        self.include_in_recent = include_in_recent
+        self.include_in_top_persons = include_in_top_persons
 
     def __repr__(self):
         return f'<Record: user {self.user_id} watched movie {self.tmdb_id}>'
