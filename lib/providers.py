@@ -3,9 +3,13 @@ from datetime import date
 from time import sleep
 
 from justwatch import JustWatch
+from justwatch import justwatchapi
 from requests import HTTPError
 
 from lib.tools import read_config
+
+justwatchapi.HEADER = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) '
+                                     'AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'}
 
 
 class Providers(object):
