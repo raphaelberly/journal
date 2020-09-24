@@ -25,8 +25,8 @@ tmdb = Tmdb()
 @app.errorhandler(Exception)
 def handle_exceptions(e):
     flash('Wops, something went wrong', category='error')
-    sys.stderr.write(str(e))  # To be replaced by logging
-    return redirect(request.referrer)
+    app.logger.error(str(e))
+    return redirect(request.referrer or url_for('search'))
 
 
 def get_post_result(key):
@@ -36,6 +36,11 @@ def get_post_result(key):
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(path.join(app.root_path, 'static'), 'images/favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
+@app.route('/error')
+def error():
+    raise Exception('A test exception was raised')
 
 
 # Load functions to be used in Jinja into Context processor
