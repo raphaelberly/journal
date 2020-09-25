@@ -1,5 +1,6 @@
 import re
 import sys
+import traceback
 from datetime import date, datetime, timedelta
 from os import path
 
@@ -25,7 +26,8 @@ tmdb = Tmdb()
 @app.errorhandler(Exception)
 def handle_exceptions(e):
     flash('Wops, something went wrong', category='error')
-    app.logger.error(str(e))
+    etype, value, tb = sys.exc_info()
+    app.logger.error(str(traceback.print_exception(etype, value, tb)))
     return redirect(request.referrer or url_for('search'))
 
 
