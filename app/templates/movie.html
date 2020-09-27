@@ -44,7 +44,7 @@
 
     {% if metadata.mode == 'show_slider' %}
     <tr><td>
-    <form action="{{ url_for('movie', tmdb_id=title.id, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args) }}" method="post">
+    <form action="{{ url_for('movie', tmdb_id=title.id, ref=metadata.referrer, ref_scroll=metadata.scroll_to, **metadata.args) }}" method="post">
 
         <div class="slidecontainer">
             <div class="mentions"><b><span id="gradeValue"></span>/10</b></div>
@@ -68,10 +68,10 @@
     <tr><td>
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args) }}';" value="Edit">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True, ref=metadata.referrer, ref_scroll=metadata.scroll_to, **metadata.args) }}';" value="Edit">
         </td>
         <td class="right">
-            <form action="{{ url_for('movie', tmdb_id=title.id, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args) }}" method="post">
+            <form action="{{ url_for('movie', tmdb_id=title.id, ref=metadata.referrer, ref_scroll=metadata.scroll_to, **metadata.args) }}" method="post">
                 <input class="styled-button empty" type="submit" name="remove" value="Remove" onclick="javascript:if (window.confirm('Remove from journal?')) {return true;} else {return false;}">
             </form>
         </td></tr>
@@ -84,7 +84,7 @@
         {% if not title.in_watchlist %}
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args) }}';" value="Add">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True, ref=metadata.referrer, ref_scroll=metadata.scroll_to, **metadata.args) }}';" value="Add">
         </td>
         <td class="right">
             <form action="{{ url_for('movie', tmdb_id=title.id) }}" method="post">
@@ -94,7 +94,7 @@
         </td>
         </tr></table>
         {% else %}
-        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True, ref=metadata.referrer, ref_scroll=metadata.scroll, **metadata.args)}} ';" value="Add">
+        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True, ref=metadata.referrer, ref_scroll=metadata.scroll_to, **metadata.args)}} ';" value="Add">
         {% endif %}
     </td></tr>
     {% endif %}

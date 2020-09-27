@@ -128,7 +128,7 @@ def recent():
 
     payload = [(record.export(), title.export(current_user.language)) for record, title in query.all()]
     metadata = {
-        'scroll': int(float(request.args.get('ref_scroll', 0))),
+        'scroll_to': int(float(request.args.get('ref_scroll', 0))),
         'show_more_button': nb_recent > len(payload),
     }
     return render_template('recent.html', payload=payload, metadata=metadata)
@@ -225,7 +225,9 @@ def statistics():
         'movies': movies,
         'year_applicable': year_applicable
     }
-    metadata = {'scroll': int(float(request.args.get('ref_scroll', 0)))}
+    metadata = {
+        'scroll_to': int(float(request.args.get('ref_scroll', 0)))
+    }
     return render_template('statistics.html', payload=payload, metadata=metadata)
 
 
@@ -269,7 +271,7 @@ def search():
     payload = enrich_results(tmdb.get_bulk(result_ids[:nb_results]))
     metadata = {
         'query': query,
-        'scroll': int(float(request.args.get('ref_scroll', 0))),
+        'scroll_to': int(float(request.args.get('ref_scroll', 0))),
         'show_more_button': nb_results < len(result_ids)
     }
     return render_template('search.html', payload=payload, metadata=metadata)
@@ -317,7 +319,7 @@ def watchlist():
 
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     metadata = {
-        'scroll': int(float(request.args.get('ref_scroll', 0))),
+        'scroll_to': int(float(request.args.get('ref_scroll', 0))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else []
     }
     return render_template('watchlist.html', payload=payload, metadata=metadata)
@@ -342,14 +344,14 @@ def movie(tmdb_id):
 
     # Get referrer if provided via GET params
     args = request.args.to_dict()
-    referrer = args.pop('ref', 'search')
+    referrer = args.pop('ref',  '')
     scroll = int(float(args.pop('ref_scroll', 0)))
 
     if request.method == 'GET' and args.pop('show_slider', False):
         metadata = {
             'mode': 'show_slider',
             'referrer': referrer,
-            'scroll': scroll,
+            'scroll_to': scroll,
             'grade_as_int': current_user.grade_as_int,
             'args': args
         }
@@ -407,7 +409,7 @@ def movie(tmdb_id):
     metadata = {
         'mode': 'show_edit_buttons' if title.get('grade') is not None else 'show_add_buttons',
         'referrer': referrer,
-        'scroll': scroll,
+        'scroll_to': scroll,
         'args': args
     }
     return render_template('movie.html', payload=title, metadata=metadata)
@@ -420,8 +422,10 @@ def people():
     if not request.args.get('query'):
         return render_template('people.html', payload={}, metadata={})
 
+    # Parse query
+    args = request.args.to_dict()
     # Clean people query
-    query = request.args['query']
+    query = args.pop('query')
     clean_query = "&".join([word for word in re.sub(r"[\W]", " ", query).split(" ") if len(word) > 0])
     # Generate SQL request
     with open(path.join(CURRENT_DIR, 'queries/people_search.sql')) as f:
@@ -441,8 +445,12 @@ def people():
         for role in title['roles']:
             payload['person']['roles'][role] = payload['person']['roles'].get(role, 0) + 1
         payload['titles'].append(title)
+    # Get referrer if provided via GET params
+    referrer = args.pop('ref', '')
     metadata = {
         'query': query,
-        'scroll': int(float(request.args.get('ref_scroll', 0))),
+        'scroll_to': int(float(args.pop('ref_scroll', 0))),
+        'referrer': referrer,
+        'args': args,
     }
     return render_template('people.html', payload=payload, metadata=metadata)
