@@ -59,10 +59,16 @@
             <br/>{{ ', '.join(item.genres) }}
         {% endif %}
         {% if item.directors %}
-            <br/>By {{ ' and '.join(item.directors) }}
+            <br/>By
+            {% for director in item.directors %}
+                <a href="{{ url_for('people', query=director|lower) }}">{{ director }}</a>{% if loop.index0 != item.directors|length-1 %} and {% endif %}
+            {% endfor %}
         {% endif %}
         {% if item.cast %}
-            <br/>With {{ ', '.join(item.cast) }}
+            <br/>With
+            {% for person in item.cast %}
+                <a href="{{ url_for('people', query=person|lower) }}">{{ person }}</a>{% if loop.index0 != item.cast|length-1 %}, {% endif %}
+            {% endfor %}
         {% endif %}
         {% if item.duration %}
             <br/>{{ item.duration }}
