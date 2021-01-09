@@ -76,7 +76,7 @@
         {% if element == 'genres' %}
         <br/><span class="top-name">{{ top.name }}</span>
         {% else %}
-        <br/><span class="top-name"><a href="javascript:add_referrer_and_load('{{ url_for('people', query=top.name) }}', 'recent')">{{ top.name }}</a></span>
+        <br/><span class="top-name"><a href="javascript:add_referrer_and_load('{{ url_for('people', query=top.name) }}', 'statistics')">{{ top.name }}</a></span>
         {% endif %}
         <br/>Top {{ top.top_3_movies|length }} movies ({{ top.count }} in total):
 

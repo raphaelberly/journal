@@ -4,7 +4,7 @@ import traceback
 from datetime import date, datetime, timedelta
 from os import path
 
-from flask import render_template, request, url_for, flash, send_from_directory
+from flask import session, render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy import func
 from werkzeug.utils import redirect
@@ -107,9 +107,19 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/referrer', methods=['GET'])
+def referrer():
+    if not session['history']:
+        return redirect(url_for('search'))
+    ref, args = session['history'].pop(-1)
+    return redirect(url_for(ref, **args))
+
+
 @app.route('/recent', methods=['GET'])
 @login_required
 def recent():
+
+    session['history'] = []
 
     nb_recent = Record.query \
         .filter(Record.user_id == current_user.id) \
@@ -128,7 +138,7 @@ def recent():
 
     payload = [(record.export(), title.export(current_user.language)) for record, title in query.all()]
     metadata = {
-        'scroll_to': int(float(request.args.get('ref_scroll', 0))),
+        'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'show_more_button': nb_recent > len(payload),
     }
     return render_template('recent.html', payload=payload, metadata=metadata)
@@ -152,6 +162,8 @@ def add_rank_and_suffix(item, rank):
 @app.route('/statistics', methods=['GET'])
 @login_required
 def statistics():
+
+    session['history'] = []
 
     activity = {}
     activity_metrics = ['viewing activity', 'time spent']
@@ -226,7 +238,7 @@ def statistics():
         'year_applicable': year_applicable
     }
     metadata = {
-        'scroll_to': int(float(request.args.get('ref_scroll', 0)))
+        'scroll_to': int(float(request.args.get('scroll_to', 0)))
     }
     return render_template('statistics.html', payload=payload, metadata=metadata)
 
@@ -255,6 +267,8 @@ def enrich_results(results):
 @app.route('/search', methods=['GET', 'POST'])
 @login_required
 def search():
+
+    session['history'] = []
 
     if not request.args.get('query'):
         return render_template('search.html', metadata={})
@@ -305,6 +319,8 @@ def remove_from_watchlist(tmdb_id):
 @login_required
 def watchlist():
 
+    session['history'] = []
+
     if request.method == 'POST':
         if 'remove_from_watchlist' in request.form:
             tmdb_id = get_post_result('remove_from_watchlist')
@@ -319,7 +335,7 @@ def watchlist():
 
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     metadata = {
-        'scroll_to': int(float(request.args.get('ref_scroll', 0))),
+        'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else []
     }
     return render_template('watchlist.html', payload=payload, metadata=metadata)
@@ -342,18 +358,18 @@ def movie(tmdb_id):
     _title = tmdb.get(tmdb_id)
     title = enrich_results([_title])[0]
 
-    # Get referrer if provided via GET params
+    # Adjust referrer information in session history
     args = request.args.to_dict()
-    referrer = args.pop('ref',  '')
-    scroll = int(float(args.pop('ref_scroll', 0)))
+    ref = args.pop('ref', None)
+    scroll_to = int(float(args.pop('scroll_to', 0)))
+    show_slider = args.pop('show_slider', False)
+    if ref:
+        session['history'] = session.get('history', []) + [(ref, {'scroll_to': scroll_to, **args})]
 
-    if request.method == 'GET' and args.pop('show_slider', False):
+    if request.method == 'GET' and show_slider:
         metadata = {
             'mode': 'show_slider',
-            'referrer': referrer,
-            'scroll_to': scroll,
             'grade_as_int': current_user.grade_as_int,
-            'args': args
         }
         return render_template('movie.html', payload=title, metadata=metadata)
 
@@ -404,13 +420,10 @@ def movie(tmdb_id):
             title['grade'] = grade
             # Start statistics refresh
             refresh_materialized_views()
-
+    # Prepare page and title metadata
     title['in_watchlist'] = tmdb_id in get_watchlist_ids()
     metadata = {
         'mode': 'show_edit_buttons' if title.get('grade') is not None else 'show_add_buttons',
-        'referrer': referrer,
-        'scroll_to': scroll,
-        'args': args
     }
     return render_template('movie.html', payload=title, metadata=metadata)
 
