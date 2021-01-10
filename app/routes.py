@@ -112,6 +112,7 @@ def referrer():
     if not session['history']:
         return redirect(url_for('search'))
     ref, args = session['history'].pop(-1)
+    session.modified = True
     return redirect(url_for(ref, **args))
 
 
@@ -432,17 +433,20 @@ def movie(tmdb_id):
 @login_required
 def people():
 
-    if not request.args.get('query'):
+    if not request.args.get('person_id') and not request.args.get('query'):
+        # Empty history
+        session['history'] = []
+        # Return empty people search page
         return render_template('people.html', payload={}, metadata={})
 
-    # Parse query
-    args = request.args.to_dict()
+    metadata = {'query': request.args.get('query')}
     # Clean people query
-    query = args.pop('query')
+    query = request.args.get('query')
     clean_query = "&".join([word for word in re.sub(r"[\W]", " ", query).split(" ") if len(word) > 0])
     # Generate SQL request
-    with open(path.join(CURRENT_DIR, 'queries/people_search.sql')) as f:
+    with open(path.join(CURRENT_DIR, 'queries/people_search_by_name.sql')) as f:
         sql = f.read().format(query=clean_query, user_id=current_user.id)
+
     # Execute SQL request
     with db.engine.connect() as conn:
         response = conn.execute(sql)
@@ -458,12 +462,14 @@ def people():
         for role in title['roles']:
             payload['person']['roles'][role] = payload['person']['roles'].get(role, 0) + 1
         payload['titles'].append(title)
-    # Get referrer if provided via GET params
-    referrer = args.pop('ref', '')
-    metadata = {
-        'query': query,
-        'scroll_to': int(float(args.pop('ref_scroll', 0))),
-        'referrer': referrer,
-        'args': args,
-    }
+
+    # Adjust referrer information in session history
+    args = request.args.to_dict()
+    ref = args.pop('ref', None)
+    scroll_to = int(float(args.pop('scroll_to', 0)))
+    if ref:
+        session['history'] = session.get('history', []) + [(ref, {'scroll_to': scroll_to, **args})]
+    else:
+        metadata['scroll_to'] = scroll_to
+
     return render_template('people.html', payload=payload, metadata=metadata)

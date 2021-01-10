@@ -58,13 +58,13 @@
         {% if title.directors %}
             <br/>By
             {% for director in title.directors %}
-                <a href="{{ url_for('people', query=director|lower) }}">{{ director }}</a>{% if loop.index0 != title.directors|length-1 %} and {% endif %}
+                <a href="javascript:add_referrer_and_load('{{ url_for('people', query=director|lower) }}', 'watchlist')">{{ director }}</a>{% if loop.index0 != title.directors|length-1 %} and {% endif %}
             {% endfor %}
         {% endif %}
         {% if title.cast %}
             <br/>With
             {% for person in title.cast %}
-                <a href="{{ url_for('people', query=person|lower) }}">{{ person }}</a>{% if loop.index0 != title.cast|length-1 %}, {% endif %}
+                <a href="javascript:add_referrer_and_load('{{ url_for('people', query=person|lower) }}', 'watchlist')">{{ person }}</a>{% if loop.index0 != title.cast|length-1 %}, {% endif %}
             {% endfor %}
         {% endif %}
         {% if title.duration %}
