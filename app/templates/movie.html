@@ -31,16 +31,16 @@
         {% if title.genres %}
             <br/>{{ ', '.join(title.genres) }}
         {% endif %}
-        {% if title.directors %}
+        {% if title.director_names %}
+            {% for name, id in zip(title.director_names, title.director_ids) %}
             <br/>By
-            {% for director in title.directors %}
-                <a href="{{ url_for('people', query=director|lower) }}">{{ director }}</a>{% if loop.index0 != title.directors|length-1 %} and {% endif %}
+                <a href="{{ url_for('people', person_id=id) }}">{{ name }}</a>{% if loop.index0 != title.director_names|length-1 %} and {% endif %}
             {% endfor %}
         {% endif %}
-        {% if title.cast %}
+        {% if title.top_cast_names %}
             <br/>With
-            {% for person in title.cast %}
-                <a href="{{ url_for('people', query=person|lower) }}">{{ person }}</a>{% if loop.index0 != title.cast|length-1 %}, {% endif %}
+            {% for name, id in zip(title.top_cast_names, title.top_cast_ids) %}
+                <a href="{{ url_for('people', person_id=id) }}">{{ name }}</a>{% if loop.index0 != title.top_cast_names|length-1 %}, {% endif %}
             {% endfor %}
         {% endif %}
         {% if title.duration %}

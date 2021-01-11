@@ -23,6 +23,10 @@ CURRENT_DIR = path.dirname(path.abspath(__file__))
 tmdb = Tmdb()
 
 
+# Add zip support for jinja2
+app.jinja_env.globals.update(zip=zip)
+
+
 @app.errorhandler(Exception)
 def handle_exceptions(e):
     flash('Wops, something went wrong', category='error')
@@ -439,13 +443,20 @@ def people():
         # Return empty people search page
         return render_template('people.html', payload={}, metadata={})
 
-    metadata = {'query': request.args.get('query')}
-    # Clean people query
-    query = request.args.get('query')
-    clean_query = "&".join([word for word in re.sub(r"[\W]", " ", query).split(" ") if len(word) > 0])
-    # Generate SQL request
-    with open(path.join(CURRENT_DIR, 'queries/people_search_by_name.sql')) as f:
-        sql = f.read().format(query=clean_query, user_id=current_user.id)
+    elif request.args.get('query'):
+        metadata = {'query': request.args.get('query')}
+        # Clean people query
+        query = request.args.get('query')
+        clean_query = "&".join([word for word in re.sub(r"[\W]", " ", query).split(" ") if len(word) > 0])
+        # Generate SQL request
+        with open(path.join(CURRENT_DIR, 'queries/people_search_by_name.sql')) as f:
+            sql = f.read().format(query=clean_query, user_id=current_user.id)
+
+    else:
+        metadata = {'person_id': request.args.get('person_id')}
+        # Generate SQL request
+        with open(path.join(CURRENT_DIR, 'queries/people_search_by_id.sql')) as f:
+            sql = f.read().format(person_id=request.args.get('person_id'), user_id=current_user.id)
 
     # Execute SQL request
     with db.engine.connect() as conn:

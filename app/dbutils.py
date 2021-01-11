@@ -29,7 +29,9 @@ def _upsert(table_model: DeclarativeMeta, records: Iterable[dict], exclude: Opti
     primary_keys = [key.name for key in inspect(table_model).primary_key]
     # Assemble upsert statement
     statement = insert(table_model).values([{**record, 'update_datetime_utc': datetime.utcnow()} for record in records])
-    cols_to_update = {col.name: col for col in statement.excluded if (not col.primary_key and col.name not in exclude)}
+    cols_to_update = {
+        col.name: col for col in statement.excluded if (not col.primary_key and col.name not in (exclude or []))
+    }
     upsert_statement = statement.on_conflict_do_update(index_elements=primary_keys, set_=cols_to_update)
     # Execute statement
     db.session.execute(upsert_statement)

@@ -18,6 +18,8 @@
 {% endwith %}
 {% include 'base/alert.html' %}
 
+{% if not metadata.person_id %}
+
 <div class="form-search">
 
 <form method="get" action="{{ url_for('people') }}">
@@ -26,6 +28,8 @@
 </form>
 
 </div>
+
+{% endif %}
 
 {% if payload.titles == [] %}
 <div class="notfound">
@@ -42,7 +46,7 @@
 
 {% if payload %}
 
-<div class="recent">
+<div class="recent{% if metadata.person_id %} no-bar{% endif %}">
 
 <div class="card">
 <center><table>
