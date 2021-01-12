@@ -26,8 +26,9 @@ genres AS (
   SELECT
     m.user_id,
     m.genre,
-    array_agg(m.title ORDER BY m.grade DESC, m.date DESC) AS titles,
-    array_agg(m.year ORDER BY m.grade DESC, m.date DESC) AS titles_year,
+    array_agg(m.title ORDER BY m.grade DESC, m.date DESC)   AS title_names,
+    array_agg(m.year ORDER BY m.grade DESC, m.date DESC)    AS title_years,
+    array_agg(m.tmdb_id ORDER BY m.grade DESC, m.date DESC) AS title_ids,
     avg(m.grade)  AS grade,
     count(*)      AS count
   FROM movies_with_genre m
@@ -38,8 +39,9 @@ genres AS (
 SELECT
   g.user_id,
   g.genre             AS name,
-  g.titles[1:3]       AS top_3_movies,
-  g.titles_year[1:3]  AS top_3_movies_year,
+  g.title_names[1:3]  AS top_3_movie_names,
+  g.title_years[1:3]  AS top_3_movie_years,
+  g.title_ids[1:3]    AS top_3_movie_ids,
   g.grade,
   g.count
 FROM genres g

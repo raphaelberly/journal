@@ -17,6 +17,7 @@ credits_enriched AS (
 
   SELECT
     c.*,
+    t.id,
     t.title,
     t.original_title,
     t.original_language,
@@ -45,8 +46,9 @@ persons_and_roles AS (
     array_agg(
       CASE WHEN t.original_language = u.language THEN t.original_title ELSE t.title END
       ORDER BY r.grade DESC, r.date DESC
-    )                                                                                   AS titles,
-    array_agg(c.year ORDER BY r.grade DESC, r.date DESC)                                AS titles_year,
+    )                                                                                   AS title_names,
+    array_agg(c.year ORDER BY r.grade DESC, r.date DESC)                                AS title_years,
+    array_agg(t.id ORDER BY r.grade DESC, r.date DESC)                                  AS title_ids,
     max(r.date)                                                                         AS last_added,
     count(*)                                                                            AS count,
     sum(c.principal::INTEGER)                                                           AS count_principal,
@@ -69,9 +71,11 @@ persons_and_roles AS (
 SELECT
   d.user_id,
   d.role,
+  d.person_id,
   d.name,
-  d.titles[1:3]       AS top_3_movies,
-  d.titles_year[1:3]  AS top_3_movies_year,
+  d.title_names[1:3]    AS top_3_movie_names,
+  d.title_years[1:3]    AS top_3_movie_years,
+  d.title_ids[1:3]      AS top_3_movie_ids,
   d.grade,
   d.count,
   d.count_principal

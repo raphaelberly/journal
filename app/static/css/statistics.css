@@ -38,8 +38,10 @@
     color: black;
 }
 
-.top-movies {
+.top-movies a {
     font-style: italic;
+    color: black;
+    text-decoration: none;
 }
 
 td.sideline {

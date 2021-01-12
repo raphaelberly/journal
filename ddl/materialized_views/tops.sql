@@ -11,7 +11,7 @@ tops AS (
   FROM journal.top_persons p
   UNION
   SELECT
-    g.user_id, 'genre' AS role, g.name, g.top_3_movies, g.top_3_movies_year, g.grade, g.count, NULL AS count_principal
+    g.user_id, 'genre' AS role, NULL AS person_id, g.name, g.top_3_movie_names, g.top_3_movie_years, g.top_3_movie_ids, g.grade, g.count, NULL AS count_principal
   FROM journal.top_genres g
 ),
 tops_ranked AS (
@@ -35,8 +35,10 @@ SELECT
   t.user_id,
   t.role,
   t.name,
-  t.top_3_movies,
-  t.top_3_movies_year,
+  t.person_id,
+  t.top_3_movie_names,
+  t.top_3_movie_years,
+  t.top_3_movie_ids,
   t.grade,
   t.count,
   t.count_principal,
