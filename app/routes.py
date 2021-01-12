@@ -115,16 +115,17 @@ def logout():
 def referrer():
     if not session['history']:
         return redirect(url_for('search'))
-    ref, args = session['history'].pop(-1)
+    # Remove current page from history
+    session['history'].pop(-1)
     session.modified = True
+    # Load referrer page with all arguments
+    ref, args = session['history'][-1]
     return redirect(url_for(ref, **args))
 
 
 @app.route('/recent', methods=['GET'])
 @login_required
 def recent():
-
-    session['history'] = []
 
     nb_recent = Record.query \
         .filter(Record.user_id == current_user.id) \
@@ -142,11 +143,28 @@ def recent():
     query = query.limit(nb_results)
 
     payload = [(record.export(), title.export(current_user.language)) for record, title in query.all()]
+    show_more_button = nb_recent > len(payload)
     metadata = {
-        'scroll_to': int(float(request.args.get('scroll_to', 0))),
-        'show_more_button': nb_recent > len(payload),
+        'scroll_to': int(float(request.args.get('scroll_to', 0))),  # TODO: handle "More" scrolls
+        'show_more_button': show_more_button,
     }
+
+    session['history'] = [('recent', {'nb_results': nb_results})]
+
     return render_template('recent.html', payload=payload, metadata=metadata)
+
+
+def parse_ref_parameters():
+    # Collect params
+    params = {}
+    if request.args.get('ref_scroll'):
+        params['scroll_to'] = request.args.get('ref_scroll')
+    if request.args.get('ref') == 'watchlist' and request.args.get('ref_providers'):
+        params['providers'] = request.args.get('ref_providers')
+    # TODO: ref is now unused
+    # Update last item in history
+    session['history'][-1][1].update(params)
+    session.modified = True
 
 
 def get_number_suffix(number):
@@ -167,8 +185,6 @@ def add_rank_and_suffix(item, rank):
 @app.route('/statistics', methods=['GET'])
 @login_required
 def statistics():
-
-    session['history'] = []
 
     activity = {}
     activity_metrics = ['viewing activity', 'time spent']
@@ -245,6 +261,10 @@ def statistics():
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', 0)))
     }
+
+    session['history'] = [('statistics', {})]
+    session.modified = True
+
     return render_template('statistics.html', payload=payload, metadata=metadata)
 
 
@@ -273,9 +293,9 @@ def enrich_results(results):
 @login_required
 def search():
 
-    session['history'] = []
-
     if not request.args.get('query'):
+        session['history'] = []
+        session.modified = True
         return render_template('search.html', metadata={})
 
     if request.method == 'POST':
@@ -290,9 +310,13 @@ def search():
     payload = enrich_results(tmdb.get_bulk(result_ids[:nb_results]))
     metadata = {
         'query': query,
-        'scroll_to': int(float(request.args.get('ref_scroll', 0))),
+        'scroll_to': int(float(request.args.get('scroll_to', 0))),  # TODO: handle "More" scrolls
         'show_more_button': nb_results < len(result_ids)
     }
+
+    session['history'] = [('search', {'query': query, 'nb_results': nb_results})]
+    session.modified = True
+
     return render_template('search.html', payload=payload, metadata=metadata)
 
 
@@ -324,8 +348,6 @@ def remove_from_watchlist(tmdb_id):
 @login_required
 def watchlist():
 
-    session['history'] = []
-
     if request.method == 'POST':
         if 'remove_from_watchlist' in request.form:
             tmdb_id = get_post_result('remove_from_watchlist')
@@ -343,6 +365,11 @@ def watchlist():
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else []
     }
+
+    args = {'providers': request.args.get('providers')} if request.args.get('providers') else {}
+    session['history'] = [('watchlist', args)]
+    session.modified = True
+
     return render_template('watchlist.html', payload=payload, metadata=metadata)
 
 
@@ -363,15 +390,13 @@ def movie(tmdb_id):
     _title = tmdb.get(tmdb_id)
     title = enrich_results([_title])[0]
 
-    # Adjust referrer information in session history
-    args = request.args.to_dict()
-    ref = args.pop('ref', None)
-    scroll_to = int(float(args.pop('scroll_to', 0)))
-    show_slider = args.pop('show_slider', False)
-    if ref:
-        session['history'] = session.get('history', []) + [(ref, {'scroll_to': scroll_to, **args})]
+    # Add this page to history if previous page was not already movie
+    if session['history'][-1][0] != 'movie':
+        parse_ref_parameters()
+        session['history'] = session.get('history', []) + [('movie', {'tmdb_id': tmdb_id})]
+        session.modified = True
 
-    if request.method == 'GET' and show_slider:
+    if request.method == 'GET' and request.args.get('show_slider', False):
         metadata = {
             'mode': 'show_slider',
             'grade_as_int': current_user.grade_as_int,
@@ -445,6 +470,10 @@ def people():
 
     elif request.args.get('query'):
         metadata = {'query': request.args.get('query')}
+        # Parse referral parameters and update history
+        if session['history'][-1][0] != 'people':
+            parse_ref_parameters()
+            session['history'] = [('people', metadata.copy())]
         # Clean people query
         query = request.args.get('query')
         clean_query = "&".join([word for word in re.sub(r"[\W]", " ", query).split(" ") if len(word) > 0])
@@ -454,6 +483,10 @@ def people():
 
     else:
         metadata = {'person_id': request.args.get('person_id')}
+        # Parse referral parameters and update history
+        if session['history'][-1][0] != 'people':
+            parse_ref_parameters()
+            session['history'] = session['history'] + [('people', metadata.copy())]
         # Generate SQL request
         with open(path.join(CURRENT_DIR, 'queries/people_search_by_id.sql')) as f:
             sql = f.read().format(person_id=request.args.get('person_id'), user_id=current_user.id)
@@ -474,13 +507,5 @@ def people():
             payload['person']['roles'][role] = payload['person']['roles'].get(role, 0) + 1
         payload['titles'].append(title)
 
-    # Adjust referrer information in session history
-    args = request.args.to_dict()
-    ref = args.pop('ref', None)
-    scroll_to = int(float(args.pop('scroll_to', 0)))
-    if ref:
-        session['history'] = session.get('history', []) + [(ref, {'scroll_to': scroll_to, **args})]
-    else:
-        metadata['scroll_to'] = scroll_to
-
+    metadata['scroll_to'] = int(float(request.args.get('scroll_to', 0)))
     return render_template('people.html', payload=payload, metadata=metadata)

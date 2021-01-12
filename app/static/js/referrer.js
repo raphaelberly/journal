@@ -1,8 +1,8 @@
 add_referrer = function(url, current_title) {
     if (url.includes('?'))  { var conn = '&' } else { var conn = '?' };
-    var new_url = url.concat(conn, 'ref=', current_title, '&scroll_to=', window.scrollY);
+    var new_url = url.concat(conn, 'ref=', current_title, '&ref_scroll=', window.scrollY);
     if (current_title == 'watchlist') {
-        new_url = new_url.concat('&providers=', getActivatedFilters().join(','))
+        new_url = new_url.concat('&ref_providers=', getActivatedFilters().join(','))
     }
     return new_url;
 };
