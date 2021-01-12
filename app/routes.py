@@ -470,7 +470,7 @@ def people():
     elif request.args.get('query'):
         metadata = {'query': request.args.get('query')}
         # Parse referral parameters and update history
-        if session['history'][-1][0] != 'people':
+        if session['history'] and session['history'][-1][0] != 'people':
             parse_ref_parameters()
             session['history'] = [('people', metadata.copy())]
         # Clean people query
