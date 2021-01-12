@@ -145,7 +145,7 @@ def recent():
     payload = [(record.export(), title.export(current_user.language)) for record, title in query.all()]
     show_more_button = nb_recent > len(payload)
     metadata = {
-        'scroll_to': int(float(request.args.get('scroll_to', 0))),  # TODO: handle "More" scrolls
+        'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
         'show_more_button': show_more_button,
     }
 
@@ -159,9 +159,8 @@ def parse_ref_parameters():
     params = {}
     if request.args.get('ref_scroll'):
         params['scroll_to'] = request.args.get('ref_scroll')
-    if request.args.get('ref') == 'watchlist' and request.args.get('ref_providers'):
+    if request.args.get('ref_providers'):
         params['providers'] = request.args.get('ref_providers')
-    # TODO: ref is now unused
     # Update last item in history
     session['history'][-1][1].update(params)
     session.modified = True
@@ -310,7 +309,7 @@ def search():
     payload = enrich_results(tmdb.get_bulk(result_ids[:nb_results]))
     metadata = {
         'query': query,
-        'scroll_to': int(float(request.args.get('scroll_to', 0))),  # TODO: handle "More" scrolls
+        'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
         'show_more_button': nb_results < len(result_ids)
     }
 

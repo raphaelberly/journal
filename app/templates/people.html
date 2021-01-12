@@ -32,13 +32,17 @@
 {% endif %}
 
 {% if payload.titles == [] %}
-<div class="notfound">
+<div class="notfound{% if metadata.person_id %} no-bar{% endif %}">
 <table>
     <tr><td>
         <img src="static/images/fail.png">
     </td></tr>
     <tr><td>
-        Sorry, we could not find <b>"{{ metadata.query|title }}"</b> in any of your movies.
+        {% if metadata.query %}
+        Sorry, we could not find <b>"{{ metadata.query|title }}"</b> in any of the movies you rated.
+        {% elif metadata.person_id %}
+        Sorry, we could not find this person in any of the movies you rated.
+        {% endif %}
     </td></tr>
 </table>
 </div>
@@ -80,7 +84,7 @@
         <br/>
         {{ ', '.join(title.roles)|title }}
         <br/>
-        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.tmdb_id, query=metadata.query) }}', 'people')">{{ title.title }} ({{ title.year }})</a></b>
+        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.tmdb_id, query=metadata.query) }}')">{{ title.title }} ({{ title.year }})</a></b>
         <br/>
         {{ ', '.join(title.genres) }}
         <br/>

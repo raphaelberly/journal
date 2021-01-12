@@ -7,6 +7,12 @@
     padding-bottom: 30px;
 }
 
+.notfound.no-bar {
+    padding-top: 80px;
+    padding-top: calc(80px + constant(safe-area-inset-top));
+    padding-top: calc(80px + env(safe-area-inset-top));
+}
+
 .notfound table {
     width: 100%;
     text-align: center;

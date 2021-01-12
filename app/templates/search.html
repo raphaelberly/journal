@@ -47,9 +47,9 @@
     {% if item.poster_url %}
     <tr><td>
         {% if item.grade %}
-        <a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id) }}', 'search')"><img src="{{ item.poster_url }}"></a>
+        <a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id) }}')"><img src="{{ item.poster_url }}"></a>
         {% else %}
-        <a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}', 'search')"><img src="{{ item.poster_url }}"></a>
+        <a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}')"><img src="{{ item.poster_url }}"></a>
         {% endif %}
     </td></tr>
     {% endif %}
@@ -79,17 +79,17 @@
             {% if not item.in_watchlist %}
             <table class="dual"><tr>
             <td class="left">
-                <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}', 'search');" value="Add">
+                <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}');" value="Add">
             </td>
             <td class="right">
-                <form onsubmit="this.action=add_referrer('{{ url_for('search') }}', 'search');" method="post">
+                <form onsubmit="this.action=add_referrer('{{ url_for('search') }}');" method="post">
                     <input type="hidden" name="add_to_watchlist" value="{{ item.id }}">
                     <input class="styled-button empty" type="submit" value="Watchlist">
                 </form>
             </td>
             </tr></table>
             {% else %}
-            <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}', 'search');" value="Add">
+            <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}');" value="Add">
             {% endif %}
         {% else %}
         <div class="mentions">
@@ -104,7 +104,7 @@
 {% if metadata.show_more_button %}
 <table>
     <tr><td>
-        <a id="show_more_link" href="javascript:add_referrer_and_load('{{ url_for('search', query=metadata.query, nb_results=payload|length*2+1) }}', 'search');">More results</a>
+        <a id="show_more_link" href="javascript:add_referrer_and_load('{{ url_for('search', query=metadata.query, nb_results=payload|length*2+1) }}');">More results</a>
     </td></tr>
 </table>
 {% endif %}
