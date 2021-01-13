@@ -79,10 +79,11 @@
         <br/><span class="top-name"><a href="javascript:add_referrer_and_load('{{ url_for('people', person_id=top.person_id) }}')">{{ top.name }}</a></span>
         {% endif %}
         <br/>Top {{ top.top_3_movie_names|length }} movies ({{ top.count }} in total):
-
+        <ul>
         {% for title, id in zip(top.top_3_movie_names, top.top_3_movie_ids) %}
-            <br/><span class="top-movies"> &bull; <a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=id) }}')">{{ title }}</a></span>
+            <li class="top-movies"><span><a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=id) }}')">{{ title }}</a></span></li>
         {% endfor %}
+        </ul>
         </p>
 
     {% endfor %}

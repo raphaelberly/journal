@@ -38,6 +38,13 @@
     color: black;
 }
 
+.top-movies {
+  line-height: 22px;
+  position: relative;
+  left: -20px;
+  top: -15px;
+}
+
 .top-movies a {
     font-style: italic;
     color: black;
