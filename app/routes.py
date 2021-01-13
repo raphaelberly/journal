@@ -483,7 +483,7 @@ def people():
     else:
         metadata = {'person_id': request.args.get('person_id')}
         # Parse referral parameters and update history
-        if session['history'][-1][0] != 'people':
+        if session['history'] and session['history'][-1][0] != 'people':
             parse_ref_parameters()
             session['history'] = session['history'] + [('people', metadata.copy())]
         # Generate SQL request
