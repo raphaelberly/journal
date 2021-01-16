@@ -390,7 +390,7 @@ def movie(tmdb_id):
     title = enrich_results([_title])[0]
 
     # Add this page to history if previous page was not already movie
-    if session['history'][-1][0] != 'movie':
+    if session['history'] and session['history'][-1][0] != 'movie':
         parse_ref_parameters()
         session['history'] = session.get('history', []) + [('movie', {'tmdb_id': tmdb_id})]
         session.modified = True
@@ -453,6 +453,7 @@ def movie(tmdb_id):
     title['in_watchlist'] = tmdb_id in get_watchlist_ids()
     metadata = {
         'mode': 'show_edit_buttons' if title.get('grade') is not None else 'show_add_buttons',
+        'show_back_button': len(session['history']) >= 2
     }
     return render_template('movie.html', payload=title, metadata=metadata)
 
@@ -463,16 +464,17 @@ def people():
 
     if not request.args.get('person_id') and not request.args.get('query'):
         # Empty history
-        session['history'] = []
+        session['history'] = [('people', {'query': ''})]
         # Return empty people search page
         return render_template('people.html', payload={}, metadata={})
 
     elif request.args.get('query'):
         metadata = {'query': request.args.get('query')}
         # Parse referral parameters and update history
-        if session['history'] and session['history'][-1][0] != 'people':
-            parse_ref_parameters()
-            session['history'] = [('people', metadata.copy())]
+        if session['history']:
+            if session['history'][-1][0] != 'people':
+                parse_ref_parameters()
+            session['history'][-1][1].update(metadata.copy())
         # Clean people query
         query = request.args.get('query')
         clean_query = "&".join([word for word in re.sub(r"[\W]", " ", query).split(" ") if len(word) > 0])
@@ -506,5 +508,9 @@ def people():
             payload['person']['roles'][role] = payload['person']['roles'].get(role, 0) + 1
         payload['titles'].append(title)
 
-    metadata['scroll_to'] = int(float(request.args.get('scroll_to', 0)))
+    metadata.update({
+        'scroll_to': int(float(request.args.get('scroll_to', 0))),
+        'show_back_button': len(session['history']) >= 2 and not request.args.get('query'),
+    })
+
     return render_template('people.html', payload=payload, metadata=metadata)
