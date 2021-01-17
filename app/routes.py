@@ -399,6 +399,7 @@ def movie(tmdb_id):
         metadata = {
             'mode': 'show_slider',
             'grade_as_int': current_user.grade_as_int,
+            'show_back_button': len(session['history']) >= 2
         }
         return render_template('movie.html', payload=title, metadata=metadata)
 
