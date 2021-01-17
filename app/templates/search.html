@@ -82,7 +82,7 @@
                 <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}');" value="Add">
             </td>
             <td class="right">
-                <form onsubmit="this.action=add_referrer('{{ url_for('search') }}');" method="post">
+                <form onsubmit="this.action=add_referrer('{{ url_for('search', query=metadata.query) }}');" method="post">
                     <input type="hidden" name="add_to_watchlist" value="{{ item.id }}">
                     <input class="styled-button empty" type="submit" value="Watchlist">
                 </form>
