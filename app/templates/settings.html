@@ -21,7 +21,6 @@
 <form method="post">
 
 <table>
-
     <tr><td>
         <input id="decimal_grades" name="decimal_grades" class="apple-switch" type="checkbox"{% if payload.decimal_grades %} checked{% endif %}>
     </td><td>
@@ -32,7 +31,17 @@
     </td><td>
         Use original titles for French movies
     </td></tr>
+</table>
 
+<h2>Watchlist filters</h2>
+<table>
+    {% for provider in payload.providers %}
+    <tr><td>
+        <input id="{{ provider }}" name="{{ provider }}" class="apple-switch" type="checkbox"{% if payload.providers[provider] %} checked{% endif %}>
+    </td><td>
+        {{ payload.provider_names[provider] }}
+    </td></tr>
+    {% endfor %}
 </table>
 
 <input class="styled-button full" type="submit" value="Save">

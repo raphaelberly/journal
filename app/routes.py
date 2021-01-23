@@ -362,7 +362,8 @@ def watchlist():
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
-        'filters': request.args.get('providers').split(',') if request.args.get('providers') else []
+        'filters': request.args.get('providers').split(',') if request.args.get('providers') else [],
+        'providers': current_user.providers,
     }
 
     args = {'providers': request.args.get('providers')} if request.args.get('providers') else {}
@@ -521,24 +522,48 @@ def people():
 @login_required
 def settings():
 
+    available_providers = {
+        'netflix': 'Netflix',
+        'amazonprimevideo': 'Amazon Prime Video',
+        'canalplayvod': 'Canal Play VOD',
+        'disneyplus': 'Disney+',
+    }
+    user_providers = {provider: provider in current_user.providers for provider in available_providers.keys()}
+
     if request.method == 'GET':
         decimal_grades = not current_user.grade_as_int
         original_titles_fr = current_user.language == 'fr'
 
     elif request.method == 'POST':
+        modified = False
         # If decimal_grades preference was changed, change it in the db
         decimal_grades = 'decimal_grades' in request.form
         if decimal_grades == current_user.grade_as_int:
             current_user.grade_as_int = not decimal_grades
+            modified = True
         # If original_titles_fr preference was changed, change it in the db
         original_titles_fr = 'original_titles_fr' in request.form
         if original_titles_fr != (current_user.language == 'fr'):
             current_user.language = 'fr' if original_titles_fr else 'en'
-        db.session.commit()
-        flash('Settings were successfully updated', category='success')
+            modified = True
+        # If the list of providers was changed, change it in the db
+        submitted_providers = {provider: provider in request.form for provider in available_providers}
+        if submitted_providers != user_providers:
+            current_user.providers = [k for k, v in submitted_providers.items() if v]
+            user_providers = submitted_providers
+            modified = True
+        # Apply changes if any
+        if modified:
+            current_user.update_datetime_utc = datetime.utcnow()
+            db.session.commit()
+            flash('Settings were successfully updated', category='success')
+        else:
+            flash('No settings were changed', category='error')
 
     payload = {
         'decimal_grades': decimal_grades,
         'original_titles_fr': original_titles_fr,
+        'providers': user_providers,
+        'provider_names': available_providers,
     }
     return render_template('settings.html', payload=payload, metadata={})

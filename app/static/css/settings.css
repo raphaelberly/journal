@@ -14,3 +14,10 @@
 .settings table {
     padding-bottom: 20px;
 }
+
+.settings h2 {
+    text-align: left;
+    color: 6caee0;
+    font-size: 22px;
+    font-weight:normal;
+}

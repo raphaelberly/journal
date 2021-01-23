@@ -3,7 +3,7 @@ supported_providers:
   - netflix
   - amazonprimevideo
   - disneyplus
-#  - canalplayvod
+  - canalplayvod
 
 country: FR
 main_city:

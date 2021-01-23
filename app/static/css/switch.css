@@ -23,8 +23,8 @@ input.apple-switch:after {
 }
 
 input.apple-switch:checked {
-  box-shadow: inset 20px 0 0 0 #4ed164;
-  border-color: #4ed164;
+  box-shadow: inset 20px 0 0 0 #6caee0;
+  border-color: #6caee0;
 }
 
 input.apple-switch:checked:after {
