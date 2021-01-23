@@ -1,0 +1,16 @@
+
+.settings {
+    padding-top: 85px;
+    padding-top: calc(85px + constant(safe-area-inset-top));
+    padding-top: calc(85px + env(safe-area-inset-top));
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.settings td {
+    padding: 5px;
+}
+
+.settings table {
+    padding-bottom: 20px;
+}

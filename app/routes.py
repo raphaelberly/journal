@@ -515,3 +515,30 @@ def people():
     })
 
     return render_template('people.html', payload=payload, metadata=metadata)
+
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+
+    if request.method == 'GET':
+        decimal_grades = not current_user.grade_as_int
+        original_titles_fr = current_user.language == 'fr'
+
+    elif request.method == 'POST':
+        # If decimal_grades preference was changed, change it in the db
+        decimal_grades = 'decimal_grades' in request.form
+        if decimal_grades == current_user.grade_as_int:
+            current_user.grade_as_int = not decimal_grades
+        # If original_titles_fr preference was changed, change it in the db
+        original_titles_fr = 'original_titles_fr' in request.form
+        if original_titles_fr != (current_user.language == 'fr'):
+            current_user.language = 'fr' if original_titles_fr else 'en'
+        db.session.commit()
+        flash('Settings were successfully updated', category='success')
+
+    payload = {
+        'decimal_grades': decimal_grades,
+        'original_titles_fr': original_titles_fr,
+    }
+    return render_template('settings.html', payload=payload, metadata={})

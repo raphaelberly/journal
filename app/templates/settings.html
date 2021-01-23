@@ -1,0 +1,45 @@
+<html>
+
+<head>
+    {% include 'base/head.html' %}
+    <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/switch.css')}}">
+</head>
+
+<body ontouchstart="">
+
+{% with page_title = 'Settings' %}
+    {% include 'base/menu.html' %}
+{% endwith %}
+{% include 'base/alert.html' %}
+
+<div class="settings">
+
+<form method="post">
+
+<table>
+
+    <tr><td>
+        <input id="decimal_grades" name="decimal_grades" class="apple-switch" type="checkbox"{% if payload.decimal_grades %} checked{% endif %}>
+    </td><td>
+        Allow decimal grades
+    </td></tr>
+    <tr><td>
+        <input id="original_titles_fr" name="original_titles_fr" class="apple-switch" type="checkbox"{% if payload.original_titles_fr %} checked{% endif %}>
+    </td><td>
+        Use original titles for French movies
+    </td></tr>
+
+</table>
+
+<input class="styled-button full" type="submit" value="Save">
+
+</form>
+
+</div>
+
+</body>
+</html>
