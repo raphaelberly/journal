@@ -16,9 +16,12 @@ function getActivatedFilters() {
   const p = ["netflix", "amazonprimevideo", "canalplayvod", "disneyplus"];
   var x = [], y, i;
   for (i = 0; i < p.length; i++) {
-    y = document.getElementsByClassName(p[i])[0];
-    if (y.className.includes("ON")) {
-      x.push(p[i])
+    y = document.getElementsByClassName(p[i]);
+    if (y.length > 0) {
+        y = y[0];
+        if (y.className.includes("ON")) {
+          x.push(p[i])
+        };
     };
   }
   return x;
