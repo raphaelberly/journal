@@ -71,13 +71,11 @@
             <br/>{{ title.duration }}
         {% endif %}
     </td></tr>
-    {% if watchlist_item.providers|length > 0 %}
+    {% if intersect(watchlist_item.providers, metadata.providers) %}
     <tr><td>
         <div class="providers">
-        {% for provider in ['netflix', 'amazonprimevideo', 'disneyplus'] %}
-            {% if provider in watchlist_item.providers %}
+        {% for provider in intersect(watchlist_item.providers, metadata.providers) %}
             <img src="static/images/providers/{{ provider }}.png">
-            {% endif %}
         {% endfor %}
         </div>
     </td></tr>

@@ -23,8 +23,13 @@ CURRENT_DIR = path.dirname(path.abspath(__file__))
 tmdb = Tmdb()
 
 
+def intersect(a, b):
+    return set(a) & set(b)
+
+
 # Add zip support for jinja2
 app.jinja_env.globals.update(zip=zip)
+app.jinja_env.globals.update(intersect=intersect)
 
 
 @app.errorhandler(Exception)
