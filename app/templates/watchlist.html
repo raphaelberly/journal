@@ -30,13 +30,17 @@
     </td></tr>
 </table>
 {% elif metadata.providers %}
-<div id="filterContainer" class="providers">
+<center><div id="filterContainer" class="filters">
+    <table><tr>
     {% for provider in metadata.providers %}
+        <td>
         <a href="javascript:void(0)" class="btn {{ provider }} {{ 'ON' if provider in metadata.filters else 'OFF' }}" onclick="switchFilterState('{{ provider }}')">
             <img src="static/images/providers/{{ provider }}.png">
         </a>
+        </td>
     {% endfor %}
-</div>
+    </tr></table>
+</div></center>
 {% endif %}
 
 

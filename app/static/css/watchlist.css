@@ -1,14 +1,5 @@
-.container {
-  overflow: hidden;
-}
-
 .filterDiv {
   display: none; /* Hidden by default */
-}
-
-#filterContainer {
-  margin-top: 1px;
-  margin-bottom: 21px;
 }
 
 /* The "show" class is added to the filtered elements */
@@ -16,17 +7,26 @@
   display: block;
 }
 
-/* Style the buttons */
-.btn {
-  border: none;
-  outline: none;
-  padding: 12px 16px;
-  cursor: pointer;
+.filters table {
+  width: 1%;
 }
 
+.filters td {
+    padding-left: 10px;
+    padding-right: 10px;
+}
 
-p {
-  margin-bottom: 10px;
+.filters td:first-child {
+    padding-left: 0px;
+}
+
+.filters td:last-child {
+    padding-right: 0px;
+}
+
+.filters img {
+  max-height: 20px;
+  width: auto;
 }
 
 .providers {
