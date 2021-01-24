@@ -1,23 +1,39 @@
-
 .settings {
-    padding-top: 85px;
-    padding-top: calc(85px + constant(safe-area-inset-top));
-    padding-top: calc(85px + env(safe-area-inset-top));
-    padding-left: 20px;
-    padding-right: 20px;
-}
-
-.settings td {
-    padding: 5px;
+    padding-top: 100px;
+    padding-top: calc(100px + constant(safe-area-inset-top));
+    padding-top: calc(100px + env(safe-area-inset-top));
+    padding-right: 30px;
+    padding-left: 30px;
 }
 
 .settings table {
-    padding-bottom: 20px;
+    border-spacing: 0;
+    table-layout: fixed;
+    width: 100%;
+    max-width: 400px;
+}
+
+.settings td.switch {
+    padding-bottom: 12px;
+    width: 50px;
+}
+
+.settings td.caption {
+    padding-bottom: 12px;
+    padding-left: 10px;
+    width: 100%;
+}
+
+.settings table {
+    padding-bottom: 25px;
 }
 
 .settings h2 {
+    margin: 0 0 20px 0;
     text-align: left;
     color: 6caee0;
     font-size: 22px;
     font-weight:normal;
+    width: 100%;
+    max-width: 400px;
 }

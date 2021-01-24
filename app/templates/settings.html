@@ -16,19 +16,21 @@
 {% endwith %}
 {% include 'base/alert.html' %}
 
+<center>
 <div class="settings">
 
 <form method="post">
 
+<h2>General</h2>
 <table>
-    <tr><td>
+    <tr><td class="switch">
         <input id="decimal_grades" name="decimal_grades" class="apple-switch" type="checkbox"{% if payload.decimal_grades %} checked{% endif %}>
-    </td><td>
+    </td><td class="caption">
         Allow decimal grades
     </td></tr>
-    <tr><td>
+    <tr><td class="switch">
         <input id="original_titles_fr" name="original_titles_fr" class="apple-switch" type="checkbox"{% if payload.original_titles_fr %} checked{% endif %}>
-    </td><td>
+    </td><td class="caption">
         Use original titles for French movies
     </td></tr>
 </table>
@@ -36,9 +38,9 @@
 <h2>Watchlist filters</h2>
 <table>
     {% for provider in payload.providers %}
-    <tr><td>
+    <tr><td class="switch">
         <input id="{{ provider }}" name="{{ provider }}" class="apple-switch" type="checkbox"{% if payload.providers[provider] %} checked{% endif %}>
-    </td><td>
+    </td><td class="caption">
         {{ payload.provider_names[provider] }}
     </td></tr>
     {% endfor %}
@@ -49,6 +51,7 @@
 </form>
 
 </div>
+</center>
 
 </body>
 </html>

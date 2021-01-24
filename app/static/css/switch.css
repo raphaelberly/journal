@@ -8,6 +8,8 @@ input.apple-switch {
   border: 1px solid #D9DADC;
   border-radius: 50px;
   box-shadow: inset -20px 0 0 0 #fff;
+  margin: 0px;
+  padding: 0px;
 }
 
 input.apple-switch:after {
