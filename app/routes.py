@@ -366,7 +366,7 @@ def watchlist():
 
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     metadata = {
-        'scroll_to': int(float(request.args.get('scroll_to', 0))),
+        'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else [],
         'providers': current_user.providers,
     }
