@@ -1,4 +1,3 @@
-
 .navbar {
   z-index: 2;
   overflow: visible;
@@ -51,8 +50,24 @@
     background-color: #6caee0;
     overflow-x: hidden;
     transition: 0.2s;
-    padding-top: 90px;
 
+}
+
+.sidenav table {
+    height: 100%;
+    width: 100%;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
+.top td {
+    height: 100%;
+    padding-top: 100px;
+    vertical-align: top;
+}
+
+.bottom td {
+    padding-bottom: 12px;
 }
 
 .sidenav a {
