@@ -4,6 +4,7 @@ supported_providers:
   - amazonprimevideo
   - disneyplus
   - canalplayvod
+  - mubi
 
 country: FR
 main_city:

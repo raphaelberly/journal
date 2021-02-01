@@ -55,3 +55,6 @@
 .OFF.disneyplus img {
   content:url('/static/images/providers/disneyplus_gray.png');
 }
+.OFF.mubi img {
+  content:url('/static/images/providers/mubi_gray.png');
+}

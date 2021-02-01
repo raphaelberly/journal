@@ -532,6 +532,7 @@ def settings():
         'amazonprimevideo': 'Amazon Prime Video',
         'canalplayvod': 'Canal Play VOD',
         'disneyplus': 'Disney+',
+        'mubi': 'Mubi',
     }
     user_providers = {provider: provider in current_user.providers for provider in available_providers.keys()}
 
