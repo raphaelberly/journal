@@ -70,6 +70,11 @@
     padding-bottom: 12px;
 }
 
+.bottom img {
+    height: 30px;
+    width: auto;
+}
+
 .sidenav a {
     margin: 20px 25px;
     text-decoration: none;

@@ -19,15 +19,15 @@
 <table>
     <tr class="top"><td>
         <a href="javascript:void(0)" onclick="closeNav()"><img src="/static/images/icon_close_menu.png" class="closebtn"></a>
-        <a href="{{url_for('search')}}">Search</a>
-        <a href="{{url_for('recent')}}">Recent</a>
-        <a href="{{url_for('people')}}">People</a>
-        <a href="{{url_for('watchlist')}}">Watchlist</a>
-        <a href="{{url_for('statistics')}}">Statistics</a>
+        <a href="{{ url_for('search') }}">Search</a>
+        <a href="{{ url_for('recent') }}">Recent</a>
+        <a href="{{ url_for('people') }}">People</a>
+        <a href="{{ url_for('watchlist') }}">Watchlist</a>
+        <a href="{{ url_for('statistics') }}">Statistics</a>
     </td></tr>
     <tr class="bottom"><td>
-        <a href="{{url_for('settings')}}">Settings</a>
-        <a href="{{url_for('logout')}}">Logout</a>
+        <a href="{{ url_for('settings') }}"><img src="/static/images/settings.png"></a>
+        <a href="{{ url_for('logout') }}"><img src="/static/images/logout.png"></a>
     </td></tr>
 </table>
 </div>
