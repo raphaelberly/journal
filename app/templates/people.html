@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <title>{% if payload.person %}{{ payload.person.name }} - Journal{% else %}People - Journal{% endif %}</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
