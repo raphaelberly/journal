@@ -152,7 +152,12 @@ def recent():
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
         'show_more_button': show_more_button,
+        'bypass_pageview_tracking': False if not session['history'] else session['history'][-1][0] == 'recent',
     }
+    if session['history']:
+        last_page, _ = session['history'][-1]
+        if last_page == 'recent':
+            metadata['bypass_pageview_tracking'] = True
 
     session['history'] = [('recent', {'nb_results': nb_results})]
 
@@ -317,6 +322,10 @@ def search():
         'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
         'show_more_button': nb_results < len(result_ids)
     }
+    if session['history']:
+        last_page, last_args = session['history'][-1]
+        if last_page == 'search' and last_args.get('query') == query:
+            metadata['bypass_pageview_tracking'] = True
 
     session['history'] = [('search', {'query': query, 'nb_results': nb_results})]
     session.modified = True
@@ -401,12 +410,16 @@ def movie(tmdb_id):
         session['history'] = session.get('history', []) + [('movie', {'tmdb_id': tmdb_id})]
         session.modified = True
 
+    metadata = {}
+    if request.referrer and '/movie/' in request.referrer:
+        metadata['bypass_pageview_tracking'] = True
+
     if request.method == 'GET' and request.args.get('show_slider', False):
-        metadata = {
+        metadata.update({
             'mode': 'show_slider',
             'grade_as_int': current_user.grade_as_int,
             'show_back_button': len(session['history']) >= 2
-        }
+        })
         return render_template('movie.html', payload=title, metadata=metadata)
 
     if request.method == 'POST':
@@ -458,10 +471,10 @@ def movie(tmdb_id):
             refresh_materialized_views()
     # Prepare page and title metadata
     title['in_watchlist'] = tmdb_id in get_watchlist_ids()
-    metadata = {
+    metadata.update({
         'mode': 'show_edit_buttons' if title.get('grade') is not None else 'show_add_buttons',
         'show_back_button': len(session['history']) >= 2
-    }
+    })
     return render_template('movie.html', payload=title, metadata=metadata)
 
 
@@ -572,4 +585,9 @@ def settings():
         'providers': user_providers,
         'provider_names': available_providers,
     }
-    return render_template('settings.html', payload=payload, metadata={})
+
+    metadata = {}
+    if request.referrer and '/settings' in request.referrer:
+        metadata['bypass_pageview_tracking'] = True
+
+    return render_template('settings.html', payload=payload, metadata=metadata)
