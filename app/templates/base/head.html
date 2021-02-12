@@ -27,8 +27,8 @@
   gtag('js', new Date());
 
   {% if metadata.bypass_pageview_tracking %}
-      gtag('config', 'G-5V7Y6WG93H', {'send_page_view': false});
+      gtag('config', '{{ config.GOOGLE_ANALYTICS_KEY }}', {'send_page_view': false});
   {% else %}
-      gtag('config', 'G-5V7Y6WG93H');
+      gtag('config', '{{ config.GOOGLE_ANALYTICS_KEY }}');
   {% endif %}
 </script>
