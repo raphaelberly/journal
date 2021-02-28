@@ -1,17 +1,4 @@
 WITH
-search AS (
-  SELECT
-    p.id AS person_id,
-    round(ts_rank(to_tsvector(p.name), to_tsquery('{query}'))::NUMERIC, 5) AS score
-  FROM journal.persons p
-),
-search_filtered AS (
-  SELECT
-    s.*,
-    rank() OVER (ORDER BY s.score DESC, s.person_id) AS rank
-  FROM search s
-  WHERE s.score > 0.05
-),
 credits AS (
   SELECT
     c.person_id,
@@ -19,6 +6,31 @@ credits AS (
     array_agg(c.role) AS roles
   FROM journal.credits c
   GROUP BY 1,2
+),
+counts AS (
+  SELECT
+    c.person_id,
+    count(DISTINCT c.tmdb_id) AS movie_count
+  FROM journal.credits c
+  INNER JOIN journal.records r
+    ON c.tmdb_id = r.tmdb_id
+    AND r.user_id = {user_id}
+  GROUP BY 1
+),
+search AS (
+  SELECT
+    p.id                                                                    AS person_id,
+    round(ts_rank(to_tsvector(p.name), to_tsquery('{query}'))::NUMERIC, 5)  AS score
+  FROM journal.persons p
+),
+search_filtered AS (
+  SELECT
+    s.person_id
+  FROM search s
+  INNER JOIN counts p
+    ON s.person_id = p.person_id
+  ORDER BY s.score DESC, p.movie_count DESC
+  LIMIT 1
 )
 SELECT
   s.person_id,
@@ -38,7 +50,6 @@ INNER JOIN journal.titles t
   ON r.tmdb_id = t.id
 INNER JOIN journal.users u
   ON r.user_id = u.id
-  AND u.id = {user_id}
-WHERE s.rank = 1
-ORDER BY r.date DESC, r.grade DESC
+WHERE u.id = {user_id}
+ORDER BY r.date DESC, r.insert_datetime_utc DESC
 ;
