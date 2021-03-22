@@ -26,7 +26,7 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  {% if metadata.bypass_pageview_tracking %}
+  {% if metadata is defined and metadata.bypass_pageview_tracking %}
       gtag('config', '{{ config.GOOGLE_ANALYTICS_KEY }}', {'send_page_view': false});
   {% else %}
       gtag('config', '{{ config.GOOGLE_ANALYTICS_KEY }}');
