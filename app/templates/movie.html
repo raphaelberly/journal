@@ -33,8 +33,8 @@
             <br/>{{ ', '.join(title.genres) }}
         {% endif %}
         {% if title.director_names %}
-            {% for name, id in zip(title.director_names, title.director_ids) %}
             <br/>By
+            {% for name, id in zip(title.director_names, title.director_ids) %}
                 <a href="javascript:add_referrer_and_load('{{ url_for('people', person_id=id) }}')">{{ name }}</a>{% if loop.index0 != title.director_names|length-1 %} and {% endif %}
             {% endfor %}
         {% endif %}
