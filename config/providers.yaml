@@ -5,6 +5,7 @@ supported_providers:
   - disneyplus
   - canalplayvod
   - mubi
+  - universcine
 
 country: FR
 main_city:

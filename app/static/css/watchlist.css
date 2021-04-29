@@ -58,3 +58,6 @@
 .OFF.mubi img {
   content:url('/static/images/providers/mubi_gray.png');
 }
+.OFF.universcine img {
+  content:url('/static/images/providers/universcine_gray.png');
+}

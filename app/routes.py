@@ -546,6 +546,7 @@ def settings():
         'canalplayvod': 'Canal Play VOD',
         'disneyplus': 'Disney+',
         'mubi': 'Mubi',
+        'universcine': 'Univers Ciné',
     }
     user_providers = {provider: provider in current_user.providers for provider in available_providers.keys()}
 
