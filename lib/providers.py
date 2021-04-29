@@ -54,7 +54,7 @@ class Providers(object):
             sleep(0.1)
             response = self._client.search_for_item(**kwargs)
         for result in response['items']:
-            if self._check_tmdb_id(result['scoring'], movie_tmdb_id):
+            if self._check_tmdb_id(result.get('scoring', []), movie_tmdb_id):
                 for offer in result.get('offers', []):
                     if offer['provider_id'] in self.supported_providers.keys():
                         names.add(self.supported_providers[offer['provider_id']])
