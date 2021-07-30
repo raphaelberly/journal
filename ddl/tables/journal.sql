@@ -52,6 +52,8 @@ CREATE TABLE imdb.users (
   email                 VARCHAR(256)    NOT NULL,
   grade_as_int          BOOLEAN         NOT NULL DEFAULT TRUE,
   language              VARCHAR(4)      NOT NULL DEFAULT 'fr',
+  providers             VARCHAR(128)[]  NOT NULL DEFAULT '{}',
+  social_activated      BOOLEAN         NOT NULL DEFAULT FALSE,
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   CONSTRAINT "users_pkey" PRIMARY KEY (id)

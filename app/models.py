@@ -21,6 +21,7 @@ class User(UserMixin, db.Model):
     grade_as_int = db.Column(db.Boolean)
     language = db.Column(db.String(4))
     providers = db.Column(db.ARRAY(db.String(128)))
+    social_activated = db.Column(db.Boolean)
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -29,13 +30,15 @@ class User(UserMixin, db.Model):
 
     _default_providers = ('netflix', 'amazonprimevideo')
 
-    def __init__(self, username, password, email, grade_as_int=True, language='fr', providers=_default_providers):
+    def __init__(self, username, password, email, grade_as_int=True, language='fr', providers=_default_providers,
+                 social_activated=False):
         self.username = username
         self.password_hash = generate_password_hash(password)
         self.email = email
         self.grade_as_int = grade_as_int
         self.language = language
         self.providers = providers
+        self.social_activated = social_activated
 
     def __repr__(self):
         return f'<User {self.id}: {self.username}>'
