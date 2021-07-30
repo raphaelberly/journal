@@ -566,6 +566,11 @@ def settings():
         if original_titles_fr != (current_user.language == 'fr'):
             current_user.language = 'fr' if original_titles_fr else 'en'
             modified = True
+        # If social_activated preference was changed, perform change in the db
+        social_activated = 'social_activated' in request.form
+        if social_activated != current_user.social_activated:
+            current_user.social_activated = social_activated
+            modified = True
         # If the list of providers was changed, change it in the db
         submitted_providers = {provider: provider in request.form for provider in available_providers}
         if submitted_providers != user_providers:
@@ -583,6 +588,7 @@ def settings():
     payload = {
         'decimal_grades': decimal_grades,
         'original_titles_fr': original_titles_fr,
+        'social_activated': social_activated,
         'providers': user_providers,
         'provider_names': available_providers,
     }
