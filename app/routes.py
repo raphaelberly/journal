@@ -553,6 +553,7 @@ def settings():
     if request.method == 'GET':
         decimal_grades = not current_user.grade_as_int
         original_titles_fr = current_user.language == 'fr'
+        social_activated = current_user.social_activated
 
     elif request.method == 'POST':
         modified = False
