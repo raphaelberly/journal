@@ -599,3 +599,9 @@ def settings():
         metadata['bypass_pageview_tracking'] = True
 
     return render_template('settings.html', payload=payload, metadata=metadata)
+
+
+@app.route('/social', methods=['GET', 'POST'])
+@login_required
+def social():
+    pass

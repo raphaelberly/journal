@@ -24,6 +24,9 @@
         <a href="{{ url_for('people') }}">People</a>
         <a href="{{ url_for('watchlist') }}">Watchlist</a>
         <a href="{{ url_for('statistics') }}">Statistics</a>
+        {% if current_user.social_activated %}
+        <a href="{{ url_for('social') }}">Social</a>
+        {% endif %}
     </td></tr>
     <tr class="bottom"><td>
         <a href="{{ url_for('settings') }}"><img src="/static/images/settings.png"></a>
