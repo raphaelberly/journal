@@ -46,6 +46,11 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def export(self):
+        value = self.__dict__.copy()
+        value.pop('_sa_instance_state')
+        return value
+
 
 class Title(db.Model):
 

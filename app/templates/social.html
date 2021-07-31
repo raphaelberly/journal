@@ -1,0 +1,56 @@
+<html>
+
+<head>
+    <title>Social - Journal</title>
+    {% include 'base/head.html' %}
+    <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recent.css')}}">
+</head>
+
+<body ontouchstart="">
+
+{% with page_title = 'Social' %}
+    {% include 'base/menu.html' %}
+{% endwith %}
+{% include 'base/alert.html' %}
+
+<div class="recent">
+
+<center><table>
+
+{% for record, title, user in payload %}
+<tr>
+    {% if loop.index0 == 0 %}
+        <td class="timeline top"></td>
+    {% else %}
+        <td class="timeline middle"></td>
+    {% endif %}
+    <td>
+        <span class="time-ago">{{ user.username }}, {{ format_date(record.date) }}</span>
+        <br/>
+        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.id) }}')">{{ title.title }} ({{ title.year }})</a></b>
+        <br/>
+        {{ ', '.join(title.genres) }}
+        <br/>
+        {{ [record.grade|int, record.grade]|max }}/10
+    </td>
+</tr>
+{% endfor %}
+
+</table></center>
+
+{% if metadata.show_more_button %}
+<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_referrer_and_load('{{ url_for('social', nb_results=payload|length+20) }}')" value="More">
+{% endif %}
+
+</div>
+
+{% if metadata.scroll_to %}
+<script type = "text/javascript"> window.scrollTo(0, {{ metadata.scroll_to }}); </script>
+{% endif %}
+
+</body>
+</html>

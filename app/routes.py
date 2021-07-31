@@ -604,4 +604,35 @@ def settings():
 @app.route('/social', methods=['GET', 'POST'])
 @login_required
 def social():
-    pass
+
+    nb_recent = Record.query \
+        .filter(Record.user_id != current_user.id) \
+        .filter(Record.include_in_recent == True) \
+        .count()
+
+    query = db.session \
+        .query(Record, Title, User) \
+        .select_from(Record).join(Title).join(User) \
+        .filter(Record.user_id != current_user.id) \
+        .filter(Record.include_in_recent == True) \
+        .filter(User.social_activated == True) \
+        .order_by(Record.date.desc(), Record.insert_datetime_utc.desc())
+
+    nb_results = int(request.args.get('nb_results', 20))
+    query = query.limit(nb_results)
+
+    payload = [(record.export(), title.export(current_user.language), user.export()) for record, title, user in query.all()]
+    show_more_button = nb_recent > len(payload)
+    metadata = {
+        'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
+        'show_more_button': show_more_button,
+        'bypass_pageview_tracking': False if not session['history'] else session['history'][-1][0] == 'social',
+    }
+    if session['history']:
+        last_page, _ = session['history'][-1]
+        if last_page == 'social':
+            metadata['bypass_pageview_tracking'] = True
+
+    session['history'] = [('social', {'nb_results': nb_results})]
+
+    return render_template('social.html', payload=payload, metadata=metadata)
