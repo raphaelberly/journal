@@ -59,3 +59,7 @@ td {
     margin-right: 3px;
     vertical-align: text-bottom;
 }
+
+.dual .mentions {
+    color: #6caee0;
+}

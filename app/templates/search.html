@@ -90,7 +90,15 @@
             </td>
             </tr></table>
             {% else %}
-            <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}');" value="Add">
+            <table class="dual"><tr>
+            <td class="left">
+                <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}');" value="Add">
+            </td><td class="right">
+                <div class="mentions">
+                <img src="/static/images/icon_check_blue.png"> <b>in watchlist</b>
+                </div>
+            </td></tr>
+            </table>
             {% endif %}
         {% else %}
         <div class="mentions">
