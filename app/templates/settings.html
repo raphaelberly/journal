@@ -5,7 +5,6 @@
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/switch.css')}}">
 </head>
@@ -25,12 +24,12 @@
 <h2>General</h2>
 <table>
     <tr><td class="switch">
-        <input id="decimal_grades" name="decimal_grades" class="apple-switch" type="checkbox"{% if payload.decimal_grades %} checked{% endif %}>
+        <input id="decimal_grades" onChange="this.form.submit()" name="decimal_grades" class="apple-switch" type="checkbox"{% if payload.decimal_grades %} checked{% endif %}>
     </td><td class="caption">
         Allow decimal grades
     </td></tr>
     <tr><td class="switch">
-        <input id="original_titles_fr" name="original_titles_fr" class="apple-switch" type="checkbox"{% if payload.original_titles_fr %} checked{% endif %}>
+        <input id="original_titles_fr" onChange="this.form.submit()" name="original_titles_fr" class="apple-switch" type="checkbox"{% if payload.original_titles_fr %} checked{% endif %}>
     </td><td class="caption">
         Use original titles for French movies
     </td></tr>
@@ -40,14 +39,12 @@
 <table>
     {% for provider in payload.providers %}
     <tr><td class="switch">
-        <input id="{{ provider }}" name="{{ provider }}" class="apple-switch" type="checkbox"{% if payload.providers[provider] %} checked{% endif %}>
+        <input id="{{ provider }}" onChange="this.form.submit()" name="{{ provider }}" class="apple-switch" type="checkbox"{% if payload.providers[provider] %} checked{% endif %}>
     </td><td class="caption">
         {{ payload.provider_names[provider] }}
     </td></tr>
     {% endfor %}
 </table>
-
-<input class="styled-button full" type="submit" value="Save">
 
 </form>
 
