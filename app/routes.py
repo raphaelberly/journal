@@ -294,7 +294,7 @@ def enrich_results(results):
             **TitleConverter.json_to_front(res, current_user.language),
             'grade': records.get(res['id'], {}).get('grade'),
             'date': records.get(res['id'], {}).get('date'),
-            'include_in_recent': records.get(res['id'], {}).get('include_in_recent'),
+            'include_in_recent': records.get(res['id'], {}).get('include_in_recent', True),  # default to True
             'in_watchlist': res['id'] in watchlist_ids,
         })
     return output
