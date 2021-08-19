@@ -282,7 +282,7 @@ def enrich_results(results):
     records = Record.query \
         .filter(Record.user_id == current_user.id)  \
         .filter(Record.tmdb_id.in_([result['id'] for result in results])).all()
-    records = dict({record.tmdb_id: record for record in records})
+    records = dict({record.tmdb_id: record.export() for record in records})
     # Query ids of movies in user's watchlist
     watchlist_ids = get_watchlist_ids()
     # Create output dict
@@ -290,9 +290,9 @@ def enrich_results(results):
     for res in results:
         output.append({
             **TitleConverter.json_to_front(res, current_user.language),
-            'grade': records.get(res['id'], {}).grade,
-            'date': records.get(res['id'], {}).date,
-            'include_in_recent': records.get(res['id'], {}).include_in_recent,
+            'grade': records.get(res['id'], {}).get('grade'),
+            'date': records.get(res['id'], {}).get('date'),
+            'include_in_recent': records.get(res['id'], {}).get('include_in_recent'),
             'in_watchlist': res['id'] in watchlist_ids,
         })
     return output
