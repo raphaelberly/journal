@@ -199,7 +199,8 @@ def statistics():
     activity_metrics = ['viewing activity', 'time spent']
     agg = db.session.query(func.coalesce(func.count(Title.title), 0), func.coalesce(func.sum(Title.runtime), 0),) \
         .select_from(Record).join(Title) \
-        .filter(Record.user_id == current_user.id)
+        .filter(Record.user_id == current_user.id) \
+        .filter(Record.include_in_recent == True)
     # This month
     this_month = agg \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
@@ -231,6 +232,7 @@ def statistics():
                Title.title, db.cast(db.extract('year', Title.release_date), db.Integer).label('year'), Title.genres) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
+        .filter(Record.include_in_recent == True) \
         .filter(db.extract('year', Record.date) == year_applicable)
     best = query.order_by(Record.grade.desc(), Record.insert_datetime_utc.desc()).limit(5).all()
     worst = query.order_by(Record.grade, Record.insert_datetime_utc.desc()).limit(5).all()
