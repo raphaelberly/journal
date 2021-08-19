@@ -279,10 +279,10 @@ def statistics():
 
 def enrich_results(results):
     # Query (tmdb_id, grade, date) of results which were already graded by user
-    records = Record.query.with_entities(Record.tmdb_id, Record.grade, Record.date) \
+    records = Record.query \
         .filter(Record.user_id == current_user.id)  \
         .filter(Record.tmdb_id.in_([result['id'] for result in results])).all()
-    records = dict({_id: {'grade': _grade, 'date': _date} for _id, _grade, _date in records})
+    records = dict({record.tmdb_id: record for record in records})
     # Query ids of movies in user's watchlist
     watchlist_ids = get_watchlist_ids()
     # Create output dict
@@ -290,8 +290,9 @@ def enrich_results(results):
     for res in results:
         output.append({
             **TitleConverter.json_to_front(res, current_user.language),
-            'grade': records.get(res['id'], {}).get('grade'),
-            'date': records.get(res['id'], {}).get('date'),
+            'grade': records.get(res['id'], {}).grade,
+            'date': records.get(res['id'], {}).date,
+            'include_in_recent': records.get(res['id'], {}).include_in_recent,
             'in_watchlist': res['id'] in watchlist_ids,
         })
     return output
@@ -444,19 +445,22 @@ def movie(tmdb_id):
         elif 'gradeRange' in request.form:
             # Get submitted grade
             grade = float(get_post_result('gradeRange'))
+            include_in_recent = 'include_in_recent' in request.form
             # If there is already a grade, then it's an update. Otherwise it's an addition
             if title.get('grade') is not None:
                 action = 'updated'
                 # Update the movie in the records table
                 Record.query \
                     .filter_by(user_id=current_user.id, tmdb_id=tmdb_id) \
-                    .update({'grade': grade, 'update_datetime_utc': datetime.utcnow()})
+                    .update({
+                        'grade': grade, 'include_in_recent': include_in_recent, 'update_datetime_utc': datetime.utcnow()
+                    })
             else:
                 action = 'added'
                 # Add the movie to the titles table
                 upsert_title_metadata(_title)
                 # Add the movie to the records table
-                record = Record(current_user.id, tmdb_id, grade)
+                record = Record(current_user.id, tmdb_id, grade, include_in_recent=include_in_recent)
                 db.session.add(record)
                 # Remove from watchlist (if in it)
                 remove_from_watchlist(tmdb_id)
