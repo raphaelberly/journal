@@ -199,7 +199,8 @@ def statistics():
     activity_metrics = ['viewing activity', 'time spent']
     agg = db.session.query(func.coalesce(func.count(Title.title), 0), func.coalesce(func.sum(Title.runtime), 0),) \
         .select_from(Record).join(Title) \
-        .filter(Record.user_id == current_user.id)
+        .filter(Record.user_id == current_user.id) \
+        .filter(Record.include_in_recent == True)
     # This month
     this_month = agg \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
@@ -231,6 +232,7 @@ def statistics():
                Title.title, db.cast(db.extract('year', Title.release_date), db.Integer).label('year'), Title.genres) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
+        .filter(Record.include_in_recent == True) \
         .filter(db.extract('year', Record.date) == year_applicable)
     best = query.order_by(Record.grade.desc(), Record.insert_datetime_utc.desc()).limit(5).all()
     worst = query.order_by(Record.grade, Record.insert_datetime_utc.desc()).limit(5).all()
@@ -279,10 +281,10 @@ def statistics():
 
 def enrich_results(results):
     # Query (tmdb_id, grade, date) of results which were already graded by user
-    records = Record.query.with_entities(Record.tmdb_id, Record.grade, Record.date) \
+    records = Record.query \
         .filter(Record.user_id == current_user.id)  \
         .filter(Record.tmdb_id.in_([result['id'] for result in results])).all()
-    records = dict({_id: {'grade': _grade, 'date': _date} for _id, _grade, _date in records})
+    records = dict({record.tmdb_id: record.export() for record in records})
     # Query ids of movies in user's watchlist
     watchlist_ids = get_watchlist_ids()
     # Create output dict
@@ -292,6 +294,7 @@ def enrich_results(results):
             **TitleConverter.json_to_front(res, current_user.language),
             'grade': records.get(res['id'], {}).get('grade'),
             'date': records.get(res['id'], {}).get('date'),
+            'include_in_recent': records.get(res['id'], {}).get('include_in_recent', True),  # default to True
             'in_watchlist': res['id'] in watchlist_ids,
         })
     return output
@@ -444,19 +447,22 @@ def movie(tmdb_id):
         elif 'gradeRange' in request.form:
             # Get submitted grade
             grade = float(get_post_result('gradeRange'))
+            include_in_recent = 'include_in_recent' in request.form
             # If there is already a grade, then it's an update. Otherwise it's an addition
             if title.get('grade') is not None:
                 action = 'updated'
                 # Update the movie in the records table
                 Record.query \
                     .filter_by(user_id=current_user.id, tmdb_id=tmdb_id) \
-                    .update({'grade': grade, 'update_datetime_utc': datetime.utcnow()})
+                    .update({
+                        'grade': grade, 'include_in_recent': include_in_recent, 'update_datetime_utc': datetime.utcnow()
+                    })
             else:
                 action = 'added'
                 # Add the movie to the titles table
                 upsert_title_metadata(_title)
                 # Add the movie to the records table
-                record = Record(current_user.id, tmdb_id, grade)
+                record = Record(current_user.id, tmdb_id, grade, include_in_recent=include_in_recent)
                 db.session.add(record)
                 # Remove from watchlist (if in it)
                 remove_from_watchlist(tmdb_id)

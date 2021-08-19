@@ -5,10 +5,12 @@
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/options.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/checkbox.css')}}">
 </head>
 
 <body ontouchstart="">
@@ -50,17 +52,26 @@
     </td></tr>
 
     {% if metadata.mode == 'show_slider' %}
-    <tr><td>
     <form action="{{ url_for('movie', tmdb_id=title.id) }}" method="post">
 
+    <tr><td>
         <div class="slidecontainer">
             <div class="mentions"><b><span id="gradeValue"></span>/10</b></div>
             <input id="gradeRange" name="gradeRange" type="range" min="{{ 1 if metadata.grade_as_int else 0 }}" max="10" value="{{ title.get('grade', 6 if metadata.grade_as_int else 6.5)|string }}" step="{{ 1 if metadata.grade_as_int else 0.5 }}" class="slider">
         </div>
+    </td></tr>
+    <tr><td>
+        <div class="options-link"><a href="#" onclick="switchOptionsSection(); return false;">options</a></div>
+        <div id="options-table">
+            <label class="container">I just watched this
+              <input id="include_in_recent" name="include_in_recent" type="checkbox" {% if title.include_in_recent %} checked{% endif %}>
+              <span class="checkmark"></span>
+            </label>
+        </div>
         <input class="styled-button full" type="submit" value="{{ 'Update' if title.grade else 'Add' }}">
+    </td></tr>
 
     </form>
-    </td></tr>
     {% endif %}
 
     {% if metadata.mode == 'show_edit_buttons' %}

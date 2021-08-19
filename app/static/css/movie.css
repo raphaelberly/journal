@@ -35,3 +35,13 @@
     color: black;
     text-decoration: none;
 }
+
+.options-link a {
+    display: inline-block;
+    padding-bottom: 15px;
+    color: #cccccc;
+}
+
+#options-table {
+    display: none;
+}
