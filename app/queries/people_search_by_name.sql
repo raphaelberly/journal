@@ -29,6 +29,7 @@ search_filtered AS (
   FROM search s
   INNER JOIN counts p
     ON s.person_id = p.person_id
+  WHERE score > 0
   ORDER BY s.score DESC, p.movie_count DESC
   LIMIT 1
 )
