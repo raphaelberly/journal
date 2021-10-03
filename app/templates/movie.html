@@ -49,6 +49,9 @@
         {% if title.duration %}
             <br/>{{ title.duration }}
         {% endif %}
+        {% if title.imdb_rating %}
+            <br/><a href="https://imdb.com/title/{{ title.imdb_id }}">IMDb: {{ title.imdb_rating }}/10</a> <span class="beta">beta</span>
+        {% endif %}
     </td></tr>
 
     {% if metadata.mode == 'show_slider' %}
