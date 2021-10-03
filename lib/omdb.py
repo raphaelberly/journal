@@ -1,6 +1,7 @@
 import json
 import os
 from functools import lru_cache
+from typing import Optional
 
 import requests
 
@@ -25,5 +26,8 @@ class Omdb(object):
                 return response
         return {}
 
-    def imdb_rating(self, title_id: str) -> str:
-        return self._get(title_id).get('imdbRating')
+    def imdb_rating(self, title_id: str) -> Optional[float]:
+        try:
+            return float(self._get(title_id).get('imdbRating'))
+        except ValueError:
+            return None
