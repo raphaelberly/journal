@@ -9,6 +9,7 @@ from urllib.parse import urlencode
 import requests
 from request_boost import boosted_requests
 
+from lib.omdb import Omdb
 from lib.tools import read_config
 
 
@@ -43,6 +44,23 @@ class Tmdb(object):
         return results
 
 
+class DataCollector(object):
+
+    def __init__(self):
+        self.tmdb = Tmdb()
+        self.omdb = Omdb()
+
+    def collect(self, title_id: int) -> dict:
+        result = self.tmdb.get(title_id)
+        imdb_rating = self.omdb.imdb_rating(result['imdb_id'])
+        return {**result, 'imdb_rating': imdb_rating}
+
+    def collect_bulk(self, title_ids: List[int]) -> List[dict]:
+        results = self.tmdb.get_bulk(title_ids)
+        imdb_ratings = self.omdb.imdb_ratings([result['imdb_id'] for result in results])
+        return [{**result, 'imdb_rating': rating} for result, rating in zip(results, imdb_ratings)]
+
+
 class TitleConverter(object):
 
     @staticmethod
@@ -64,6 +82,7 @@ class TitleConverter(object):
             'revenue': item.get('revenue'),
             'budget': item.get('budget'),
             'tagline': item.get('tagline'),
+            'imdb_rating': item.get('imdb_rating'),
         }
         return title
 
@@ -80,6 +99,7 @@ class TitleConverter(object):
             'director_ids': item['director_ids'],
             'duration': f'{item["runtime"] // 60}h {item["runtime"] % 60}min' if item.get('runtime') else None,
             'poster_url': 'https://image.tmdb.org/t/p/w200' + item['poster_path'] if item.get('poster_path') else None,
+            'imdb_rating': item.get('imdb_rating'),
         }
         return title
 
@@ -97,6 +117,7 @@ class TitleConverter(object):
             'director_ids': [item['id'] for item in item['credits'].get('crew', []) if item['job'] == 'Director'],
             'duration': f'{item["runtime"] // 60}h {item["runtime"] % 60}min' if item.get('runtime') else None,
             'poster_url': 'https://image.tmdb.org/t/p/w200' + item['poster_path'] if item.get('poster_path') else None,
+            'imdb_rating': item.get('imdb_rating'),
         }
         return title
 
