@@ -62,6 +62,7 @@ class Title(db.Model):
     revenue = db.Column(db.BigInteger)
     budget = db.Column(db.BigInteger)
     tagline = db.Column(db.String(1024))
+    imdb_rating = db.Column(db.Float)
     insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
 

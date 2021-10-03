@@ -75,6 +75,9 @@
         {% if title.duration %}
             <br/>{{ title.duration }}
         {% endif %}
+        {% if title.imdb_rating %}
+            <br/>IMDb: {{ title.imdb_rating }}/10 <span class="beta">beta</span>
+        {% endif %}
     </td></tr>
     {% if intersect(watchlist_item.providers, metadata.providers) %}
     <tr><td>

@@ -63,3 +63,10 @@ td {
 .dual .mentions {
     color: #6caee0;
 }
+
+.beta {
+    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: bold;
+    color: #6caee0;
+}

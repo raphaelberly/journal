@@ -74,6 +74,9 @@
         {% if item.duration %}
             <br/>{{ item.duration }}
         {% endif %}
+        {% if item.imdb_rating %}
+            <br/>IMDb: {{ item.imdb_rating }}/10 <span class="beta">beta</span>
+        {% endif %}
     </td></tr>
     <tr><td>
         {% if not item.grade %}
