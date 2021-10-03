@@ -4,7 +4,7 @@ from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db, login
-from lib.tmdb import TitleConverter
+from app.converters import TitleConverter
 
 
 @login.user_loader
@@ -187,3 +187,16 @@ class Top(db.Model):
 
     def __repr__(self):
         return '<Top {0}: {1}>'.format(self.role, self.name)
+
+
+class Rating(db.Model):
+
+    title_id = db.Column(db.String(32), primary_key=True)
+    rating = db.Column(db.Float)
+    votes = db.Column(db.BigInteger)
+
+    __table_args__ = {"schema": "imdb"}
+    __tablename__ = "ratings"
+
+    def __repr__(self):
+        return f'<Rating for {self.title_id}: {self.rating}>'

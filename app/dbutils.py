@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import DeclarativeMeta
 
 from app import db
 from app.models import Title, Person, Credit
-from lib.tmdb import TitleConverter, CrewConverter
+from app.converters import TitleConverter, CrewConverter
 
 
 def _execute_in_thread(conn, query):

@@ -14,13 +14,14 @@ from app import db, login
 from app.dbutils import upsert_title_metadata, async_execute
 from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User, Person
+from app.titles import TitleCollector
+from app.converters import TitleConverter
 from lib.providers import Providers
-from lib.tmdb import Tmdb, TitleConverter
 from lib.tools import get_time_ago_string, get_time_spent_string
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
 
-tmdb = Tmdb()
+title_collector = TitleCollector()
 
 
 def intersect(a, b):
@@ -318,8 +319,8 @@ def search():
 
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 3))
-    result_ids = tmdb.search(query)
-    payload = enrich_results(tmdb.get_bulk(result_ids[:nb_results]))
+    result_ids = title_collector.tmdb.search(query)
+    payload = enrich_results(title_collector.collect_bulk(result_ids[:nb_results]))
     metadata = {
         'query': query,
         'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
@@ -345,7 +346,7 @@ def get_watchlist_ids():
 
 
 def add_to_watchlist(tmdb_id):
-    title = tmdb.get(tmdb_id)
+    title = title_collector.collect(tmdb_id)
     upsert_title_metadata(title)
     providers = Providers().get_names(title['original_title'], tmdb_id)
     item = WatchlistItem(user_id=current_user.id, tmdb_id=tmdb_id, providers=providers)
@@ -404,7 +405,7 @@ def movie(tmdb_id):
 
     # Get movie item
     tmdb_id = int(tmdb_id)
-    _title = tmdb.get(tmdb_id)
+    _title = title_collector.collect(tmdb_id)
     title = enrich_results([_title])[0]
 
     # Add this page to history if previous page was not already movie
