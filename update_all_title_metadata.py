@@ -5,11 +5,11 @@ from tqdm import tqdm
 from app import db
 from app.dbutils import upsert_title_metadata
 from app.models import Title
-from lib.tmdb import Tmdb
+from app.titles import TitleCollector
 
 
 # Initialize Tmdb instance
-tmdb = Tmdb()
+title_collector = TitleCollector()
 
 # Load all titles present in the db
 title_ids = [title_id for title_id, in db.session.query(Title.id).all()]
@@ -17,7 +17,7 @@ title_ids = [title_id for title_id, in db.session.query(Title.id).all()]
 # Update all titles one after the other
 errors = []
 for title_id in tqdm(title_ids):
-    title = tmdb.get(title_id)
+    title = title_collector.collect(title_id)
     try:
         upsert_title_metadata(item=title)
     except Exception:
