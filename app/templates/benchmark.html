@@ -1,0 +1,128 @@
+<html>
+
+<head>
+    <title>{% if metadata.query %}{{ metadata.query }} - Journal{% else %}Search - Journal{% endif %}</title>
+    {% include 'base/head.html' %}
+    <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notfound.css')}}">
+</head>
+
+<body ontouchstart="">
+
+{% with page_title = 'Search' %}
+    {% include 'base/menu.html' %}
+{% endwith %}
+{% include 'base/alert.html' %}
+
+<div class="form-search">
+
+<form method="get" action="{{ url_for('benchmark') }}">
+    <input name="query" placeholder="Type a movie title here..." type="text" value="{{ metadata.query or '' }}">
+    <button type="submit">Go</button>
+</form>
+
+</div>
+
+{% if payload == [] %}
+<div class="notfound">
+<table>
+    <tr><td>
+        <img id="img-no-results" src="static/images/fail.png">
+    </td></tr>
+    <tr><td>
+        Wops, no results were found.
+    </td></tr>
+</table>
+</div>
+{% endif %}
+
+<div class="movies bar">
+
+{% for item in payload %}
+<table>
+    {% if item.poster_url %}
+    <tr><td>
+        {% if item.grade %}
+        <a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id) }}')"><img src="{{ item.poster_url }}"></a>
+        {% else %}
+        <a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}')"><img src="{{ item.poster_url }}"></a>
+        {% endif %}
+    </td></tr>
+    {% endif %}
+    <tr><td>
+        <b>{{ item.title }}{% if item.year %} ({{ item.year }}){% endif %}</b>
+        {% if item.genres %}
+            <br/>{{ ', '.join(item.genres) }}
+        {% endif %}
+        {% if item.director_names %}
+            <br/>By
+            {% for name, id in zip(item.director_names, item.director_ids) %}
+                <a href="{{ url_for('people', person_id=id) }}">{{ name }}</a>{% if loop.index0 != item.director_names|length-1 %} and {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% if item.top_cast_names %}
+            <br/>With
+            {% for name, id in zip(item.top_cast_names, item.top_cast_ids) %}
+                <a href="{{ url_for('people', person_id=id) }}">{{ name }}</a>{% if loop.index0 != item.top_cast_names|length-1 %}, {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% if item.duration %}
+            <br/>{{ item.duration }}
+        {% endif %}
+    </td></tr>
+    <tr><td>
+        {% if not item.grade %}
+            {% if not item.in_watchlist %}
+            <table class="dual"><tr>
+            <td class="left">
+                <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}');" value="Add">
+            </td>
+            <td class="right">
+                <form onsubmit="this.action=add_referrer('{{ url_for('benchmark', query=metadata.query, nb_results=payload|length) }}');" method="post">
+                    <input type="hidden" name="add_to_watchlist" value="{{ item.id }}">
+                    <input class="styled-button empty" type="submit" value="Watchlist">
+                </form>
+            </td>
+            </tr></table>
+            {% else %}
+            <table class="dual"><tr>
+            <td class="left">
+                <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=item.id, show_slider=True) }}');" value="Add">
+            </td><td class="right">
+                <div class="mentions">
+                <img src="/static/images/icon_check_blue.png"> <b>in watchlist</b>
+                </div>
+            </td></tr>
+            </table>
+            {% endif %}
+        {% else %}
+        <div class="mentions">
+            <img src="/static/images/icon_check.png">
+            <b>{{ [item.grade|int, item.grade]|max }}/10</b>, rated {{ format_date(item.date)|lower }}
+        </div>
+        {% endif %}
+    </td></tr>
+</table>
+{% endfor %}
+
+{% if metadata.show_more_button %}
+<table>
+    <tr><td>
+        <a id="show_more_link" href="javascript:add_referrer_and_load('{{ url_for('benchmark', query=metadata.query, nb_results=payload|length*2+1) }}');">More results</a>
+    </td></tr>
+</table>
+{% endif %}
+
+</div>
+
+{% if metadata.scroll_to %}
+<script type = "text/javascript"> window.scrollTo(0, {{ metadata.scroll_to }}); </script>
+{% endif %}
+
+</body>
+</html>

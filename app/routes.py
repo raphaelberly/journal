@@ -599,3 +599,43 @@ def settings():
         metadata['bypass_pageview_tracking'] = True
 
     return render_template('settings.html', payload=payload, metadata=metadata)
+
+
+@app.route('/benchmark', methods=['GET'])
+def benchmark():
+
+    if not request.args.get('query'):
+        session['history'] = []
+        session.modified = True
+        return render_template('benchmark.html', metadata={})
+
+    def enrich_results(results):
+        output = []
+        for res in results:
+            output.append({
+                **TitleConverter.json_to_front(res),
+                'grade': None,
+                'date': None,
+                'include_in_recent': True,
+                'in_watchlist': False,
+            })
+        return output
+
+    query = request.args['query']
+    nb_results = int(request.args.get('nb_results', 3))
+    result_ids = title_collector.tmdb.search(query)
+    payload = enrich_results(title_collector.collect_bulk(result_ids[:nb_results]))
+    metadata = {
+        'query': query,
+        'scroll_to': 0,
+        'show_more_button': nb_results < len(result_ids)
+    }
+    if session['history']:
+        last_page, last_args = session['history'][-1]
+        if last_page == 'search' and last_args.get('query') == query:
+            metadata['bypass_pageview_tracking'] = True
+
+    session['history'] = [('search', {'query': query, 'nb_results': nb_results})]
+    session.modified = True
+
+    return render_template('benchmark.html', payload=payload, metadata=metadata)
