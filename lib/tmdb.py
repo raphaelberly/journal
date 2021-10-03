@@ -3,10 +3,11 @@ import os
 import re
 from datetime import datetime
 from functools import lru_cache
-from multiprocessing.pool import ThreadPool
 from typing import List
+from urllib.parse import urlencode
 
 import requests
+from request_boost import boosted_requests
 
 from lib.tools import read_config
 
@@ -35,11 +36,11 @@ class Tmdb(object):
         return json.loads(response.content)
 
     def get_bulk(self, title_ids: List[int]) -> List[dict]:
-        if len(title_ids) == 0:
-            return []
-        pool = ThreadPool(processes=len(title_ids))
-        async_results = (pool.apply_async(self.get, (title_id,)) for title_id in title_ids)
-        return [async_result.get() for async_result in async_results if async_result.get()]
+        params = {'api_key': self._api_key, 'append_to_response': 'credits'}
+        url_template = '?'.join([self.URL_MOVIE, urlencode(params)])
+        urls = [url_template.format(title_id=title_id) for title_id in title_ids]
+        results = boosted_requests(urls=urls)
+        return results
 
 
 class TitleConverter(object):
