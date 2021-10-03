@@ -17,11 +17,13 @@ from app.models import Record, Title, Top, WatchlistItem, User, Person
 from app.titles import TitleCollector
 from app.converters import TitleConverter
 from lib.providers import Providers
+from lib.tmdb import Tmdb
 from lib.tools import get_time_ago_string, get_time_spent_string
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
 
 title_collector = TitleCollector()
+tmdb = Tmdb()
 
 
 def intersect(a, b):
@@ -623,8 +625,8 @@ def benchmark():
 
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 3))
-    result_ids = title_collector.tmdb.search(query)
-    payload = enrich_results(title_collector.collect_bulk(result_ids[:nb_results]))
+    result_ids = tmdb.search(query)
+    payload = enrich_results(tmdb.get_bulk(result_ids[:nb_results]))
     metadata = {
         'query': query,
         'scroll_to': 0,
