@@ -1,6 +1,6 @@
-CREATE SCHEMA imdb;
+CREATE SCHEMA journal;
 
-CREATE TABLE imdb.titles (
+CREATE TABLE journal.titles (
   id                    INTEGER         NOT NULL,
   imdb_id               VARCHAR(32)     NOT NULL UNIQUE,
   title                 TEXT            NOT NULL,
@@ -17,12 +17,13 @@ CREATE TABLE imdb.titles (
   revenue               BIGINT,
   budget                BIGINT,
   tagline               TEXT,
+  imdb_rating           FLOAT,
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   CONSTRAINT "titles_pkey" PRIMARY KEY (id)
 );
 
-CREATE TABLE imdb.persons (
+CREATE TABLE journal.persons (
   id                    INTEGER         NOT NULL,
   name                  VARCHAR(128)    NOT NULL,
   gender                SMALLINT        NULL,
@@ -32,7 +33,7 @@ CREATE TABLE imdb.persons (
   CONSTRAINT "persons_pkey" PRIMARY KEY (id)
 );
 
-CREATE TABLE imdb.credits (
+CREATE TABLE journal.credits (
   id                    VARCHAR(128)    NOT NULL,
   tmdb_id               INTEGER         NOT NULL,
   person_id             INTEGER         NOT NULL,
@@ -45,7 +46,7 @@ CREATE TABLE imdb.credits (
   CONSTRAINT "credits_fkey_persons" FOREIGN KEY (person_id) REFERENCES imdb.persons (id)
 );
 
-CREATE TABLE imdb.users (
+CREATE TABLE journal.users (
   id                    SERIAL          NOT NULL,
   username              VARCHAR(32)     NOT NULL UNIQUE,
   password_hash         VARCHAR(128)    NOT NULL,
@@ -57,7 +58,7 @@ CREATE TABLE imdb.users (
   CONSTRAINT "users_pkey" PRIMARY KEY (id)
 );
 
-CREATE TABLE imdb.watchlist(
+CREATE TABLE journal.watchlist(
   user_id               INTEGER         NOT NULL,
   tmdb_id               INTEGER         NOT NULL,
   providers             VARCHAR(64)[]   NOT NULL,
@@ -68,7 +69,7 @@ CREATE TABLE imdb.watchlist(
   CONSTRAINT "watchlist_fkey_titles" FOREIGN KEY (tmdb_id) REFERENCES imdb.titles (id)
 );
 
-CREATE TABLE imdb.records(
+CREATE TABLE journal.records(
   user_id                   INTEGER             NOT NULL,
   tmdb_id                   INTEGER             NOT NULL,
   grade                     DOUBLE PRECISION    NOT NULL,
