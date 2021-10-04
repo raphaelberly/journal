@@ -7,7 +7,7 @@ class TitleConverter(object):
     def json_to_table(item: dict) -> dict:
         title = {
             'id': item['id'],
-            'imdb_id': item['imdb_id'],
+            'imdb_id': item.get('imdb_id'),
             'title': item['title'],
             'release_date': datetime.strptime(item['release_date'], '%Y-%m-%d'),
             'original_title': item['original_title'],
@@ -30,7 +30,7 @@ class TitleConverter(object):
     def table_to_front(item: dict, language: str = 'fr') -> dict:
         title = {
             'id': item['id'],
-            'imdb_id': item['imdb_id'],
+            'imdb_id': item.get('imdb_id'),
             'title': item['original_title'] if item['original_language'] == language else item['title'],
             'year': item['release_date'].year,
             'genres': item['genres'][:3],
@@ -48,7 +48,7 @@ class TitleConverter(object):
     def json_to_front(item: dict, language: str = 'fr') -> dict:
         title = {
             'id': item['id'],
-            'imdb_id': item['imdb_id'],
+            'imdb_id': item.get('imdb_id'),
             'title': item['original_title'] if item['original_language'] == language else item['title'],
             'year': item['release_date'][:4],
             'genres': [genre['name'] for genre in item.get('genres', [])[:3]],

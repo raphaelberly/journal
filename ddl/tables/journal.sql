@@ -2,7 +2,7 @@ CREATE SCHEMA journal;
 
 CREATE TABLE journal.titles (
   id                    INTEGER         NOT NULL,
-  imdb_id               VARCHAR(32)     NOT NULL UNIQUE,
+  imdb_id               VARCHAR(32)     UNIQUE,
   title                 TEXT            NOT NULL,
   release_date          DATE            NOT NULL,
   original_title        TEXT            NOT NULL,
