@@ -64,15 +64,13 @@ td {
     color: #6caee0;
 }
 
-.beta {
-    text-transform: uppercase;
-    font-size: 14px;
-    font-weight: bold;
-    color: #6caee0;
+span .imdb-star {
+    width: 15px;
+    height: auto;
+    margin-right: -1px;
+    margin-bottom: -1px;
 }
 
-.imdb {
-    font: 16px Impact, Arial, Helvetica, sans-serif;
-    font-weight: bold;
-    color: #f6cd00;
+svg.imdb-star {
+    color: rgb(245, 197, 24);
 }
