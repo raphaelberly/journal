@@ -19,8 +19,8 @@ counts AS (
 ),
 search AS (
   SELECT
-    p.id                                                                    AS person_id,
-    round(ts_rank(to_tsvector(p.name), to_tsquery('{query}'))::NUMERIC, 5)  AS score
+    p.id                                                                                        AS person_id,
+    round(ts_rank(to_tsvector(unaccent(p.name)), to_tsquery(unaccent('{query}')))::NUMERIC, 5)  AS score
   FROM journal.persons p
 ),
 search_filtered AS (

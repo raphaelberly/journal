@@ -1,4 +1,5 @@
 CREATE SCHEMA journal;
+CREATE EXTENSION unaccent;
 
 CREATE TABLE journal.titles (
   id                    INTEGER         NOT NULL,
