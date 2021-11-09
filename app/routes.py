@@ -200,17 +200,18 @@ def statistics():
     activity_metrics = ['viewing activity', 'time spent']
     agg = db.session.query(func.coalesce(func.count(Title.title), 0), func.coalesce(func.sum(Title.runtime), 0),) \
         .select_from(Record).join(Title) \
-        .filter(Record.user_id == current_user.id) \
-        .filter(Record.include_in_recent == True)
+        .filter(Record.user_id == current_user.id)
     # This month
     this_month = agg \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
         .filter(db.extract('month', Record.date) == db.extract('month', date.today())) \
+        .filter(Record.include_in_recent == True) \
         .first()
     activity.update({'month': {'values': dict(zip(activity_metrics, this_month)), 'desc': 'this month'}})
     # This year
     this_year = agg \
         .filter(db.extract('year', Record.date) == db.extract('year', date.today())) \
+        .filter(Record.include_in_recent == True) \
         .first()
     activity.update({'year': {'values': dict(zip(activity_metrics, this_year)), 'desc': 'this year'}})
     # Overall
