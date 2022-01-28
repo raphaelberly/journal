@@ -6,7 +6,7 @@ from time import sleep
 from tqdm import tqdm
 
 from app import db
-from app.models import WatchlistItem, Title, User
+from app.models import WatchlistItem, Title
 from lib.providers import Providers
 
 
@@ -30,10 +30,11 @@ for item, title, tmdb_id in tqdm(query.all()):
     if set(updated_providers) != set(item.providers):
         item.providers = updated_providers
         item.update_datetime_utc = datetime.utcnow()
+        # Commit straight away to avoid IdleInTransactionSessionTimeout
+        db.session.commit()
         i += 1
-    sleep(0.5)
+    sleep(0.1)
 
-LOGGER.info(f'Apply {i} changes to the database')
-db.session.commit()
+LOGGER.info(f'Applied {i} changes to the database')
 
 LOGGER.info('Done')
