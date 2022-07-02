@@ -17,11 +17,11 @@ title_ids = [title_id for title_id, in db.session.query(Title.id).all()]
 # Update all titles one after the other
 errors = []
 for title_id in tqdm(title_ids):
-    title = title_collector.collect(title_id)
     try:
+        title = title_collector.collect(title_id)
         upsert_title_metadata(item=title)
-    except Exception:
-        errors.append(errors)
+    except:
+        errors.append(title_id)
     sleep(0.2)
 
 # Commit changes if everything went well
