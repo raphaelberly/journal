@@ -21,7 +21,8 @@ CREATE TABLE journal.titles (
   imdb_rating           FLOAT,
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-  CONSTRAINT "titles_pkey" PRIMARY KEY (id)
+  CONSTRAINT "titles_pkey" PRIMARY KEY (id),
+  CONSTRAINT "titles_fkey_imdb_titles" FOREIGN KEY (imdb_id) REFERENCES imdb.titles (id)
 );
 
 CREATE TABLE journal.persons (
@@ -43,8 +44,8 @@ CREATE TABLE journal.credits (
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   CONSTRAINT "credits_pkey" PRIMARY KEY (id),
-  CONSTRAINT "credits_fkey_titles" FOREIGN KEY (tmdb_id) REFERENCES imdb.titles (id),
-  CONSTRAINT "credits_fkey_persons" FOREIGN KEY (person_id) REFERENCES imdb.persons (id)
+  CONSTRAINT "credits_fkey_titles"  FOREIGN KEY (tmdb_id) REFERENCES journal.titles(id),
+  CONSTRAINT "credits_fkey_persons" FOREIGN KEY (person_id) REFERENCES journal.persons(id)
 );
 
 CREATE TABLE journal.users (
@@ -66,8 +67,8 @@ CREATE TABLE journal.watchlist(
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   CONSTRAINT "watchlist_pkey" PRIMARY KEY (user_id,tmdb_id),
-  CONSTRAINT "watchlist_fkey_users" FOREIGN KEY (user_id) REFERENCES imdb.users (id),
-  CONSTRAINT "watchlist_fkey_titles" FOREIGN KEY (tmdb_id) REFERENCES imdb.titles (id)
+  CONSTRAINT "watchlist_fkey_users" FOREIGN KEY (user_id) REFERENCES journal.users(id),
+  CONSTRAINT "watchlist_fkey_titles" FOREIGN KEY (tmdb_id) REFERENCES journal.titles(id)
 );
 
 CREATE TABLE journal.records(
@@ -80,6 +81,6 @@ CREATE TABLE journal.records(
   insert_datetime_utc       TIMESTAMP           NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc       TIMESTAMP           NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   CONSTRAINT "records_pkey" PRIMARY KEY (user_id,tmdb_id),
-  CONSTRAINT "records_fkey_users" FOREIGN KEY (user_id) REFERENCES imdb.users (id),
-  CONSTRAINT "records_fkey_titles" FOREIGN KEY (tmdb_id) REFERENCES imdb.titles (id)
+  CONSTRAINT "records_fkey_users" FOREIGN KEY (user_id) REFERENCES journal.users(id),
+  CONSTRAINT "records_fkey_titles" FOREIGN KEY (tmdb_id) REFERENCES journal.titles(id)
 );

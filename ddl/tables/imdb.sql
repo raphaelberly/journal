@@ -28,7 +28,7 @@ CREATE TABLE imdb.crew (
 CREATE TABLE imdb.principals (
   title_id  VARCHAR(32) NOT NULL,
   person_id VARCHAR(32) NOT NULL,
-  role      TEXT        NOT NULL,
+  role      TEXT        NOT NULL
 );
 
 CREATE TABLE imdb.ratings (
