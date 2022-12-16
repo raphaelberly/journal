@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 
 import yaml
 import pandas as pd
@@ -28,7 +29,7 @@ for table_name in table_names:
         table_ref = f'{credentials["db"]["schema"]}.{table_name}'
         df = pd.read_sql_query(f'SELECT * FROM {table_ref}', db.engine)
         # Backup table as CSV
-        backup_path = f'{args.folder}/{table_name}.csv'
+        backup_path = os.path.join(args.folder, f'{table_name}.csv')
         df.to_csv(backup_path, header=True, index=False)
         LOGGER.info(f'Successful backup of {table_ref} table to: {backup_path}')
     except Exception:
