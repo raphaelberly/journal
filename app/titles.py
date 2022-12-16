@@ -11,11 +11,12 @@ class TitleCollector(object):
 
     def collect(self, title_id: int) -> dict:
         title = self.tmdb.get(title_id)
-        if title.get('imdb_id'):
-            result = Rating.query.filter_by(title_id=title['imdb_id']).first()
+        imdb_id = title.pop('imdb_id') if 'imdb_id' in title else ''
+        if imdb_id:
+            result = Rating.query.filter_by(title_id=imdb_id).first()
             if result is not None:
-                return {**title, 'imdb_rating': result.rating}
-        return {**title, 'imdb_rating': None}
+                return {**title, 'imdb_id': imdb_id, 'imdb_rating': result.rating}
+        return {**title, 'imdb_id': None, 'imdb_rating': None}
 
     def collect_bulk(self, title_ids: List[int]) -> List[dict]:
         # Get titles data from TMDb
