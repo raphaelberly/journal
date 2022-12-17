@@ -600,3 +600,47 @@ def settings():
         metadata['bypass_pageview_tracking'] = True
 
     return render_template('settings.html', payload=payload, metadata=metadata)
+
+
+def enrich_titles(title_ids):
+    # Fetch data on required titles
+    titles = Title.query.filter(Title.id.in_(title_ids)).all()
+    # Query ids of movies in user's watchlist
+    watchlist_ids = get_watchlist_ids()
+    # Create output dict
+    output = []
+    for title in titles:
+        output.append({
+            **title.export(language=current_user.language),
+            'in_watchlist': title.id in watchlist_ids,
+        })
+    return output
+
+
+@app.route('/recommended', methods=['GET', 'POST'])
+@login_required
+def recommended():
+
+    session['history'] = [('recommended', {})]
+    session.modified = True
+
+    if request.method == 'POST':
+        if 'add_to_watchlist' in request.form:
+            tmdb_id = int(get_post_result('add_to_watchlist'))
+            add_to_watchlist(tmdb_id)
+            flash('Movie added to watchlist', category='success')
+
+    # Generate SQL request
+    with open(path.join(CURRENT_DIR, 'queries/recommended_movies.sql')) as f:
+        sql = f.read().format(user_id=current_user.id)
+    # Execute SQL request and parse response
+    with db.engine.connect() as conn:
+        response = conn.execute(sql)
+    title_ids = [title_id for title_id, in response]
+
+    nb_results = 10
+    payload = {'titles': enrich_titles(title_ids)[:nb_results]}
+    metadata = {
+        'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
+    }
+    return render_template('recommended.html', payload=payload, metadata=metadata)
