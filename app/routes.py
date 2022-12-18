@@ -603,16 +603,16 @@ def settings():
 
 
 def enrich_titles(title_ids):
-    # Fetch data on required titles
-    titles = Title.query.filter(Title.id.in_(title_ids)).all()
+    # Fetch data on required titles, keep ID as key, so you can order them later
+    titles = {title.id: title for title in Title.query.filter(Title.id.in_(title_ids)).all()}
     # Query ids of movies in user's watchlist
     watchlist_ids = get_watchlist_ids()
     # Create output dict
     output = []
-    for title in titles:
+    for title_id in title_ids:
         output.append({
-            **title.export(language=current_user.language),
-            'in_watchlist': title.id in watchlist_ids,
+            **titles[title_id].export(language=current_user.language),
+            'in_watchlist': title_id in watchlist_ids,
         })
     return output
 
