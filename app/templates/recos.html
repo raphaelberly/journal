@@ -35,7 +35,6 @@
 <div class="movies nobar">
 
 {% for title in payload.titles %}
-
 <table>
 
     <tr><td>
@@ -91,8 +90,15 @@
     </td></tr>
 
 </table>
-
 {% endfor %}
+
+{% if metadata.show_more_button %}
+<table>
+    <tr><td>
+        <a id="show_more_link" href="javascript:add_referrer_and_load('{{ url_for('recos', nb_results=payload.titles|length+5) }}');">More</a>
+    </td></tr>
+</table>
+{% endif %}
 
 </div>
 

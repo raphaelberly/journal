@@ -51,3 +51,8 @@ table.dual {
     vertical-align: baseline;
 
 }
+
+#show_more_link{
+    color: #6caee0;
+    text-decoration: none;
+}

@@ -155,11 +155,6 @@ def recent():
         'show_more_button': show_more_button,
         'bypass_pageview_tracking': False if not session['history'] else session['history'][-1][0] == 'recent',
     }
-    if session['history']:
-        last_page, _ = session['history'][-1]
-        if last_page == 'recent':
-            metadata['bypass_pageview_tracking'] = True
-
     session['history'] = [('recent', {'nb_results': nb_results})]
 
     return render_template('recent.html', payload=payload, metadata=metadata)
@@ -621,9 +616,6 @@ def enrich_titles(title_ids):
 @login_required
 def recos():
 
-    session['history'] = [('recos', {})]
-    session.modified = True
-
     if request.method == 'POST':
         if 'add_to_watchlist' in request.form:
             tmdb_id = int(get_post_result('add_to_watchlist'))
@@ -638,9 +630,17 @@ def recos():
         response = conn.execute(sql)
     title_ids = [title_id for title_id, in response]
 
-    nb_results = 10
+    # Check whether we need to display "More" button
+    nb_results = int(request.args.get('nb_results', 5))
+    show_more_button = len(title_ids) > nb_results
+
+    # Prepare payload and metadata
     payload = {'titles': enrich_titles(title_ids)[:nb_results]}
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
+        'show_more_button': show_more_button,
+        'bypass_pageview_tracking': False if not session['history'] else session['history'][-1][0] == 'recos',
     }
+    session['history'] = [('recos', {'nb_results': nb_results})]
+
     return render_template('recos.html', payload=payload, metadata=metadata)
