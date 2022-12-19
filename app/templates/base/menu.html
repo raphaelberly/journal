@@ -8,7 +8,9 @@
         {% endif %}
     </td>
     <td>
-        <span style="cursor:pointer" onclick="topFunction()">{{page_title or 'Journal'}}</span>
+        <span style="cursor:pointer" onclick="topFunction()">
+            {{page_title or 'Journal'}}{% if beta is defined %}{% if beta %}<sup style="font-size:30%">BÊTA</sup>{% endif %}{% endif %}
+        </span>
     </td>
     <td class="right">
         <span style="cursor:pointer" onclick="openNav()"><img src="/static/images/icon_open_menu.png" class="openbtn"></span>
@@ -24,7 +26,7 @@
         <a href="{{ url_for('people') }}">People</a>
         <a href="{{ url_for('watchlist') }}">Watchlist</a>
         <a href="{{ url_for('statistics') }}">Statistics</a>
-        <a href="{{ url_for('recommended') }}">Recos<sup style="font-size:30%">BÊTA</sup></a>
+        <a href="{{ url_for('recos') }}">Recos<sup style="font-size:30%">BÊTA</sup></a>
     </td></tr>
     <tr class="bottom"><td>
         <a href="{{ url_for('settings') }}"><img src="/static/images/settings.png"></a>

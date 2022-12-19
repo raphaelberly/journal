@@ -617,11 +617,11 @@ def enrich_titles(title_ids):
     return output
 
 
-@app.route('/recommended', methods=['GET', 'POST'])
+@app.route('/recos', methods=['GET', 'POST'])
 @login_required
-def recommended():
+def recos():
 
-    session['history'] = [('recommended', {})]
+    session['history'] = [('recos', {})]
     session.modified = True
 
     if request.method == 'POST':
@@ -643,4 +643,4 @@ def recommended():
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
     }
-    return render_template('recommended.html', payload=payload, metadata=metadata)
+    return render_template('recos.html', payload=payload, metadata=metadata)

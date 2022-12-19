@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Recommended - Journal</title>
+    <title>Recos - Journal</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
@@ -13,9 +13,9 @@
 
 <body ontouchstart="" onload="filterSelection();">
 
-{% with page_title = 'Recommended' %}
+{% with page_title = 'Recos' %}{% with beta = True %}
     {% include 'base/menu.html' %}
-{% endwith %}
+{% endwith %}{% endwith %}
 {% include 'base/alert.html' %}
 
 
@@ -71,7 +71,7 @@
             <input class="styled-button full" type="button" onclick="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}');" value="Add">
         </td>
         <td class="right">
-            <form onsubmit="this.action=add_referrer('{{ url_for('recommended') }}');" method="post">
+            <form onsubmit="this.action=add_referrer('{{ url_for('recos') }}');" method="post">
                 <input type="hidden" name="add_to_watchlist" value="{{ title.id }}">
                 <input class="styled-button empty" type="submit" value="Watchlist">
             </form>
