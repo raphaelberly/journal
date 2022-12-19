@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
 </head>
 
-<body ontouchstart="" onload="filterSelection();">
+<body ontouchstart="">
 
 {% with page_title = 'Recos' %}{% with beta = True %}
     {% include 'base/menu.html' %}
@@ -39,7 +39,7 @@
 <table>
 
     <tr><td>
-        <a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}', true)">
+        <a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}')">
             <img src="{{ title.poster_url }}">
         </a>
     </td></tr>
@@ -51,13 +51,13 @@
         {% if title.director_names %}
             <br/>By
             {% for name, id in zip(title.director_names, title.director_ids) %}
-                <a href="javascript:add_referrer_and_load('{{ url_for('people', person_id=id) }}', true)">{{ name }}</a>{% if loop.index0 != title.director_names|length-1 %} and {% endif %}
+                <a href="javascript:add_referrer_and_load('{{ url_for('people', person_id=id) }}')">{{ name }}</a>{% if loop.index0 != title.director_names|length-1 %} and {% endif %}
             {% endfor %}
         {% endif %}
         {% if title.top_cast_names %}
             <br/>With
             {% for name, id in zip(title.top_cast_names, title.top_cast_ids) %}
-                <a href="javascript:add_referrer_and_load('{{ url_for('people', person_id=id) }}', true)">{{ name }}</a>{% if loop.index0 != title.top_cast_names|length-1 %}, {% endif %}
+                <a href="javascript:add_referrer_and_load('{{ url_for('people', person_id=id) }}')">{{ name }}</a>{% if loop.index0 != title.top_cast_names|length-1 %}, {% endif %}
             {% endfor %}
         {% endif %}
         {% if title.duration %}
