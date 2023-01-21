@@ -27,12 +27,11 @@ for table_name in table_names:
     try:
         # Fetch table into a Pandas dataframe
         table_ref = f'{credentials["db"]["schema"]}.{table_name}'
-        with app.app_context():
-            df = pd.read_sql_query(f'SELECT * FROM {table_ref}', db.engine)
-            # Backup table as CSV
-            backup_path = os.path.join(args.folder, f'{table_name}.csv')
-            df.to_csv(backup_path, header=True, index=False)
-            LOGGER.info(f'Successful backup of {table_ref} table to: {backup_path}')
+        df = pd.read_sql_query(f'SELECT * FROM {table_ref}', db.engine)
+        # Backup table as CSV
+        backup_path = os.path.join(args.folder, f'{table_name}.csv')
+        df.to_csv(backup_path, header=True, index=False)
+        LOGGER.info(f'Successful backup of {table_ref} table to: {backup_path}')
     except Exception:
         fail_list.append(table_name)
 

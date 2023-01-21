@@ -11,6 +11,7 @@ app.config.from_object(Config)
 
 # Initialise DB
 db = SQLAlchemy(app)
+app.app_context().push()
 
 # Initialise login manager
 login = LoginManager(app)
