@@ -38,7 +38,7 @@ for table_name in table_names:
 if fail_list:
     notifier.send_message(
         message=f'Could not backup table{"s" if len(fail_list) > 1 else ""}: {", ".join(fail_list)}',
-        title='🚨 Journal Alert'
+        title='⚠️ Journal Alert'
     )
 
 LOGGER.info('Done.')
