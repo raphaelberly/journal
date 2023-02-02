@@ -521,7 +521,7 @@ def people():
     payload = {'titles': [], 'person': {'roles': {}}}
     for i, row in enumerate(response):
         if i == 0:
-            person = Person.query.filter_by(id=row['person_id']).first()
+            person = Person.query.filter_by(id=row._mapping['person_id']).first()
             payload['person']['name'] = person.name
             if person.profile_path:
                 payload['person']['image'] = 'https://image.tmdb.org/t/p/w92' + person.profile_path
