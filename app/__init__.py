@@ -10,7 +10,8 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # Initialise DB
-db = SQLAlchemy(app)
+db = SQLAlchemy()
+db.init_app(app)
 app.app_context().push()
 
 # Initialise login manager
