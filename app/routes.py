@@ -11,7 +11,7 @@ from werkzeug.utils import redirect
 
 from app import app
 from app import db, login
-from app.dbutils import upsert_title_metadata, async_execute
+from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User, Person
 from app.titles import TitleCollector
@@ -392,7 +392,7 @@ def refresh_materialized_views():
     with open(path.join(CURRENT_DIR, 'queries/refresh_materialized_views.sql')) as f:
         sql = f.read()
     # Asynchronous execution of materialized views refresh
-    async_execute(sql)
+    async_execute_text(sql)
 
 
 @app.route('/movie/<tmdb_id>', methods=['GET', 'POST'])
@@ -516,8 +516,7 @@ def people():
             sql = f.read().format(person_id=request.args.get('person_id'), user_id=current_user.id)
 
     # Execute SQL request
-    with db.engine.connect() as conn:
-        response = conn.execute(sql)
+    response = execute_text(sql)
     # Parse query response
     payload = {'titles': [], 'person': {'roles': {}}}
     for i, row in enumerate(response):
@@ -626,8 +625,7 @@ def recos():
     with open(path.join(CURRENT_DIR, 'queries/recommended_movies.sql')) as f:
         sql = f.read().format(user_id=current_user.id)
     # Execute SQL request and parse response
-    with db.engine.connect() as conn:
-        response = conn.execute(sql)
+    response = execute_text(sql)
     title_ids = [title_id for title_id, in response]
 
     # Check whether we need to display "More" button

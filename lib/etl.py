@@ -8,6 +8,7 @@ from functools import partial
 import numpy as np
 import psycopg2
 import requests
+from sqlalchemy import text
 from toolz import partition_all
 from tqdm import tqdm
 
@@ -73,7 +74,7 @@ class ETL:
 
     def _truncate_table(self, conn):
         cur = conn.cursor()
-        cur.execute(f'TRUNCATE TABLE {self.table_name};')
+        cur.execute(text(f'TRUNCATE TABLE {self.table_name};'))
         cur.close()
 
     @staticmethod
@@ -96,7 +97,7 @@ class ETL:
         i = 0
         for query_batch in query_batch_generator:
             cur = conn.cursor()
-            cur.execute('\n'.join(query_batch))
+            cur.execute(text('\n'.join(query_batch)))
             cur.close()
             i += len(query_batch)
         LOGGER.info(f'{i} rows were processed and sent to database')

@@ -2,26 +2,33 @@ from datetime import datetime
 from threading import Thread
 from typing import List, Optional, Iterable
 
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.declarative import DeclarativeMeta
 
 from app import db
-from app.models import Title, Person, Credit
 from app.converters import TitleConverter, CrewConverter
+from app.models import Title, Person, Credit
 
 
 def _execute_in_thread(conn, query):
     try:
-        conn.execute(query)
+        sql = text(query.replace(':', '\:'))
+        conn.execute(sql)
     finally:
         conn.close()
 
 
-def async_execute(query):
+def async_execute_text(query: str):
     conn = db.engine.connect()
     thread = Thread(target=_execute_in_thread, args=(conn, query,))
     thread.start()
+
+
+def execute_text(query: str):  # expects an SQL Alchemy Text object
+    sql = text(query.replace(':', '\:'))
+    with db.engine.connect() as conn:
+        return conn.execute(sql)
 
 
 def _upsert(table_model: DeclarativeMeta, records: Iterable[dict], exclude: Optional[List[str]] = None):
