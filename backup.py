@@ -4,6 +4,8 @@ import os
 
 import yaml
 import pandas as pd
+from sqlalchemy import text
+
 from app import app, db
 from pushover import Client
 
@@ -27,13 +29,14 @@ for table_name in table_names:
     try:
         # Fetch table into a Pandas dataframe
         table_ref = f'{credentials["db"]["schema"]}.{table_name}'
-        df = pd.read_sql_query(f'SELECT * FROM {table_ref}', db.engine)
+        df = pd.read_sql_query(text(f'SELECT * FROM {table_ref}'), db.engine.connect())
         # Backup table as CSV
         backup_path = os.path.join(args.folder, f'{table_name}.csv')
         df.to_csv(backup_path, header=True, index=False)
         LOGGER.info(f'Successful backup of {table_ref} table to: {backup_path}')
-    except Exception:
+    except Exception as e:
         fail_list.append(table_name)
+        LOGGER.error(str(e))
 
 if fail_list:
     notifier.send_message(
