@@ -1,9 +1,9 @@
+from flask import Flask
+from flask_cachebuster import CacheBuster
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
 
 from config.app import Config
-from flask import Flask
-from flask_login import LoginManager
-from flask_cachebuster import CacheBuster
-from flask_sqlalchemy import SQLAlchemy
 
 # Initialise app
 app = Flask(__name__)
@@ -15,7 +15,8 @@ db.init_app(app)
 app.app_context().push()
 
 # Initialise login manager
-login = LoginManager(app)
+login = LoginManager()
+login.init_app(app)
 
 # Create cache buster
 cache_buster = CacheBuster(config={'extensions': ['.js', '.css', '.json'], 'hash_size': 5})

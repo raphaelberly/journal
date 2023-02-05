@@ -9,7 +9,9 @@ from app.converters import TitleConverter
 
 @login.user_loader
 def load_user(id_):
-    return User.query.get(id_)
+    user = User.query.get(id_)
+    # DEBUG: logging.getLogger('gunicorn.error').error(f'LOADING USER "{id_}" => {user}')
+    return user
 
 
 class User(UserMixin, db.Model):
