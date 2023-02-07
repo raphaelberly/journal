@@ -1,5 +1,4 @@
 import os
-from datetime import date
 from time import sleep
 
 from justwatch import JustWatch
@@ -20,7 +19,6 @@ class Providers(object):
     def __init__(self, config_path='config'):
         config = read_config(os.path.join(config_path, 'providers.yaml'))
         self.country = config['country']
-        self.main_city = config['main_city']
         self._client = JustWatch(country=self.country)
         self.supported_providers = self._get_providers_id(config['supported_providers'])
 
@@ -58,8 +56,5 @@ class Providers(object):
                 for offer in result.get('offers', []):
                     if offer['provider_id'] in self.supported_providers.keys():
                         names.add(self.supported_providers[offer['provider_id']])
-                today = date.today().strftime(self.DATE_FORMAT)
-                if self._client.get_cinema_times(result['id'], date=today, **self.main_city):
-                    names.add('cinema')
                 break
         return list(names)

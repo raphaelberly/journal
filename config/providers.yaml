@@ -1,5 +1,4 @@
 supported_providers:
-#  - cinema
   - netflix
   - amazonprimevideo
   - disneyplus
@@ -8,7 +7,3 @@ supported_providers:
   - universcine
 
 country: FR
-main_city:
-  latitude: 48.8534
-  longitude: 2.3481
-  radius: 6000
