@@ -4,7 +4,7 @@ import traceback
 from datetime import date, datetime, timedelta
 from os import path
 
-from flask import session, render_template, request, url_for, flash, send_from_directory
+from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy import func
 from werkzeug.utils import redirect
@@ -117,18 +117,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/referrer', methods=['GET'])
-def referrer():
-    if not session['history']:
-        return redirect(url_for('search'))
-    # Remove current page from history
-    session['history'].pop(-1)
-    session.modified = True
-    # Load referrer page with all arguments
-    ref, args = session['history'][-1]
-    return redirect(url_for(ref, **args))
-
-
 @app.route('/recent', methods=['GET'])
 @login_required
 def recent():
@@ -151,25 +139,10 @@ def recent():
     payload = [(record.export(), title.export(current_user.language)) for record, title in query.all()]
     show_more_button = nb_recent > len(payload)
     metadata = {
-        'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
+        'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'show_more_button': show_more_button,
-        'bypass_pageview_tracking': False if not session['history'] else session['history'][-1][0] == 'recent',
     }
-    session['history'] = [('recent', {'nb_results': nb_results})]
-
     return render_template('recent.html', payload=payload, metadata=metadata)
-
-
-def parse_ref_parameters():
-    # Collect params
-    params = {}
-    if request.args.get('ref_scroll'):
-        params['scroll_to'] = request.args.get('ref_scroll')
-    if request.args.get('ref_providers'):
-        params['providers'] = request.args.get('ref_providers')
-    # Update last item in history
-    session['history'][-1][1].update(params)
-    session.modified = True
 
 
 def get_number_suffix(number):
@@ -266,14 +239,7 @@ def statistics():
         'movies': movies,
         'year_applicable': year_applicable
     }
-    metadata = {
-        'scroll_to': int(float(request.args.get('scroll_to', 0)))
-    }
-
-    session['history'] = [('statistics', {})]
-    session.modified = True
-
-    return render_template('statistics.html', payload=payload, metadata=metadata)
+    return render_template('statistics.html', payload=payload, metadata={})
 
 
 def enrich_results(results):
@@ -303,8 +269,6 @@ def enrich_results(results):
 def search():
 
     if not request.args.get('query'):
-        session['history'] = []
-        session.modified = True
         return render_template('search.html', metadata={})
 
     if request.method == 'POST':
@@ -319,17 +283,9 @@ def search():
     payload = enrich_results(title_collector.collect_bulk(result_ids[:nb_results]))
     metadata = {
         'query': query,
-        'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
+        'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'show_more_button': nb_results < len(result_ids)
     }
-    if session['history']:
-        last_page, last_args = session['history'][-1]
-        if last_page == 'search' and last_args.get('query') == query:
-            metadata['bypass_pageview_tracking'] = True
-
-    session['history'] = [('search', {'query': query, 'nb_results': nb_results})]
-    session.modified = True
-
     return render_template('search.html', payload=payload, metadata=metadata)
 
 
@@ -375,15 +331,9 @@ def watchlist():
 
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     metadata = {
-        'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else [],
         'providers': current_user.providers,
     }
-
-    args = {'providers': request.args.get('providers')} if request.args.get('providers') else {}
-    session['history'] = [('watchlist', args)]
-    session.modified = True
-
     return render_template('watchlist.html', payload=payload, metadata=metadata)
 
 
@@ -404,21 +354,12 @@ def movie(tmdb_id):
     _title = title_collector.collect(tmdb_id)
     title = enrich_results([_title])[0]
 
-    # Add this page to history if previous page was not already movie
-    if session['history'] and session['history'][-1][0] != 'movie':
-        parse_ref_parameters()
-        session['history'] = session.get('history', []) + [('movie', {'tmdb_id': tmdb_id})]
-        session.modified = True
-
     metadata = {}
-    if request.referrer and '/movie/' in request.referrer:
-        metadata['bypass_pageview_tracking'] = True
 
     if request.method == 'GET' and request.args.get('show_slider', False):
         metadata.update({
             'mode': 'show_slider',
             'grade_as_int': current_user.grade_as_int,
-            'show_back_button': len(session['history']) >= 2
         })
         return render_template('movie.html', payload=title, metadata=metadata)
 
@@ -476,7 +417,6 @@ def movie(tmdb_id):
     title['in_watchlist'] = tmdb_id in get_watchlist_ids()
     metadata.update({
         'mode': 'show_edit_buttons' if title.get('grade') is not None else 'show_add_buttons',
-        'show_back_button': len(session['history']) >= 2
     })
     return render_template('movie.html', payload=title, metadata=metadata)
 
@@ -486,18 +426,11 @@ def movie(tmdb_id):
 def people():
 
     if not request.args.get('person_id') and not request.args.get('query'):
-        # Empty history
-        session['history'] = [('people', {'query': ''})]
         # Return empty people search page
         return render_template('people.html', payload={}, metadata={})
 
     elif request.args.get('query'):
         metadata = {'query': request.args.get('query')}
-        # Parse referral parameters and update history
-        if session['history']:
-            if session['history'][-1][0] != 'people':
-                parse_ref_parameters()
-            session['history'][-1][1].update(metadata.copy())
         # Clean people query
         query = request.args.get('query')
         clean_query = "&".join([word for word in re.sub(r"[\W]", " ", query).split(" ") if len(word) > 0])
@@ -507,10 +440,6 @@ def people():
 
     else:
         metadata = {'person_id': request.args.get('person_id')}
-        # Parse referral parameters and update history
-        if session['history'] and session['history'][-1][0] != 'people':
-            parse_ref_parameters()
-            session['history'] = session['history'] + [('people', metadata.copy())]
         # Generate SQL request
         with open(path.join(CURRENT_DIR, 'queries/people_search_by_id.sql')) as f:
             sql = f.read().format(person_id=request.args.get('person_id'), user_id=current_user.id)
@@ -529,11 +458,6 @@ def people():
         for role in title['roles']:
             payload['person']['roles'][role] = payload['person']['roles'].get(role, 0) + 1
         payload['titles'].append(title)
-
-    metadata.update({
-        'scroll_to': int(float(request.args.get('scroll_to', 0))),
-        'show_back_button': len(session['history']) >= 2 and not request.args.get('query'),
-    })
 
     return render_template('people.html', payload=payload, metadata=metadata)
 
@@ -589,11 +513,7 @@ def settings():
         'provider_names': available_providers,
     }
 
-    metadata = {}
-    if request.referrer and '/settings' in request.referrer:
-        metadata['bypass_pageview_tracking'] = True
-
-    return render_template('settings.html', payload=payload, metadata=metadata)
+    return render_template('settings.html', payload=payload, metadata={})
 
 
 def enrich_titles(title_ids):
@@ -635,10 +555,8 @@ def recos():
     # Prepare payload and metadata
     payload = {'titles': enrich_titles(title_ids)[:nb_results]}
     metadata = {
-        'scroll_to': int(float(request.args.get('scroll_to', request.args.get('ref_scroll', 0)))),
+        'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'show_more_button': show_more_button,
-        'bypass_pageview_tracking': False if not session['history'] else session['history'][-1][0] == 'recos',
     }
-    session['history'] = [('recos', {'nb_results': nb_results})]
 
     return render_template('recos.html', payload=payload, metadata=metadata)

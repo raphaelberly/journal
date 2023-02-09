@@ -4,7 +4,6 @@
     <title>{% if payload.person %}{{ payload.person.name }} - Journal{% else %}People - Journal{% endif %}</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
-    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/recent.css')}}">
@@ -85,7 +84,7 @@
         <br/>
         {{ ', '.join(title.roles)|title }}
         <br/>
-        <b><a href="javascript:add_referrer_and_load('{{ url_for('movie', tmdb_id=title.tmdb_id, query=metadata.query) }}')">{{ title.title }} ({{ title.year }})</a></b>
+        <b><a href="{{ url_for('movie', tmdb_id=title.tmdb_id, query=metadata.query) }}">{{ title.title }} ({{ title.year }})</a></b>
         <br/>
         {{ ', '.join(title.genres) }}
         <br/>
@@ -96,10 +95,6 @@
 
 </table></center>
 </div>
-
-{% if metadata.scroll_to %}
-<script type = "text/javascript"> window.scrollTo(0, {{ metadata.scroll_to }}); </script>
-{% endif %}
 
 {% endif %}
 

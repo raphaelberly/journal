@@ -4,7 +4,6 @@
     <title>{{ payload.title }} - Journal</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
-    <script type=text/javascript src="{{ url_for('static', filename='js/referrer.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='js/options.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
@@ -37,13 +36,13 @@
         {% if title.director_names %}
             <br/>By
             {% for name, id in zip(title.director_names, title.director_ids) %}
-                <a href="javascript:add_referrer_and_load('{{ url_for('people', person_id=id) }}')">{{ name }}</a>{% if loop.index0 != title.director_names|length-1 %} and {% endif %}
+                <a href="{{ url_for('people', person_id=id) }}">{{ name }}</a>{% if loop.index0 != title.director_names|length-1 %} and {% endif %}
             {% endfor %}
         {% endif %}
         {% if title.top_cast_names %}
             <br/>With
             {% for name, id in zip(title.top_cast_names, title.top_cast_ids) %}
-                <a href="javascript:add_referrer_and_load('{{ url_for('people', person_id=id) }}')">{{ name }}</a>{% if loop.index0 != title.top_cast_names|length-1 %}, {% endif %}
+                <a href="{{ url_for('people', person_id=id) }}">{{ name }}</a>{% if loop.index0 != title.top_cast_names|length-1 %}, {% endif %}
             {% endfor %}
         {% endif %}
         {% if title.duration %}

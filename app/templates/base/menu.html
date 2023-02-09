@@ -1,11 +1,7 @@
 
 <div class="navbar"><table><tr>
     <td class="left">
-        {% if metadata.show_back_button %}
-        <a href="{{ url_for('referrer') }}"><img src="/static/images/icon_back.png"></a>
-        {% else %}
         <a href="{{url_for('search')}}"><img src="/static/images/icon_logo.png"></a>
-        {% endif %}
     </td>
     <td>
         <span style="cursor:pointer" onclick="topFunction()">
