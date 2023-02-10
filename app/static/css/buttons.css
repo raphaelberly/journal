@@ -26,6 +26,11 @@
 
 }
 
+.red {
+    border-color: #d24242cc;
+    color: #d24242cc;
+}
+
 .dual {
     width: 100%;
     padding-top: 10px;

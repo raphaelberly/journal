@@ -85,7 +85,6 @@
     </td></tr>
     {% endif %}
     <tr><td>
-        {% if not title.grade %}
         <table class="dual"><tr>
         <td class="left">
             <input class="styled-button full" type="button" onclick="location.href={{ url_for('movie', tmdb_id=title.id, show_slider=True) }}" value="Add">
@@ -93,11 +92,10 @@
         <td class="right">
             <form onsubmit="{{ url_for('watchlist') }}" method="post">
                 <input type="hidden" name="remove_from_watchlist" value="{{ title.id }}">
-                <input class="styled-button empty" type="submit" value="Unlist" onclick="javascript:if (window.confirm('Remove from watchlist?')) {return true;} else {return false;}">
+                <input class="styled-button empty red" type="submit" value="Unlist" onclick="javascript:if (window.confirm('Remove from watchlist?')) {return true;} else {return false;}">
             </form>
         </td>
         </tr></table>
-        {% endif %}
     </td></tr>
 
 </table>

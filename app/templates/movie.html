@@ -89,7 +89,7 @@
         </td>
         <td class="right">
             <form action="{{ url_for('movie', tmdb_id=title.id) }}" method="post">
-                <input class="styled-button empty" type="submit" name="remove" value="Remove" onclick="javascript:if (window.confirm('Remove from journal?')) {return true;} else {return false;}">
+                <input class="styled-button empty red" type="submit" name="remove" value="Remove" onclick="javascript:if (window.confirm('Remove from journal?')) {return true;} else {return false;}">
             </form>
         </td></tr>
         </table>
@@ -98,21 +98,22 @@
 
     {% if metadata.mode == 'show_add_buttons' %}
     <tr><td>
-        {% if not title.in_watchlist %}
         <table class="dual"><tr>
         <td class="left">
             <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}';" value="Add">
         </td>
         <td class="right">
             <form action="{{ url_for('movie', tmdb_id=title.id) }}" method="post">
+            {% if not title.in_watchlist %}
                 <input type="hidden" name="add_to_watchlist" value="{{ title.id }}">
                 <input class="styled-button empty" type="submit" value="Watchlist">
+            {% else %}
+                <input type="hidden" name="remove_from_watchlist" value="{{ title.id }}">
+                <input class="styled-button empty red" type="submit" value="Unlist">
+            {% endif %}
             </form>
         </td>
         </tr></table>
-        {% else %}
-        <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True)}} ';" value="Add">
-        {% endif %}
     </td></tr>
     {% endif %}
 

@@ -276,6 +276,10 @@ def search():
             tmdb_id = int(get_post_result('add_to_watchlist'))
             add_to_watchlist(tmdb_id)
             flash('Movie added to watchlist', category='success')
+        if 'remove_from_watchlist' in request.form:
+            tmdb_id = int(get_post_result('remove_from_watchlist'))
+            remove_from_watchlist(tmdb_id)
+            flash('Movie removed from watchlist', category='success')
 
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 3))
@@ -368,6 +372,9 @@ def movie(tmdb_id):
         if 'add_to_watchlist' in request.form:
             add_to_watchlist(tmdb_id)
             flash('Movie added to watchlist', category='success')
+        if 'remove_from_watchlist' in request.form:
+            remove_from_watchlist(tmdb_id)
+            flash('Movie removed from watchlist', category='success')
 
         elif 'remove' in request.form:
             # Delete the movie from the database
