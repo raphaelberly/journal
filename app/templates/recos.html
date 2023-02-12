@@ -64,29 +64,22 @@
         {% endif %}
     </td></tr>
     <tr><td>
-        {% if not title.in_watchlist %}
         <table class="dual"><tr>
         <td class="left">
             <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}';" value="Add">
         </td>
         <td class="right">
             <form onsubmit="this.action=add_scroll('{{ url_for('recos') }}');" method="post">
+            {% if not title.in_watchlist %}
                 <input type="hidden" name="add_to_watchlist" value="{{ title.id }}">
                 <input class="styled-button empty" type="submit" value="Watchlist">
+            {% else %}
+                <input type="hidden" name="remove_from_watchlist" value="{{ title.id }}">
+                <input class="styled-button empty red" type="submit" value="Unlist">
+            {% endif %}
             </form>
         </td>
         </tr></table>
-        {% else %}
-        <table class="dual"><tr>
-        <td class="left">
-            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}';" value="Add">
-        </td><td class="right">
-            <div class="mentions">
-            <img src="/static/images/icon_check_blue.png"> <b>in watchlist</b>
-            </div>
-        </td></tr>
-        </table>
-        {% endif %}
     </td></tr>
 
 </table>

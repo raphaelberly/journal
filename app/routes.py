@@ -547,6 +547,10 @@ def recos():
             tmdb_id = int(get_post_result('add_to_watchlist'))
             add_to_watchlist(tmdb_id)
             flash('Movie added to watchlist', category='success')
+        if 'remove_from_watchlist' in request.form:
+            tmdb_id = int(get_post_result('add_to_watchlist'))
+            remove_from_watchlist(tmdb_id)
+            flash('Movie removed from watchlist', category='success')
 
     # Generate SQL request
     with open(path.join(CURRENT_DIR, 'queries/recommended_movies.sql')) as f:
