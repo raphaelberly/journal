@@ -72,6 +72,15 @@ CREATE TABLE journal.watchlist(
   CONSTRAINT "watchlist_fkey_titles" FOREIGN KEY (tmdb_id) REFERENCES journal.titles(id)
 );
 
+CREATE TABLE journal.blacklist(
+  user_id               INTEGER         NOT NULL,
+  tmdb_id               INTEGER         NOT NULL,
+  insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+  CONSTRAINT "blacklist_pkey" PRIMARY KEY (user_id,tmdb_id),
+  CONSTRAINT "blacklist_fkey_users" FOREIGN KEY (user_id) REFERENCES journal.users(id),
+  CONSTRAINT "blacklist_fkey_titles" FOREIGN KEY (tmdb_id) REFERENCES journal.titles(id)
+);
+
 CREATE TABLE journal.records(
   user_id                   INTEGER             NOT NULL,
   tmdb_id                   INTEGER             NOT NULL,

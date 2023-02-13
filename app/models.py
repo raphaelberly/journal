@@ -140,6 +140,23 @@ class WatchlistItem(db.Model):
         return value
 
 
+class BlacklistItem(db.Model):
+
+    user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)
+    tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
+    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = {"schema": "journal"}
+    __tablename__ = "blacklist"
+
+    def __init__(self, user_id, tmdb_id):
+        self.user_id = user_id
+        self.tmdb_id = tmdb_id
+
+    def __repr__(self):
+        return f'<No reco item: movie {self.tmdb_id} for user {self.user_id}>'
+
+
 class Record(db.Model):
 
     user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)

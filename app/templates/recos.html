@@ -26,7 +26,7 @@
     <img id="img-no-results" src="static/images/fail.png">
     </td></tr>
     <tr><td>
-    No recommendation for now...<br/> Please, come back later!
+    Come back later for new recommendations!
     </td></tr>
 </table>
 </div>
@@ -69,7 +69,7 @@
             <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}';" value="Add">
         </td>
         <td class="right">
-            <form onsubmit="this.action=add_scroll('{{ url_for('recos') }}');" method="post">
+            <form onsubmit="this.action=add_scroll('{{ url_for('recos', nb_results=payload.titles|length) }}');" method="post">
             {% if not title.in_watchlist %}
                 <input type="hidden" name="add_to_watchlist" value="{{ title.id }}">
                 <input class="styled-button empty" type="submit" value="Watchlist">
@@ -81,7 +81,12 @@
         </td>
         </tr></table>
     </td></tr>
-
+    <tr><td>
+        <form onsubmit="this.action=add_scroll('{{ url_for('recos', nb_results=payload.titles|length) }}');" method="post">
+        <input type="hidden" name="blacklist" value="{{ title.id }}">
+            <div class="mentions blacklist"><input type="submit" value="Hide from Recos"></div>
+        </form>
+    </td></tr>
 </table>
 {% endfor %}
 

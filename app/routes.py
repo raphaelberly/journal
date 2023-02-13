@@ -11,11 +11,11 @@ from werkzeug.utils import redirect
 
 from app import app
 from app import db, login
+from app.converters import TitleConverter
 from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
-from app.models import Record, Title, Top, WatchlistItem, User, Person
+from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
-from app.converters import TitleConverter
 from lib.providers import Providers
 from lib.tools import get_time_ago_string, get_time_spent_string
 
@@ -551,6 +551,12 @@ def recos():
             tmdb_id = int(get_post_result('remove_from_watchlist'))
             remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist', category='success')
+        if 'blacklist' in request.form:
+            tmdb_id = int(get_post_result('blacklist'))
+            item = BlacklistItem(current_user.id, tmdb_id)
+            db.session.add(item)
+            db.session.commit()
+            flash('Movie hidden from recos', category='success')
 
     # Generate SQL request
     with open(path.join(CURRENT_DIR, 'queries/recommended_movies.sql')) as f:

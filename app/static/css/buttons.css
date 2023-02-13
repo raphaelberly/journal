@@ -61,3 +61,12 @@ table.dual {
     color: #6caee0;
     text-decoration: none;
 }
+
+.blacklist input{
+    font: normal 10px Trebuchet MS;
+    color: #d24242cc;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
