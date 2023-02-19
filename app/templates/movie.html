@@ -109,7 +109,7 @@
                 <input class="styled-button empty" type="submit" value="Watchlist">
             {% else %}
                 <input type="hidden" name="remove_from_watchlist" value="{{ title.id }}">
-                <input class="styled-button empty red" type="submit" value="Unlist">
+                <input class="styled-button empty red" type="submit" value="Unlist" onclick="javascript:if (window.confirm('Remove from watchlist?')) {return true;} else {return false;}">
             {% endif %}
             </form>
         </td>
