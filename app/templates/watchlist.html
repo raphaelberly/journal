@@ -87,7 +87,7 @@
     <tr><td>
         <table class="dual"><tr>
         <td class="left">
-            <input class="styled-button full" type="button" onclick="location.href={{ url_for('movie', tmdb_id=title.id, show_slider=True) }}" value="Add">
+            <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}'" value="Add">
         </td>
         <td class="right">
             <form onsubmit="{{ url_for('watchlist') }}" method="post">
