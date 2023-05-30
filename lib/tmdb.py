@@ -31,8 +31,10 @@ class Tmdb(object):
     def get(self, title_id: int) -> dict:
         url = self.URL_MOVIE.format(title_id=title_id)
         params = {'api_key': self._api_key, 'append_to_response': 'credits'}
-        response = requests.get(url, params)
-        return json.loads(response.content)
+        response = json.loads(requests.get(url, params).content)
+        if response.get('success', True) is False:
+            raise RuntimeError(f'Could not find title: {title_id}')
+        return response
 
     def get_bulk(self, title_ids: List[int]) -> List[dict]:
         params = {'api_key': self._api_key, 'append_to_response': 'credits'}
