@@ -3,6 +3,7 @@ Flask-CacheBuster
 Flask-Login
 Flask-SQLAlchemy
 Flask-WTF
+email_validator
 gunicorn
 Jinja2
 JustWatch
