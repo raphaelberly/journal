@@ -49,8 +49,7 @@ class Providers(object):
         try:
             response = self._client.search_for_item(**kwargs)
         except HTTPError:
-            sleep(0.1)
-            response = self._client.search_for_item(**kwargs)
+            response = {'items': []}
         for result in response['items']:
             if self._check_tmdb_id(result.get('scoring', []), movie_tmdb_id):
                 for offer in result.get('offers', []):
