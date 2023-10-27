@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+from datetime import datetime
 
 import yaml
 import pandas as pd
@@ -23,7 +24,12 @@ credentials = yaml.safe_load(open(f'{args.config}/credentials.yaml'))
 table_names = yaml.safe_load(open(f'{args.config}/backup.yaml'))
 notifier = Client(**credentials['push'])
 
-# For each target_type type, run the ETL process
+# Create a dated folder
+folder_path = os.path.join(args.folder, datetime.today().strftime('%Y-%m-%d'))
+if not os.path.exists(folder_path):
+    os.makedirs(folder_path)
+
+# Backup each table
 fail_list = []
 for table_name in table_names:
     try:
@@ -31,7 +37,7 @@ for table_name in table_names:
         table_ref = f'{credentials["db"]["schema"]}.{table_name}'
         df = pd.read_sql_query(text(f'SELECT * FROM {table_ref}'), db.engine.connect())
         # Backup table as CSV
-        backup_path = os.path.join(args.folder, f'{table_name}.csv')
+        backup_path = os.path.join(folder_path, f'{table_name}.csv')
         df.to_csv(backup_path, header=True, index=False)
         LOGGER.info(f'Successful backup of {table_ref} table to: {backup_path}')
     except Exception as e:
@@ -43,5 +49,3 @@ if fail_list:
         message=f'Could not backup table{"s" if len(fail_list) > 1 else ""}: {", ".join(fail_list)}',
         title='⚠️ Journal Alert'
     )
-
-LOGGER.info('Done.')
