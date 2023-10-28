@@ -13,7 +13,7 @@ function switchFilterState(p) {
 
 // Provide activated filters list
 function getActivatedFilters() {
-  const p = ["netflix", "amazonprimevideo", "canalplayvod", "disneyplus", "mubi", "universcine"];
+  const p = ["netflix", "amazonprimevideo", "canal", "disneyplus", "mubi", "universcine"];
   var x = [], y, i;
   for (i = 0; i < p.length; i++) {
     y = document.getElementsByClassName(p[i]);

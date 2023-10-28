@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from app import db
 from app.models import WatchlistItem, Title
-from lib.providers import Providers
+from lib.tmdb import Tmdb
 
 
 LOGGER = logging.getLogger(__name__)
@@ -19,14 +19,11 @@ parser.add_argument('--config', '-c', default='config')
 args = parser.parse_args()
 
 i = 0
-providers = Providers(config_path=args.config)
+tmdb = Tmdb(args.config)
 LOGGER.info('Update all watchlist items with outdated providers list')
 
-query = db.session.query(WatchlistItem, Title.title, Title.id) \
-    .select_from(WatchlistItem).join(Title)
-
-for item, title, tmdb_id in tqdm(query.all()):
-    updated_providers = [provider for provider in providers.get_names(title, tmdb_id)]
+for item in tqdm(WatchlistItem.query.all()):
+    updated_providers = tmdb.providers(item.tmdb_id)
     if set(updated_providers) != set(item.providers):
         item.providers = updated_providers
         item.update_datetime_utc = datetime.utcnow()

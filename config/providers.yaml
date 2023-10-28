@@ -2,7 +2,7 @@ supported_providers:
   - netflix
   - amazonprimevideo
   - disneyplus
-  - canalplayvod
+  - canal
   - mubi
   - universcine
 

@@ -16,7 +16,6 @@ from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
-from lib.providers import Providers
 from lib.tools import get_time_ago_string, get_time_spent_string
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
@@ -304,7 +303,7 @@ def get_watchlist_ids():
 def add_to_watchlist(tmdb_id):
     title = title_collector.collect(tmdb_id)
     upsert_title_metadata(title)
-    providers = Providers().get_names(title['original_title'], tmdb_id)
+    providers = title_collector.tmdb.providers(tmdb_id)
     item = WatchlistItem(user_id=current_user.id, tmdb_id=tmdb_id, providers=providers)
     db.session.add(item)
     db.session.commit()
@@ -476,7 +475,7 @@ def settings():
     available_providers = {
         'netflix': 'Netflix',
         'amazonprimevideo': 'Amazon Prime Video',
-        'canalplayvod': 'Canal Play VOD',
+        'canal': 'Canal+',
         'disneyplus': 'Disney+',
         'mubi': 'Mubi',
         'universcine': 'Univers Ciné',
