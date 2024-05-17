@@ -16,11 +16,13 @@ from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
+from lib.plex import Plex
 from lib.tools import get_time_ago_string, get_time_spent_string
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
 
 title_collector = TitleCollector()
+plex = Plex()
 
 
 def intersect(a, b):
@@ -304,6 +306,8 @@ def add_to_watchlist(tmdb_id):
     title = title_collector.collect(tmdb_id)
     upsert_title_metadata(title)
     providers = title_collector.tmdb.providers(tmdb_id)
+    if tmdb_id in plex.library:
+        providers.append('plex')
     item = WatchlistItem(user_id=current_user.id, tmdb_id=tmdb_id, providers=providers)
     db.session.add(item)
     db.session.commit()
@@ -479,6 +483,7 @@ def settings():
         'disneyplus': 'Disney+',
         'mubi': 'Mubi',
         'universcine': 'Univers Ciné',
+        'plex': 'Plex',
     }
     user_providers = {provider: provider in current_user.providers for provider in available_providers.keys()}
 

@@ -6,7 +6,8 @@ from time import sleep
 from tqdm import tqdm
 
 from app import db
-from app.models import WatchlistItem, Title
+from app.models import WatchlistItem
+from lib.plex import Plex
 from lib.tmdb import Tmdb
 
 
@@ -20,10 +21,13 @@ args = parser.parse_args()
 
 i = 0
 tmdb = Tmdb(args.config)
+plex = Plex(args.config)
 LOGGER.info('Update all watchlist items with outdated providers list')
 
 for item in tqdm(WatchlistItem.query.all()):
     updated_providers = tmdb.providers(item.tmdb_id)
+    if item.tmdb_id in plex.library:
+        updated_providers.append('plex')
     if set(updated_providers) != set(item.providers):
         item.providers = updated_providers
         item.update_datetime_utc = datetime.utcnow()

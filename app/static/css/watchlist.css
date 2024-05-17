@@ -58,3 +58,6 @@
 .OFF.universcine img {
   content:url('/static/images/providers/universcine_gray.png');
 }
+.OFF.plex img {
+  content:url('/static/images/providers/plex_gray.png');
+}

@@ -18,3 +18,5 @@ tqdm
 urllib3
 Werkzeug
 python-pushover==0.4  # WARNING: python-pushover requires setuptools 57.X.X
+plexapi
+cachetools
