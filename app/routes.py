@@ -16,6 +16,7 @@ from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
+from lib.overseerr import Overseerr
 from lib.plex import Plex
 from lib.tools import get_time_ago_string, get_time_spent_string
 
@@ -23,6 +24,7 @@ CURRENT_DIR = path.dirname(path.abspath(__file__))
 
 title_collector = TitleCollector()
 plex = Plex()
+overseerr = Overseerr()
 
 
 def intersect(a, b):
@@ -329,6 +331,9 @@ def watchlist():
             tmdb_id = get_post_result('remove_from_watchlist')
             remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist', category='success')
+        if 'request_on_plex' in request.form:
+            tmdb_id = int(get_post_result('request_on_plex'))
+            overseerr.request_title(tmdb_id)
 
     query = db.session \
         .query(WatchlistItem, Title) \
@@ -338,8 +343,10 @@ def watchlist():
 
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     metadata = {
+        'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else [],
         'providers': current_user.providers,
+        'request_statuses': overseerr.request_statuses,
     }
     return render_template('watchlist.html', payload=payload, metadata=metadata)
 

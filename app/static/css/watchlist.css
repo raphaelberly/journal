@@ -40,6 +40,24 @@
   width: auto;
 }
 
+.pending-request-on-plex {
+    font: normal 10px Trebuchet MS;
+    color: #cb7800cc;
+    margin-bottom: 2px;
+    margin-top: -3px;
+}
+
+.request-on-plex input{
+    font: normal 10px Trebuchet MS;
+    color: #6caee0;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-bottom: 2px;
+    margin-top: -3px;
+    cursor: pointer;
+}
+
 .OFF.netflix img {
   content:url('/static/images/providers/netflix_gray.png');
 }

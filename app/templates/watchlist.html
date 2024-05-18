@@ -4,6 +4,7 @@
     <title>Watchlist - Journal</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/scroll.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='js/filter.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
@@ -83,6 +84,21 @@
         {% endfor %}
         </div>
     </td></tr>
+    {% else %} <!-- When none of user's providers are available for this movie -->
+        {% if 'plex' in metadata.providers %} <!-- If plex is one of user's providers -->
+            {% if not metadata.request_statuses.get(watchlist_item.tmdb_id) %} <!-- Then add a button to make a request if no request exists -->
+    <tr><td>
+        <form onsubmit="this.action=add_scroll('{{ url_for('watchlist') }}');" method="post">
+        <input type="hidden" name="request_on_plex" value="{{ title.id }}">
+            <div class="request-on-plex"><input type="submit" value="Request on Plex" onclick="javascript:if (window.confirm('Request on Plex?')) {return true;} else {return false;}"></div>
+        </form>
+    </td></tr>
+            {% else %} <!-- Else confirm that a request exists -->
+    <tr><td>
+        <div class="pending-request-on-plex">Pending request on Plex</div>
+    </td></tr>
+            {% endif %}
+        {% endif %}
     {% endif %}
     <tr><td>
         <table class="dual"><tr>
@@ -97,13 +113,16 @@
         </td>
         </tr></table>
     </td></tr>
-
 </table>
 </div>
 
 {% endfor %}
 
 </div>
+
+{% if metadata.scroll_to %}
+<script type = "text/javascript"> window.scrollTo(0, {{ metadata.scroll_to }}); </script>
+{% endif %}
 
 </body>
 </html>
