@@ -341,12 +341,20 @@ def watchlist():
         .filter(WatchlistItem.user_id == current_user.id) \
         .order_by(WatchlistItem.insert_datetime_utc.desc())
 
+    request_statuses = overseerr.request_statuses
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
+    # If the user has plex, the movie is not yet tagged as available on plex in the watchlist, but the user requested
+    # it and the request was completed, then add "plex" to the providers
+    if 'plex' in current_user.providers:
+        for watchlist_item, _ in payload:
+            if 'plex' not in watchlist_item['providers']:
+                if request_statuses.get(watchlist_item['tmdb_id'], -1) == 2:
+                    watchlist_item['providers'].append('plex')
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else [],
         'providers': current_user.providers,
-        'request_statuses': overseerr.request_statuses,
+        'request_statuses': request_statuses,
     }
     return render_template('watchlist.html', payload=payload, metadata=metadata)
 
