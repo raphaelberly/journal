@@ -12,7 +12,7 @@ class Plex(object):
 
     def __init__(self, config_path: str = 'config'):
         _credentials = read_config(os.path.join(config_path, 'credentials.yaml'))['plex']
-        self._library = MyPlexAccount(**_credentials).resource('phulos').connect().library.section('Films')
+        self._library = MyPlexAccount(**_credentials).resource('phulos').connect().library.section('Films - Martin')
 
     @staticmethod
     def _get_tmdb_id(movie: Movie) -> int:
