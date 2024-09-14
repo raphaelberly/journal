@@ -17,13 +17,11 @@ from app.forms import RegistrationForm
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
-from lib.plex import Plex
 from lib.tools import get_time_ago_string, get_time_spent_string
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
 
 title_collector = TitleCollector()
-plex = Plex()
 overseerr = Overseerr()
 
 
@@ -308,8 +306,6 @@ def add_to_watchlist(tmdb_id):
     title = title_collector.collect(tmdb_id)
     upsert_title_metadata(title)
     providers = title_collector.tmdb.providers(tmdb_id)
-    if tmdb_id in plex.library:
-        providers.append('plex')
     item = WatchlistItem(user_id=current_user.id, tmdb_id=tmdb_id, providers=providers)
     db.session.add(item)
     db.session.commit()
@@ -341,20 +337,21 @@ def watchlist():
         .filter(WatchlistItem.user_id == current_user.id) \
         .order_by(WatchlistItem.insert_datetime_utc.desc())
 
-    request_statuses = overseerr.request_statuses
+    request_statuses = overseerr.request_statuses if overseerr.is_available else []
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     # If the user has plex, the movie is not yet tagged as available on plex in the watchlist, but the user requested
     # it and the request was completed, then add "plex" to the providers
     if 'plex' in current_user.providers:
         for watchlist_item, _ in payload:
             if 'plex' not in watchlist_item['providers']:
-                if request_statuses.get(watchlist_item['tmdb_id'], -1) == 2:
+                if request_statuses.get(watchlist_item['tmdb_id'], -1) == 5:
                     watchlist_item['providers'].append('plex')
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else [],
         'providers': current_user.providers,
         'request_statuses': request_statuses,
+        'overseerr_available': overseerr.is_available,
     }
     return render_template('watchlist.html', payload=payload, metadata=metadata)
 

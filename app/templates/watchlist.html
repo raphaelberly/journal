@@ -86,7 +86,7 @@
     </td></tr>
     {% else %} <!-- When none of user's providers are available for this movie -->
         {% if 'plex' in metadata.providers %} <!-- If plex is one of user's providers -->
-            {% if not metadata.request_statuses.get(watchlist_item.tmdb_id) %} <!-- Then add a button to make a request if no request exists -->
+            {% if metadata.overseerr_available and not metadata.request_statuses.get(watchlist_item.tmdb_id) %} <!-- Then add a button to make a request if no request exists and overseerr is available-->
     <tr><td>
         <form onsubmit="this.action=add_scroll('{{ url_for('watchlist') }}');" method="post">
         <input type="hidden" name="request_on_plex" value="{{ title.id }}">
