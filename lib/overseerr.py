@@ -31,6 +31,13 @@ class Overseerr(object):
             self.is_available = True
             self.account_id = json.loads(response.content)['id']
 
+    def request_status(self, tmdb_id: int) -> int:
+        response = self.session.get(self.BASE_URL + f'movie/{tmdb_id}')
+        try:
+            return json.loads(response.content)['mediaInfo']['status']
+        except KeyError:
+            return -1
+
     @property
     def request_statuses(self) -> dict:
         query = f'request?take={self.DEFAULT_REQUEST_NB}&requestedBy={self.account_id}&skip=0&sort=added'

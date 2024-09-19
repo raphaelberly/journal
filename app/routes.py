@@ -306,6 +306,8 @@ def add_to_watchlist(tmdb_id):
     title = title_collector.collect(tmdb_id)
     upsert_title_metadata(title)
     providers = title_collector.tmdb.providers(tmdb_id)
+    if overseerr.is_available and overseerr.request_status(tmdb_id) == 5:
+        providers.append('plex')
     item = WatchlistItem(user_id=current_user.id, tmdb_id=tmdb_id, providers=providers)
     db.session.add(item)
     db.session.commit()
