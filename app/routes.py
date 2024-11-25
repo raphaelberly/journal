@@ -281,6 +281,10 @@ def search():
             tmdb_id = int(get_post_result('remove_from_watchlist'))
             remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist', category='success')
+        if 'move_to_top_of_watchlist' in request.form:
+            tmdb_id = int(get_post_result('move_to_top_of_watchlist'))
+            move_to_top_of_watchlist(tmdb_id)
+            flash('Moved to the top of the watchlist', category='success')
 
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 3))
@@ -320,6 +324,13 @@ def remove_from_watchlist(tmdb_id):
     db.session.commit()
 
 
+def move_to_top_of_watchlist(tmdb_id):
+    items = WatchlistItem.query.filter_by(tmdb_id=tmdb_id, user_id=current_user.id).all()
+    for item in items:
+        item.update_datetime_utc = datetime.utcnow()
+    db.session.commit()
+
+
 @app.route('/watchlist', methods=['GET', 'POST'])
 @login_required
 def watchlist():
@@ -332,12 +343,17 @@ def watchlist():
         if 'request_on_plex' in request.form:
             tmdb_id = int(get_post_result('request_on_plex'))
             overseerr.request_title(tmdb_id)
+            flash('Movie requested on Plex', category='success')
+        if 'move_to_top_of_watchlist' in request.form:
+            tmdb_id = int(get_post_result('move_to_top_of_watchlist'))
+            move_to_top_of_watchlist(tmdb_id)
+            flash('Moved to the top of the watchlist', category='success')
 
     query = db.session \
         .query(WatchlistItem, Title) \
         .select_from(WatchlistItem).join(Title) \
         .filter(WatchlistItem.user_id == current_user.id) \
-        .order_by(WatchlistItem.insert_datetime_utc.desc())
+        .order_by(WatchlistItem.update_datetime_utc.desc())
 
     request_statuses = overseerr.request_statuses if overseerr.is_available else []
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
@@ -392,6 +408,9 @@ def movie(tmdb_id):
         if 'remove_from_watchlist' in request.form:
             remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist', category='success')
+        if 'move_to_top_of_watchlist' in request.form:
+            move_to_top_of_watchlist(tmdb_id)
+            flash('Moved to the top of the watchlist', category='success')
 
         elif 'remove' in request.form:
             # Delete the movie from the database

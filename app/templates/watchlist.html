@@ -106,12 +106,18 @@
             <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}'" value="Add">
         </td>
         <td class="right">
-            <form onsubmit="{{ url_for('watchlist') }}" method="post">
-                <input type="hidden" name="remove_from_watchlist" value="{{ title.id }}">
-                <input class="styled-button empty red" type="submit" value="Unlist" onclick="javascript:if (window.confirm('Remove from watchlist?')) {return true;} else {return false;}">
+            <form onsubmit="this.action=add_scroll('{{ url_for('watchlist') }}');" method="post">
+                <input type="hidden" name="move_to_top_of_watchlist" value="{{ title.id }}">
+                <input class="styled-button empty" type="submit" value="Move up" onclick="javascript:if (window.confirm('Move to the top of the watchlist?')) {return true;} else {return false;}">
             </form>
         </td>
         </tr></table>
+    </td></tr>
+    <tr><td>
+        <form onsubmit="this.action=add_scroll('{{ url_for('watchlist') }}');" method="post">
+        <input type="hidden" name="remove_from_watchlist" value="{{ title.id }}">
+            <div class="mentions blacklist"><input type="submit" value="Remove from Watchlist" onclick="javascript:if (window.confirm('Remove from Watchlist?')) {return true;} else {return false;}"></div>
+        </form>
     </td></tr>
 </table>
 </div>
