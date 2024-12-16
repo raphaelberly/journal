@@ -327,6 +327,7 @@ def remove_from_watchlist(tmdb_id):
 def move_to_top_of_watchlist(tmdb_id):
     items = WatchlistItem.query.filter_by(tmdb_id=tmdb_id, user_id=current_user.id).all()
     for item in items:
+        item.insert_datetime_utc = datetime.utcnow()  # We simulate a re-insert in the watchlist
         item.update_datetime_utc = datetime.utcnow()
     db.session.commit()
 
@@ -353,7 +354,7 @@ def watchlist():
         .query(WatchlistItem, Title) \
         .select_from(WatchlistItem).join(Title) \
         .filter(WatchlistItem.user_id == current_user.id) \
-        .order_by(WatchlistItem.update_datetime_utc.desc())
+        .order_by(WatchlistItem.insert_datetime_utc.desc())
 
     request_statuses = overseerr.request_statuses if overseerr.is_available else []
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
