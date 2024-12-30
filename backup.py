@@ -8,7 +8,7 @@ import pandas as pd
 from sqlalchemy import text
 
 from app import app, db
-from pushover import Client
+from lib.push import Push
 
 logging.basicConfig(level='INFO')
 LOGGER = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ parser.add_argument('--folder', '-f', default='tmp', type=str)
 args = parser.parse_args()
 credentials = yaml.safe_load(open(f'{args.config}/credentials.yaml'))
 table_names = yaml.safe_load(open(f'{args.config}/backup.yaml'))
-notifier = Client(**credentials['push'])
+notifier = Push(**credentials['push'])
 
 # Create a dated folder
 folder_path = os.path.join(args.folder, datetime.today().strftime('%Y-%m-%d'))
