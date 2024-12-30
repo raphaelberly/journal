@@ -21,8 +21,29 @@ parser.add_argument('--folder', '-f', default='tmp', type=str)
 # Parse args
 args = parser.parse_args()
 credentials = yaml.safe_load(open(f'{args.config}/credentials.yaml'))
-table_names = yaml.safe_load(open(f'{args.config}/backup.yaml'))
 notifier = Push(**credentials['push'])
+
+config = yaml.safe_load(open(f'{args.config}/backup.yaml'))
+table_names = config['tables']
+n_days = config['ttl_days']
+
+# Drop old backup folders when they are older than n_days days
+for folder in os.listdir(args.folder):
+    folder_path = os.path.join(args.folder, folder)
+    if os.path.isdir(folder_path):
+        try:
+            folder_date = datetime.strptime(folder, '%Y-%m-%d')
+        except ValueError:
+            continue
+        if (datetime.today() - folder_date).days > n_days:
+            LOGGER.info(f'Deleting old backup folder: {folder_path}')
+            # delete directory even if not empty
+            for root, dirs, files in os.walk(folder_path, topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+            os.rmdir(folder_path)
 
 # Create a dated folder
 folder_path = os.path.join(args.folder, datetime.today().strftime('%Y-%m-%d'))

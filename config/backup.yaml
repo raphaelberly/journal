@@ -1,5 +1,8 @@
-- watchlist
-- records
-- users
-- blacklist
-- titles
+tables:
+  - watchlist
+  - records
+  - users
+  - blacklist
+  - titles
+
+ttl_days: 60
