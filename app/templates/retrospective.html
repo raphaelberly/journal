@@ -1,0 +1,58 @@
+<html>
+
+<head>
+    <title>{{ payload.year_applicable }} Retrospective - Journal</title>
+    {% include 'base/head.html' %}
+    <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/statistics.css')}}">
+</head>
+
+<body ontouchstart="">
+
+{% with page_title = [payload.year_applicable, 'Retrospective']|join(' ') %}
+    {% include 'base/menu.html' %}
+{% endwith %}
+{% include 'base/alert.html' %}
+
+<div class="statistics">
+
+<center><table>
+
+    <tr>
+        <td class="icon"><img src="/static/images/statistics/activity.png"></td>
+        <td class="sideline"></td>
+        <td>
+            <p class="top-type">Viewing activity</p>
+                <p><span class="big-number">{{ payload.activity['year']['values']['viewing activity']|round(1) }}</span>
+                <br/>movies watched in {{ payload.year_applicable }}</p>
+                <p><span class="big-title">{{ format_timespan(payload.activity['year']['values']['time spent']) }}</span>
+                <br/>of watching in {{ payload.year_applicable }}</p>
+        </td>
+    </tr>
+
+    {% for element in payload.movies %}
+        <td class="icon"><img src="/static/images/statistics/{{ element['image'] }}"></td>
+        <td class="sideline"></td>
+        <td>
+            <p class="top-type">{{ element['section'] }}</p>
+            {% for item in element['movies'] %}
+
+            <p><span class="big-number">{{ item['rank'] }}</span>{{ item['suffix'] }}
+                <br/><span class="top-name"><a href="{{ url_for('movie', tmdb_id=item['tmdb_id']) }}">{{ item['title'] }} ({{ item['year'] }})</a></span>
+            <br/>{{ ', '.join(item['genres'][:3]) }}
+            <br/>{{ [item['grade']|int, item['grade']]|max }}/10
+
+            {% endfor %}
+        </p>
+
+        </td>
+    </tr>
+    {% endfor %}
+
+</table></center>
+
+</div>
+
+</body>
+</html>

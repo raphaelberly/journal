@@ -22,7 +22,11 @@
         <a href="{{ url_for('people') }}">People</a>
         <a href="{{ url_for('watchlist') }}">Watchlist</a>
         <a href="{{ url_for('statistics') }}">Statistics</a>
-        <a href="{{ url_for('recos') }}">Recos<sup style="font-size:30%">BÊTA</sup></a>
+        <a href="{{ url_for('recos') }}">Recos</a>
+        {% set current_date = now().strftime("%m-%d") %}
+        {% if '12-01' <= current_date <= '12-31' or '01-01' <= current_date <= '01-31' %}
+        <a href="{{ url_for('retrospective') }}">Retrospective<sup style="font-size:30%">BÊTA</sup></a>
+        {% endif %}
     </td></tr>
     <tr class="bottom"><td>
         <a href="{{ url_for('settings') }}"><img src="/static/images/settings.png"></a>
