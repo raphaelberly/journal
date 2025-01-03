@@ -20,3 +20,5 @@ Werkzeug
 git+https://github.com/Wyattjoh/pushover
 plexapi
 cachetools
+plotly
+kaleido

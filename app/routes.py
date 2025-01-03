@@ -1,7 +1,8 @@
+import os
 import re
 import sys
 import traceback
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, UTC
 from os import path
 
 from flask import render_template, request, url_for, flash, send_from_directory
@@ -14,6 +15,7 @@ from app import db, login
 from app.converters import TitleConverter
 from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
+from app.graphutils import plot_grade_distribution, cleanup_grade_distribution_plots
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
@@ -279,6 +281,22 @@ def retrospective():
     best = [add_rank_and_suffix(best[i], i+1) for i in range(len(best))]
     worst = [add_rank_and_suffix(worst[i], total_applicable - i) for i in range(len(worst))]
     worst = sorted(worst, key=lambda x: x['rank'])
+    # Generate a grade distribution image
+    grade_dist = Record.query.filter_by(user_id=current_user.id) \
+        .filter_by(include_in_recent=True) \
+        .filter(db.extract('year', Record.date) == year_applicable) \
+        .group_by(Record.grade) \
+        .with_entities(Record.grade, func.count(Record.grade)) \
+        .all()
+    grade_dist_dict = {grade: count for grade, count in grade_dist}
+    # Cleanup previous grade distribution plots
+    cleanup_grade_distribution_plots(path.join(CURRENT_DIR, f'static/generated/{current_user.username}'))
+    # Generate new grade distribution plot
+    image_name = f'generated/{current_user.username}_{datetime.now(UTC).strftime("%Y%m%d%H%M%S")}_grade_dist.png'
+    plot_grade_distribution(
+        grades=grade_dist_dict,
+        path=path.join(CURRENT_DIR, f'static/{image_name}')
+    )
     # Create object to be used by Flask
     movies = [
         {'section': f'Best of {year_applicable}', 'movies': best, 'image': 'best.png'},
@@ -288,7 +306,8 @@ def retrospective():
         'activity': activity,
         'activity_metrics': activity_metrics,
         'movies': movies,
-        'year_applicable': year_applicable
+        'year_applicable': year_applicable,
+        'grade_dist': image_name,
     }
     return render_template('retrospective.html', payload=payload, metadata={})
 

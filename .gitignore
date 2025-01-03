@@ -8,3 +8,4 @@ tmp/
 
 config/credentials.yaml
 config/app.py
+app/static/generated

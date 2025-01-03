@@ -61,3 +61,7 @@ td.sideline {
 .big-title {
     font: 22px Trebuchet MS, sans-serif;
 }
+
+img.chart {
+    width: 300px;
+}
