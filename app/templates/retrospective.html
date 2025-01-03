@@ -24,9 +24,9 @@
         <td class="sideline"></td>
         <td>
             <p class="top-type">Viewing activity</p>
-                <p><span class="big-number">{{ payload.activity['year']['values']['viewing activity']|round(1) }}</span>
+                <p><span class="big-number">{{ payload.activity['viewing activity']|round(1) }}</span>
                 <br/>movies watched in {{ payload.year_applicable }}</p>
-                <p><span class="big-title">{{ format_timespan(payload.activity['year']['values']['time spent']) }}</span>
+                <p><span class="big-title">{{ format_timespan(payload.activity['time spent']) }}</span>
                 <br/>of watching in {{ payload.year_applicable }}</p>
         </td>
     </tr>

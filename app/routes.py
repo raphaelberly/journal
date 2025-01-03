@@ -250,27 +250,19 @@ def statistics():
 @app.route('/retrospective', methods=['GET'])
 @login_required
 def retrospective():
-
     # Year applicable = this year if today > January 31st, else last year
     year_applicable = (date.today() - timedelta(days=31)).year
-
-    activity = {}
-    activity_metrics = ['viewing activity', 'time spent']
-    agg = db.session.query(func.coalesce(func.count(Title.title), 0), func.coalesce(func.sum(Title.runtime), 0),) \
+    # Compute totals for the applicable year
+    totals = db.session.query(func.coalesce(func.count(Title.title), 0), func.coalesce(func.sum(Title.runtime), 0),) \
         .select_from(Record).join(Title) \
-        .filter(Record.user_id == current_user.id)
-    # This year
-    this_year = agg \
+        .filter(Record.user_id == current_user.id) \
         .filter(db.extract('year', Record.date) == year_applicable) \
         .filter(Record.include_in_recent == True) \
         .first()
-    activity.update({'year': {'values': dict(zip(activity_metrics, this_year)), 'desc': 'this year'}})
-    total_applicable = activity['year']['values']['viewing activity']
-
+    activity = dict(zip(['viewing activity', 'time spent'], totals))
     # Query best and worst movies from applicable year
-    query = db.session \
-        .query(Record.date, Record.tmdb_id, Record.grade,
-               Title.title, db.cast(db.extract('year', Title.release_date), db.Integer).label('year'), Title.genres) \
+    query = db.session.query(Record.date, Record.tmdb_id, Record.grade,
+            Title.title, db.cast(db.extract('year', Title.release_date), db.Integer).label('year'), Title.genres) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
         .filter(Record.include_in_recent == True) \
@@ -279,7 +271,7 @@ def retrospective():
     worst = query.order_by(Record.grade, Record.insert_datetime_utc.desc()).limit(5).all()
     # Format the results (add rank and suffix) and reorder them if needed
     best = [add_rank_and_suffix(best[i], i+1) for i in range(len(best))]
-    worst = [add_rank_and_suffix(worst[i], total_applicable - i) for i in range(len(worst))]
+    worst = [add_rank_and_suffix(worst[i], activity['viewing activity'] - i) for i in range(len(worst))]
     worst = sorted(worst, key=lambda x: x['rank'])
     # Generate a grade distribution image
     grade_dist = Record.query.filter_by(user_id=current_user.id) \
@@ -304,7 +296,6 @@ def retrospective():
     ]
     payload = {
         'activity': activity,
-        'activity_metrics': activity_metrics,
         'movies': movies,
         'year_applicable': year_applicable,
         'grade_dist': image_name,
