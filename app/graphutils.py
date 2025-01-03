@@ -27,11 +27,18 @@ def plot_grade_distribution(grades: Dict[int, int], path: str):
             tickvals=list(range(1, 11)),
             ticktext=[str(i) for i in range(1, 11)],
             tickfont_color='#6caee0',
-            tickfont_size=18,
+            tickfont_size=22,
+            tickfont_family='Trebuchet MS'
         ),
         yaxis=dict(showticklabels=False),
     )
     fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
     # Show value of each column on top of it in color #6caee0 and size 16
-    fig.update_traces(texttemplate='%{y}', textposition='outside', textfont_color='#6caee0', textfont_size=18)
+    fig.update_traces(
+        texttemplate='%{y}',
+        textposition='outside',
+        textfont_color='#6caee0',
+        textfont_size=22,
+        textfont_family='Trebuchet MS'
+    )
     fig.write_image(path)
