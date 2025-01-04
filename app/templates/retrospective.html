@@ -6,9 +6,11 @@
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/statistics.css')}}">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 
-<body ontouchstart="">
+<!-- https://www.kirilv.com/canvas-confetti/ -->
+<body ontouchstart="" onload="javascript:confetti({origin: {y: -0.2}, particleCount: 150, spread: 180, startVelocity: -40})">
 
 {% with page_title = [payload.year_applicable, 'Retrospective']|join(' ') %}
     {% include 'base/menu.html' %}
