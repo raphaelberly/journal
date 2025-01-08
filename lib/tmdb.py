@@ -45,7 +45,7 @@ class Tmdb(object):
         url_template = '?'.join([self.URL_MOVIE, urlencode(params)])
         urls = [url_template.format(title_id=title_id) for title_id in title_ids]
         results = boosted_requests(urls=urls)
-        return results
+        return [result for result in results if result is not None]
 
     @staticmethod
     def _clean_name(name):
