@@ -6,7 +6,7 @@ from os import path
 
 from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
-from sqlalchemy import func
+from sqlalchemy import func, cast, Integer
 from werkzeug.utils import redirect
 
 from app import app
@@ -164,6 +164,17 @@ def add_rank_and_suffix(item, rank):
     item['suffix'] = get_number_suffix(rank)
     return item
 
+def generate_grade_dist_image(grade_dist: dict) -> str:
+    # Cleanup previous grade distribution plots
+    cleanup_grade_distribution_plots(path.join(CURRENT_DIR, f'static/generated/{current_user.username}'))
+    # Generate new grade distribution plot
+    image_name = f'generated/{current_user.username}_{datetime.now(UTC).strftime("%Y%m%d%H%M%S")}_grade_dist.png'
+    plot_grade_distribution(
+        grades=grade_dist,
+        path=path.join(CURRENT_DIR, f'static/{image_name}')
+    )
+    return image_name
+
 
 @app.route('/statistics', methods=['GET'])
 @login_required
@@ -220,7 +231,6 @@ def statistics():
         {'section': f'Best of {year_applicable}', 'movies': best, 'image': 'best.png'},
         {'section': f'Worst of {year_applicable}', 'movies': worst, 'image': 'worst.png'}
     ]
-
     tops = {}
     top_models = {
         'directors': {'role': 'director', 'nb_elements': 5},
@@ -236,13 +246,20 @@ def statistics():
             .order_by(Top.grade.desc(), Top.count.desc()) \
             .all()[:top_models[top]['nb_elements']]
         tops.update({top: values})
+    # Generate a grade distribution image
+    grade_dist = Record.query.filter_by(user_id=current_user.id) \
+        .group_by(cast(Record.grade, Integer)) \
+        .with_entities(cast(Record.grade, Integer), func.count(cast(Record.grade, Integer))) \
+        .all()
+    grade_dist_dict = {grade: count for grade, count in grade_dist}
 
     payload = {
         'activity': activity,
         'activity_metrics': activity_metrics,
         'tops': tops,
         'movies': movies,
-        'year_applicable': year_applicable
+        'year_applicable': year_applicable,
+        'grade_dist': generate_grade_dist_image(grade_dist_dict),
     }
     return render_template('statistics.html', payload=payload, metadata={})
 
@@ -276,18 +293,10 @@ def retrospective():
     grade_dist = Record.query.filter_by(user_id=current_user.id) \
         .filter_by(include_in_recent=True) \
         .filter(db.extract('year', Record.date) == year_applicable) \
-        .group_by(Record.grade) \
-        .with_entities(Record.grade, func.count(Record.grade)) \
+        .group_by(cast(Record.grade, Integer)) \
+        .with_entities(cast(Record.grade, Integer), func.count(cast(Record.grade, Integer))) \
         .all()
     grade_dist_dict = {grade: count for grade, count in grade_dist}
-    # Cleanup previous grade distribution plots
-    cleanup_grade_distribution_plots(path.join(CURRENT_DIR, f'static/generated/{current_user.username}'))
-    # Generate new grade distribution plot
-    image_name = f'generated/{current_user.username}_{datetime.now(UTC).strftime("%Y%m%d%H%M%S")}_grade_dist.png'
-    plot_grade_distribution(
-        grades=grade_dist_dict,
-        path=path.join(CURRENT_DIR, f'static/{image_name}')
-    )
     # Create object to be used by Flask
     movies = [
         {'section': f'Best of {year_applicable}', 'movies': best, 'image': 'best.png'},
@@ -297,7 +306,7 @@ def retrospective():
         'activity': activity,
         'movies': movies,
         'year_applicable': year_applicable,
-        'grade_dist': image_name,
+        'grade_dist': generate_grade_dist_image(grade_dist_dict),
     }
     return render_template('retrospective.html', payload=payload, metadata={})
 

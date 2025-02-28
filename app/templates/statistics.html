@@ -93,6 +93,15 @@
 
 {% endfor %}
 
+    <tr>
+        <td class="icon"><img src="/static/images/statistics/activity.png"></td>
+        <td class="sideline"></td>
+        <td>
+            <p class="top-type">Grade histogram</p>
+            <img class="chart" src="{{ url_for('static', filename=payload.grade_dist) }}" width="500px">
+        </td>
+    </tr>
+
 </table></center>
 
 </div>
