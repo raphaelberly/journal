@@ -21,6 +21,9 @@ definitions:
       startYear: year
       runtimeMinutes: duration
       genres: genres
+    dropna:
+      - type
+      - title
 
   ratings:
     url: https://datasets.imdbws.com/title.ratings.tsv.gz
@@ -28,6 +31,8 @@ definitions:
       tconst: title_id
       averageRating: rating
       numVotes: votes
+    dropna:
+      - rating
 
   persons:
     url: https://datasets.imdbws.com/name.basics.tsv.gz
@@ -35,6 +40,8 @@ definitions:
       nconst: id
       primaryName: name
       knownForTitles: major_titles
+    dropna:
+      - name
 
   crew:
     url: https://datasets.imdbws.com/title.crew.tsv.gz
@@ -55,3 +62,7 @@ definitions:
       tconst: title_id
       nconst: person_id
       category: role
+    dropna:
+      - title_id
+      - person_id
+      - role

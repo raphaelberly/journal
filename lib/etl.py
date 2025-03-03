@@ -55,7 +55,10 @@ class ETL:
         # Apply filters when applicable
         if self.etl_config.get('filter'):
             for col_name, col_values in self.etl_config['filter'].items():
-                rows = filter(lambda row: row[col_name] in col_values, rows)
+                rows = filter(lambda row: row(col_name) in col_values, rows)
+        if self.etl_config.get('dropna'):
+            for col_name in self.etl_config.get('dropna'):
+                rows = filter(lambda row: True if row.get(col_name) else False, rows)
         rows = map(self._rename_columns, rows)
         # Upload to db
         with psycopg2.connect(get_db_connection_string(**self._credentials['db'])) as conn:
