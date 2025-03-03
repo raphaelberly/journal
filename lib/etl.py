@@ -59,7 +59,7 @@ class ETL:
         rows = map(self._rename_columns, rows)
         if self.etl_config.get('dropna'):
             for col_name in self.etl_config.get('dropna'):
-                rows = filter(lambda row: True if row.get(col_name) else False, rows)
+                rows = filter(lambda row: True if row[col_name] or row[col_name] == "\\N" else False, rows)
         # Upload to db
         with psycopg2.connect(get_db_connection_string(**self._credentials['db'])) as conn:
             self.to_db(conn, rows, 1000)
@@ -70,8 +70,7 @@ class ETL:
     def _rename_columns(self, row):
         new_dict = {}
         for colname, new_colname in self.etl_config['columns'].items():
-            if row[colname] != "\\N":
-                new_dict[new_colname] = row[colname]
+            new_dict[new_colname] = row.get(colname)
         return new_dict
 
     def _truncate_table(self, conn):
