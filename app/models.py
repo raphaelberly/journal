@@ -33,7 +33,7 @@ class User(UserMixin, db.Model):
 
     def __init__(self, username, password, email, grade_as_int=True, language='fr', providers=_default_providers):
         self.username = username
-        self.password_hash = generate_password_hash(password)
+        self.password_hash = generate_password_hash(password, method='pbkdf2')
         self.email = email
         self.grade_as_int = grade_as_int
         self.language = language
