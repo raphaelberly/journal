@@ -5,4 +5,4 @@ tables:
   - blacklist
   - titles
 
-ttl_days: 60
+ttl_days: 45

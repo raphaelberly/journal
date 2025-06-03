@@ -34,6 +34,7 @@ for folder in os.listdir(args.folder):
         try:
             folder_date = datetime.strptime(folder, '%Y-%m-%d')
         except ValueError:
+            LOGGER.warning(f'Could not parse folder date out of folder name: {folder}')
             continue
         if (datetime.today() - folder_date).days > n_days:
             LOGGER.info(f'Deleting old backup folder: {folder_path}')
