@@ -424,7 +424,7 @@ def watchlist():
         .filter(WatchlistItem.user_id == current_user.id) \
         .order_by(WatchlistItem.insert_datetime_utc.desc())
 
-    request_statuses = overseerr.request_statuses if overseerr.is_available else []
+    request_statuses = overseerr.request_statuses if overseerr.is_available else {}
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     # If the user has plex, the movie is not yet tagged as available on plex in the watchlist, but the user requested
     # it and the request was completed, then add "plex" to the providers
