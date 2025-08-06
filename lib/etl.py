@@ -54,12 +54,22 @@ class ETL:
         rows = DictReader(stream, delimiter='\t', quoting=csv.QUOTE_NONE)
         # Apply filters when applicable
         if self.etl_config.get('filter'):
-            for col_name, col_values in self.etl_config['filter'].items():
-                rows = filter(lambda row: row(col_name) in col_values, rows)
-        rows = map(self._rename_columns, rows)
+            def _filter(row):
+                for col_name, col_values in self.etl_config['filter'].items():
+                    if row[col_name] not in col_values:
+                        return False
+                return True
+            rows = filter(_filter, rows)
+        # Rename columns
+        rows = map(self._rename_columns_and_format_nulls, rows)
+        # Drop NaN values if specified
         if self.etl_config.get('dropna'):
-            for col_name in self.etl_config.get('dropna'):
-                rows = filter(lambda row: True if row[col_name] or row[col_name] == "\\N" else False, rows)
+            def _dropna(row):
+                for col_name_dropna in self.etl_config['dropna']:
+                    if row[col_name_dropna] == '\\N':
+                        return False
+                return True
+            rows = filter(_dropna, rows)
         # Upload to db
         with psycopg2.connect(get_db_connection_string(**self._credentials['db'])) as conn:
             self.to_db(conn, rows, 1000)
@@ -67,10 +77,10 @@ class ETL:
         if not filepath.endswith('.cache'):
             os.rename(filepath, filepath + '.cache')
 
-    def _rename_columns(self, row):
+    def _rename_columns_and_format_nulls(self, row):
         new_dict = {}
         for colname, new_colname in self.etl_config['columns'].items():
-            new_dict[new_colname] = row.get(colname)
+            new_dict[new_colname] = row.get(colname) if row.get(colname) not in ('\\N', 'None', None, '') else '\\N'
         return new_dict
 
     def _truncate_table(self, conn):
@@ -82,7 +92,7 @@ class ETL:
     def _get_insert_query(table_name, row):
         key_str = ','.join(row.keys())
         val_str = "'{}'".format("','".join((str(val).replace("'", "''") for val in row.values())))
-        return f'INSERT INTO {table_name} ({key_str}) VALUES ({val_str});'
+        return f'INSERT INTO {table_name} ({key_str}) VALUES ({val_str});'.replace("'\\N'", 'NULL')
 
     def to_db(self, conn,  rows, batch_size=1):
         # Truncate table
