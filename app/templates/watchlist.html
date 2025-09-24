@@ -21,6 +21,10 @@
 
 <div class="movies nobar">
 
+<!-- Add movie count display here -->
+<div id="movie-count" style="margin-bottom: 10px;"></div>
+
+
 {% if not payload %}
 <table>
     <tr><td>
@@ -43,7 +47,6 @@
     </tr></table>
 </div></center>
 {% endif %}
-
 
 {% for watchlist_item, title in payload %}
 

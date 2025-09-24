@@ -32,14 +32,20 @@ function filterSelection() {
   var x, y, i, j, k;
   x = document.getElementsByClassName("filterDiv");
   y = getActivatedFilters()
+  var visibleCount = 0;
   for (i = 0; i < x.length; i++) {
     k = false
     addClass(x[i], "show");
     for (j = 0; j < y.length; j++) {
       if (x[i].className.includes(y[j])) k = true;
     }
-    if (y.length > 0 & k == false) removeClass(x[i], "show");
+    if (y.length > 0 & k == false) {
+      removeClass(x[i], "show");
+    } else {
+      visibleCount++;
+    }
   }
+  updateMovieCount(visibleCount, y.length > 0, x.length);
 };
 
 // Show filtered elements
@@ -65,4 +71,15 @@ function removeClass(element, name) {
     }
   }
   element.className = arr1.join(" ");
+}
+
+// Add function to update the movie count display
+function updateMovieCount(visible, filtered, total) {
+  var el = document.getElementById("movie-count");
+  if (!el) return;
+  if (filtered) {
+    el.textContent = visible + " movie" + (visible === 1 ? "" : "s") + " selected";
+  } else {
+    el.textContent = total + " movie" + (total === 1 ? "" : "s") + " in total";
+  }
 }
