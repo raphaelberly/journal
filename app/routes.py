@@ -18,13 +18,14 @@ from app.graphutils import plot_grade_distribution, cleanup_grade_distribution_p
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
+from lib.tmdb import Tmdb
 from lib.tools import get_time_ago_string, get_time_spent_string
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
 
 title_collector = TitleCollector()
 overseerr = Overseerr()
-
+tmdb = Tmdb()
 
 def intersect(a, b):
     return set(a) & set(b)
@@ -34,13 +35,13 @@ def intersect(a, b):
 app.jinja_env.globals.update(zip=zip)
 app.jinja_env.globals.update(intersect=intersect)
 
-
-@app.errorhandler(Exception)
-def handle_exceptions(e):
-    flash('Wops, something went wrong', category='error')
-    etype, value, tb = sys.exc_info()
-    app.logger.error(str(traceback.print_exception(etype, value, tb)))
-    return redirect(request.referrer or url_for('search'))
+#
+# @app.errorhandler(Exception)
+# def handle_exceptions(e):
+#     flash('Wops, something went wrong', category='error')
+#     etype, value, tb = sys.exc_info()
+#     app.logger.error(str(traceback.print_exception(etype, value, tb)))
+#     return redirect(request.referrer or url_for('search'))
 
 
 def get_post_result(key):
@@ -675,11 +676,20 @@ def recos():
     nb_results = int(request.args.get('nb_results', 5))
     show_more_button = len(title_ids) > nb_results
 
+    # Check providers of the results
+    titles_enriched = enrich_titles(title_ids)[:nb_results]
+    for title in titles_enriched:
+        providers = tmdb.providers(title['id'])
+        if overseerr.request_status(title['id']) == 5:
+            providers.append('plex')
+        title['providers'] = providers
+
     # Prepare payload and metadata
-    payload = {'titles': enrich_titles(title_ids)[:nb_results]}
+    payload = {'titles': titles_enriched}
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'show_more_button': show_more_button,
+        'providers': current_user.providers,
     }
 
     return render_template('recos.html', payload=payload, metadata=metadata)

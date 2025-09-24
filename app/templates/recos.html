@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/watchlist.css')}}">
 </head>
 
 <body ontouchstart="">
@@ -63,6 +64,15 @@
             <br/>{{ title.duration }}
         {% endif %}
     </td></tr>
+    {% if intersect(title.providers, metadata.providers) %}
+    <tr><td>
+        <div class="providers">
+        {% for provider in intersect(title.providers, metadata.providers) %}
+            <img src="static/images/providers/{{ provider }}.png">
+        {% endfor %}
+        </div>
+    </td></tr>
+    {% endif %}
     <tr><td>
         <table class="dual"><tr>
         <td class="left">
