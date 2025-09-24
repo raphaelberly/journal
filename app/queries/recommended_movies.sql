@@ -3,7 +3,7 @@ SELECT
 FROM journal.records r
 INNER JOIN journal.titles t
   ON r.tmdb_id = t.id
-WHERE r.date >= (now() - INTERVAL '24' MONTH)::DATE
+WHERE r.date >= (now() - INTERVAL '48' MONTH)::DATE
   AND r.tmdb_id NOT IN (
     SELECT tmdb_id FROM journal.records r
     WHERE r.user_id = '{user_id}'
@@ -12,5 +12,5 @@ WHERE r.date >= (now() - INTERVAL '24' MONTH)::DATE
   )
 GROUP BY 1
 HAVING count(*) >= 3
-ORDER BY count(*)*0.333 + avg(r.grade)*0.666 DESC
+ORDER BY count(*)*0.25 + avg(r.grade)*0.75 DESC
 ;
