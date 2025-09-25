@@ -1,6 +1,13 @@
 {% with messages = get_flashed_messages(with_categories=True) %}
     {% if messages %}
     <script type=text/javascript src="{{ url_for('static', filename='js/alert.js') }}"></script>
-    <div class="alert hidden {{ messages[0][0] }}" onclick="javascript:closeAlert()">{{ messages[0][1] }}</div>
+    {% set category, message = messages[0] %}
+    {% if category == 'success' and message == 'Movie added to watchlist' %}
+        <div class="alert hidden success" onclick="javascript:closeAlert()">
+            <a href="{{ url_for('watchlist') }}" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">{{ message }}</a>
+        </div>
+    {% else %}
+        <div class="alert hidden {{ category }}" onclick="javascript:closeAlert()">{{ message }}</div>
+    {% endif %}
     {% endif %}
 {% endwith %}
