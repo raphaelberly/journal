@@ -35,13 +35,13 @@ def intersect(a, b):
 app.jinja_env.globals.update(zip=zip)
 app.jinja_env.globals.update(intersect=intersect)
 
-#
-# @app.errorhandler(Exception)
-# def handle_exceptions(e):
-#     flash('Wops, something went wrong', category='error')
-#     etype, value, tb = sys.exc_info()
-#     app.logger.error(str(traceback.print_exception(etype, value, tb)))
-#     return redirect(request.referrer or url_for('search'))
+
+@app.errorhandler(Exception)
+def handle_exceptions(e):
+    flash('Wops, something went wrong', category='error')
+    etype, value, tb = sys.exc_info()
+    app.logger.error(str(traceback.print_exception(etype, value, tb)))
+    return redirect(request.referrer or url_for('search'))
 
 
 def get_post_result(key):
