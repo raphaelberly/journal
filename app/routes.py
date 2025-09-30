@@ -4,7 +4,7 @@ import traceback
 from datetime import date, datetime, timedelta, UTC
 from os import path
 
-from flask import render_template, request, url_for, flash, send_from_directory
+from flask import render_template, request, url_for, flash, send_from_directory, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy import func, cast, Integer
 from werkzeug.utils import redirect
@@ -15,6 +15,7 @@ from app.converters import TitleConverter
 from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
 from app.graphutils import plot_grade_distribution, cleanup_grade_distribution_plots
+from app.mcp import MANIFEST, METHOD_DISPATCHER
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
@@ -693,3 +694,68 @@ def recos():
     }
 
     return render_template('recos.html', payload=payload, metadata=metadata)
+
+
+@app.route('/mcp', methods=['POST'])
+def mcp_endpoint():
+    """
+    This is the single entry point for all MCP communication.
+    It handles both 'discover' and 'call' operations based on the
+    content of the incoming JSON request.
+    """
+    # Ensure the request has a JSON body
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Request must be JSON"}), 400
+
+    data = request.get_json()
+    operation = data.get('operation')
+
+    if not operation:
+        return jsonify({"status": "error", "message": "Missing 'operation' in request body"}), 400
+
+    # --- Operation: discover ---
+    if operation == 'discover':
+        return jsonify(MANIFEST)
+
+    # --- Operation: call ---
+    elif operation == 'call':
+        method_name = data.get('method')
+        params = data.get('parameters', {})
+
+        if not method_name:
+            return jsonify({"status": "error", "message": "Missing 'method' for call operation"}), 400
+
+        # Look up the function to call in our dispatcher
+        func_to_call = METHOD_DISPATCHER.get(method_name)
+        if not func_to_call:
+            return jsonify({"status": "error", "message": f"Method '{method_name}' not found"}), 404
+
+        # --- Parameter Validation and Processing ---
+        # Get the parameter specification from the manifest to check requirements
+        method_spec = next((m for m in MANIFEST['methods'] if m['name'] == method_name), None)
+        validated_params = {}
+
+        for spec in method_spec.get('parameters', []):
+            param_name = spec['name']
+
+            if spec['required'] and param_name not in params:
+                return jsonify({"status": "error", "message": f"Missing required parameter: '{param_name}'"}), 400
+
+            value = params.get(param_name, spec.get('default'))
+
+            if value is not None:
+                # Basic type checking
+                if spec['type'] == 'integer' and not isinstance(value, int):
+                    return jsonify({"status": "error", "message": f"Parameter '{param_name}' must be an integer"}), 400
+                validated_params[param_name] = value
+
+        # Try to execute the function with the validated parameters
+        try:
+            result = func_to_call(**validated_params)
+            return jsonify({"status": "success", "data": result})
+        except Exception as e:
+            # Catch potential errors during function execution
+            return jsonify({"status": "error", "message": str(e)}), 500
+
+    else:
+        return jsonify({"status": "error", "message": f"Unknown operation: '{operation}'"}), 400
