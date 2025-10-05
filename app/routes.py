@@ -693,3 +693,39 @@ def recos():
     }
 
     return render_template('recos.html', payload=payload, metadata=metadata)
+
+
+@app.route('/library', methods=['GET'])
+@login_required
+def library():
+
+    nb_movies = Record.query \
+        .filter(Record.user_id == current_user.id) \
+        .count()
+
+    submenu = request.args.get('submenu', 'inactive')
+
+    sort_by = request.args.get('sort_by', 'grade_desc')
+    if sort_by == 'grade_asc':
+        sort_by_obj = Record.grade.asc()
+    else:
+        sort_by_obj = Record.grade.desc()
+
+    query = db.session \
+        .query(Record, Title) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
+        .order_by(sort_by_obj, Record.insert_datetime_utc.desc())
+
+    nb_results = int(request.args.get('nb_results', 40))
+    query = query.limit(nb_results)
+
+    payload = [(record.export(), title.export(current_user.language)) for record, title in query.all()]
+    show_more_button = nb_movies > len(payload)
+    metadata = {
+        'scroll_to': int(float(request.args.get('scroll_to', 0))),
+        'sort_by': sort_by,
+        'submenu': submenu,
+        'show_more_button': show_more_button,
+    }
+    return render_template('library.html', payload=payload, metadata=metadata)

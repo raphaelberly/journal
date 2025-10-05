@@ -1,0 +1,83 @@
+<html>
+
+<head>
+    <title>Library - Journal</title>
+    {% include 'base/head.html' %}
+    <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/submenu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/scroll.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recent.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/library.css')}}">
+</head>
+
+<body ontouchstart="">
+
+{% with page_title = 'Library' %}
+    {% with beta = True %}{% include 'base/menu.html' %}{% endwith %}
+{% endwith %}
+{% include 'base/alert.html' %}
+
+<div class="recent">
+
+<div class="sort-by-button">
+    <button class="styled-button empty" onclick="openSubmenu()">Sort by</button>
+</div>
+
+<center><table>
+
+{% for record, title in payload %}
+<tr>
+    {% if loop.index0 == 0 %}
+        <td class="timeline top"></td>
+    {% else %}
+        <td class="timeline middle"></td>
+    {% endif %}
+    <td>
+        <b><a href="{{ url_for('movie', tmdb_id=title.id) }}">{{ title.title }} ({{ title.year }})</a></b>
+        <br/>
+        {{ ', '.join(title.genres) }}
+        <br/>
+        <b>{{ [record.grade|int, record.grade]|max }}/10</b>, added {{ format_date(record.date) | lower }}
+    </td>
+</tr>
+{% endfor %}
+
+</table></center>
+
+{% if metadata.show_more_button %}
+<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_scroll_and_load('{{ url_for('library', sort_by=metadata.sort_by, nb_results=payload|length+20) }}')" value="More">
+{% endif %}
+
+</div>
+
+<div id="mySubmenu" class="submenu">
+<table>
+    <tr><td>
+        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='active') }}">
+            <span class="sort-radio"></span>
+            Grade descending
+        </a>
+    </td></tr>
+    <tr><td>
+        <a class="{% if metadata.sort_by == 'grade_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_asc', submenu='active') }}">
+            <span class="sort-radio"></span>
+            Grade ascending
+        </a>
+    </td></tr>
+</table>
+</div>
+
+<a href="javascript:void(0)" onclick="closeSubmenu()"><div class="submenu-back" id="mySubmenuBack"></div></a>
+
+{% if metadata.submenu == 'active' %}
+<script type = "text/javascript"> instantOpenSubmenu(); </script>
+{% endif %}
+
+{% if metadata.scroll_to %}
+<script type = "text/javascript"> window.scrollTo(0, {{ metadata.scroll_to }}); </script>
+{% endif %}
+
+</body>
+</html>
