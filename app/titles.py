@@ -10,7 +10,7 @@ class TitleCollector(object):
         self.tmdb = Tmdb()
 
     def collect(self, title_id: int) -> dict:
-        title = self.tmdb.get(title_id)
+        title = self.tmdb.get(title_id).copy()
         imdb_id = title.pop('imdb_id') if 'imdb_id' in title else ''
         if imdb_id:
             result = Rating.query.filter_by(title_id=imdb_id).first()
