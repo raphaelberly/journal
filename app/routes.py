@@ -708,6 +708,10 @@ def library():
     sort_by = request.args.get('sort_by', 'grade_desc')
     if sort_by == 'grade_asc':
         sort_by_obj = Record.grade.asc()
+    elif sort_by == 'date_added_asc':
+        sort_by_obj = Record.date.asc()
+    elif sort_by == 'date_added_desc':
+        sort_by_obj = Record.date.desc()
     else:
         sort_by_obj = Record.grade.desc()
 

@@ -66,6 +66,18 @@
             Grade ascending
         </a>
     </td></tr>
+    <tr><td>
+        <a class="{% if metadata.sort_by == 'date_added_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_desc', submenu='active') }}">
+            <span class="sort-radio"></span>
+            Date added descending
+        </a>
+    </td></tr>
+    <tr><td>
+        <a class="{% if metadata.sort_by == 'date_added_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_asc', submenu='active') }}">
+            <span class="sort-radio"></span>
+            Date added ascending
+        </a>
+    </td></tr>
 </table>
 </div>
 
