@@ -28,24 +28,26 @@
 }
 
 .sort-radio {
-    display: inline-block;
-    vertical-align: middle;
     width: 18px;
     height: 18px;
     border-radius: 50%;
     margin-right: 12px;
     border: 1px solid #6caee0;
-    background-color: #fff;
     box-sizing: border-box;
-    transition: background 0.2s;
-}
-
-.selected .sort-radio {
-    background-color: #6caee0;
-}
-
-.not-selected .sort-radio {
+    position: relative;
     background-color: #fff;
+}
+
+.selected .sort-radio::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #6caee0;
+    transform: translate(-50%, -50%);
 }
 
 .submenu-back {
