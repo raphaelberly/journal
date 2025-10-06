@@ -708,10 +708,14 @@ def library():
     sort_by = request.args.get('sort_by', 'grade_desc')
     if sort_by == 'grade_asc':
         sort_by_obj = Record.grade.asc()
-    elif sort_by == 'date_added_asc':
-        sort_by_obj = Record.date.asc()
+    elif sort_by == 'imdb_rating_desc':
+        sort_by_obj = func.coalesce(Title.imdb_rating, 0).desc()
+    elif sort_by == 'imdb_rating_asc':
+        sort_by_obj = Title.imdb_rating.asc()
     elif sort_by == 'date_added_desc':
         sort_by_obj = Record.date.desc()
+    elif sort_by == 'date_added_asc':
+        sort_by_obj = Record.date.asc()
     else:
         sort_by_obj = Record.grade.desc()
 

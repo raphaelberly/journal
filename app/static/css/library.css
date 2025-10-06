@@ -20,11 +20,11 @@
     width: 400px;
     border-spacing: 0;
     margin: auto;
-    margin-top: 30px;
+    margin-top: 25px;
 }
 
 .submenu td {
-    padding: 10px 25px 10px 25px;
+    padding: 5px 25px 10px 25px;
 }
 
 .sort-radio {
@@ -61,7 +61,7 @@
 
 }
 
-a {
+.submenu a {
     text-decoration: none;
     color: #6caee0;
     display: inline-flex;
