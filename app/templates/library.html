@@ -22,7 +22,8 @@
 <div class="recent">
 
 <div class="sort-by-button">
-    <button class="styled-button empty" onclick="openSubmenu()">Sort by</button>
+    <button class="styled-button empty" onclick="openSubmenu('sortSubmenu')">Sort by</button>
+    <button class="styled-button empty right" onclick="openSubmenu('filterSubmenu')">Filter by</button>
 </div>
 
 <center><table>
@@ -52,40 +53,40 @@
 
 </div>
 
-<div id="mySubmenu" class="submenu">
+<div id="sortSubmenu" class="submenu">
 <table>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='active') }}">
+        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='sortSubmenu') }}">
             <span class="sort-radio"></span>
             Grade descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'grade_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_asc', submenu='active') }}">
+        <a class="{% if metadata.sort_by == 'grade_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_asc', submenu='sortSubmenu') }}">
             <span class="sort-radio"></span>
             Grade ascending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'imdb_rating_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_desc', submenu='active') }}">
+        <a class="{% if metadata.sort_by == 'imdb_rating_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_desc', submenu='sortSubmenu') }}">
             <span class="sort-radio"></span>
             IMDb rating descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'imdb_rating_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_asc', submenu='active') }}">
+        <a class="{% if metadata.sort_by == 'imdb_rating_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_asc', submenu='sortSubmenu') }}">
             <span class="sort-radio"></span>
             IMDb rating ascending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'date_added_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_desc', submenu='active') }}">
+        <a class="{% if metadata.sort_by == 'date_added_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_desc', submenu='sortSubmenu') }}">
             <span class="sort-radio"></span>
             Date added descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'date_added_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_asc', submenu='active') }}">
+        <a class="{% if metadata.sort_by == 'date_added_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_asc', submenu='sortSubmenu') }}">
             <span class="sort-radio"></span>
             Date added ascending
         </a>
@@ -93,10 +94,23 @@
 </table>
 </div>
 
-<a href="javascript:void(0)" onclick="closeSubmenu()"><div class="submenu-back" id="mySubmenuBack"></div></a>
+<a href="javascript:void(0)" onclick="closeSubmenu('sortSubmenu')"><div class="submenu-back" id="sortSubmenuBack"></div></a>
 
-{% if metadata.submenu == 'active' %}
-<script type = "text/javascript"> instantOpenSubmenu(); </script>
+<div id="filterSubmenu" class="submenu">
+<table>
+    <tr><td>
+        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='filterSubmenu') }}">
+            <span class="sort-radio"></span>
+            Grade descending
+        </a>
+    </td></tr>
+</table>
+</div>
+
+<a href="javascript:void(0)" onclick="closeSubmenu('filterSubmenu')"><div class="submenu-back" id="filterSubmenuBack"></div></a>
+
+{% if metadata.submenu != 'inactive' %}
+<script type = "text/javascript"> instantOpenSubmenu('{{ metadata.submenu }}'); </script>
 {% endif %}
 
 {% if metadata.scroll_to %}

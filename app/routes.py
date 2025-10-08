@@ -698,13 +698,21 @@ def recos():
 @app.route('/library', methods=['GET'])
 @login_required
 def library():
+    # COLLECT RECORDS
+    records = db.session \
+        .query(Record, Title) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id)
 
-    nb_movies = Record.query \
-        .filter(Record.user_id == current_user.id) \
-        .count()
+    # FILTER RECORDS
+    filter_grades_below = request.args.get('filter_grades_below', None)
+    filter_grades_above = request.args.get('filter_grades_above', None)
+    if filter_grades_below is not None:
+        records = records.filter(Record.grade >= float(filter_grades_below))
+    if filter_grades_above is not None:
+        records = records.filter(Record.grade <= float(filter_grades_above))
 
-    submenu = request.args.get('submenu', 'inactive')
-
+    # ORDER RECORDS
     sort_by = request.args.get('sort_by', 'grade_desc')
     if sort_by == 'grade_asc':
         sort_by_obj = Record.grade.asc()
@@ -718,22 +726,22 @@ def library():
         sort_by_obj = Record.date.asc()
     else:
         sort_by_obj = Record.grade.desc()
+    records = records.order_by(sort_by_obj, Record.insert_datetime_utc.desc())
 
-    query = db.session \
-        .query(Record, Title) \
-        .select_from(Record).join(Title) \
-        .filter(Record.user_id == current_user.id) \
-        .order_by(sort_by_obj, Record.insert_datetime_utc.desc())
-
+    # COUNT RECORDS AND LIMIT RESULTS
+    nb_records = records.count()
     nb_results = int(request.args.get('nb_results', 40))
-    query = query.limit(nb_results)
+    records = records.limit(nb_results)
 
-    payload = [(record.export(), title.export(current_user.language)) for record, title in query.all()]
-    show_more_button = nb_movies > len(payload)
+    # RETURN PAYLOAD AND METADATA
+    payload = [(record.export(), title.export(current_user.language)) for record, title in records.all()]
+    show_more_button = nb_records > len(payload)
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'sort_by': sort_by,
-        'submenu': submenu,
+        'submenu': request.args.get('submenu', 'inactive'),
+        'filter_grades_below': filter_grades_below,
+        'filter_grades_above': filter_grades_above,
         'show_more_button': show_more_button,
     }
     return render_template('library.html', payload=payload, metadata=metadata)
