@@ -743,5 +743,6 @@ def library():
         'filter_grades_below': filter_grades_below,
         'filter_grades_above': filter_grades_above,
         'show_more_button': show_more_button,
+        'grade_as_int': current_user.grade_as_int,
     }
     return render_template('library.html', payload=payload, metadata=metadata)

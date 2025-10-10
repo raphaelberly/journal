@@ -8,6 +8,7 @@
     <script type=text/javascript src="{{ url_for('static', filename='js/scroll.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/recent.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/library.css')}}">
 </head>
@@ -96,15 +97,45 @@
 
 <a href="javascript:void(0)" onclick="closeSubmenu('sortSubmenu')"><div class="submenu-back" id="sortSubmenuBack"></div></a>
 
-<div id="filterSubmenu" class="submenu">
+<div id="filterSubmenu" class="submenu filter-submenu">
 <table>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='filterSubmenu') }}">
-            <span class="sort-radio"></span>
-            Grade descending
-        </a>
+        <div class="mentions">Grades between <b><span id="gradeLowerBoundValue"></span>/10</b> and <b><span id="gradeUpperBoundValue"></span>/10</b></div>
+        <div class="dual-slider">
+            <input id="gradeLowerBound" name="gradeLowerBound" type="range" min="{{ 1 if metadata.grade_as_int else 0 }}" max="10" value="{{ metadata.filter_grades_below or (1 if metadata.grade_as_int else 0) |string }}" step="{{ 1 if metadata.grade_as_int else 0.5 }}" class="slider">
+            <input id="gradeUpperBound" name="gradeUpperBound" type="range" min="{{ 1 if metadata.grade_as_int else 0 }}" max="10" value="{{ metadata.filter_grades_above or 10 }}" step="{{ 1 if metadata.grade_as_int else 0.5 }}" class="slider">
+        </div>
+    </td></tr>
+    <tr><td>
+        <input class="styled-button full" type="button" onclick="location.href=('{{ url_for('library', sort_by=metadata.sort_by, submenu='filterSubmenu') }}&filter_grades_below=' + document.getElementById('gradeLowerBound').value + '&filter_grades_above=' + document.getElementById('gradeUpperBound').value);" value="Apply filter">
     </td></tr>
 </table>
+<script type="text/javascript">
+// Update gradeLowerBoundValue and gradeUpperBoundValue when sliders move
+(function() {
+    var lower = document.getElementById('gradeLowerBound');
+    var upper = document.getElementById('gradeUpperBound');
+    var lowerVal = document.getElementById('gradeLowerBoundValue');
+    var upperVal = document.getElementById('gradeUpperBoundValue');
+    if (lower && upper && lowerVal && upperVal) {
+        function update() {
+            // Prevent lower slider from exceeding upper slider
+            if (parseFloat(lower.value) > parseFloat(upper.value)) {
+                lower.value = upper.value;
+            }
+            // Prevent upper slider from going below lower slider
+            if (parseFloat(upper.value) < parseFloat(lower.value)) {
+                upper.value = lower.value;
+            }
+            lowerVal.textContent = parseFloat(lower.value).toFixed({{ 0 if metadata.grade_as_int else 1 }});
+            upperVal.textContent = parseFloat(upper.value).toFixed({{ 0 if metadata.grade_as_int else 1 }});
+        }
+        lower.addEventListener('input', update);
+        upper.addEventListener('input', update);
+        update();
+    }
+})();
+</script>
 </div>
 
 <a href="javascript:void(0)" onclick="closeSubmenu('filterSubmenu')"><div class="submenu-back" id="filterSubmenuBack"></div></a>

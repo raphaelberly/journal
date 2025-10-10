@@ -29,3 +29,44 @@
     border: none;
     cursor: pointer;
 }
+
+.dual-slider {
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    height: 30px;
+    width: 100%;
+}
+
+.dual-slider input {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    transform: translateY(50%);
+    pointer-events: none;
+    -webkit-appearance: none;
+    background: transparent;
+}
+
+.dual-slider input::-webkit-slider-thumb {
+    pointer-events: all;
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #6caee0;
+    outline: none;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.dual-slider::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    transform: translateY(60%);
+    height: 14px;
+    background: #efefef;
+    border-radius: 20px;
+    width: 100%;
+}

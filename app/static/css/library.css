@@ -26,8 +26,17 @@ button.right {
     margin-top: 25px;
 }
 
+.filter-submenu table {
+    width: 100%;
+    max-width: 325px;
+}
+
 .submenu td {
     padding: 5px 25px 10px 25px;
+}
+
+.filter-submenu td {
+    text-align: center;
 }
 
 .sort-radio {
