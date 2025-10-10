@@ -49,7 +49,7 @@
 </table></center>
 
 {% if metadata.show_more_button %}
-<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_scroll_and_load('{{ url_for('library', sort_by=metadata.sort_by, nb_results=payload|length+20) }}')" value="More">
+<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_scroll_and_load('{{ url_for('library', sort_by=metadata.sort_by, filter_grades_below=metadata.filter_grades_below, filter_grades_above=metadata.filter_grades_above, nb_results=payload|length+20) }}')" value="More">
 {% endif %}
 
 </div>
@@ -57,37 +57,37 @@
 <div id="sortSubmenu" class="submenu">
 <table>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='sortSubmenu') }}">
+        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='sortSubmenu', filter_grades_below=metadata.filter_grades_below, filter_grades_above=metadata.filter_grades_above) }}">
             <span class="sort-radio"></span>
             Grade descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'grade_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_asc', submenu='sortSubmenu') }}">
+        <a class="{% if metadata.sort_by == 'grade_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_asc', submenu='sortSubmenu', filter_grades_below=metadata.filter_grades_below, filter_grades_above=metadata.filter_grades_above) }}">
             <span class="sort-radio"></span>
             Grade ascending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'imdb_rating_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_desc', submenu='sortSubmenu') }}">
+        <a class="{% if metadata.sort_by == 'imdb_rating_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_desc', submenu='sortSubmenu', filter_grades_below=metadata.filter_grades_below, filter_grades_above=metadata.filter_grades_above) }}">
             <span class="sort-radio"></span>
             IMDb rating descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'imdb_rating_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_asc', submenu='sortSubmenu') }}">
+        <a class="{% if metadata.sort_by == 'imdb_rating_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_asc', submenu='sortSubmenu', filter_grades_below=metadata.filter_grades_below, filter_grades_above=metadata.filter_grades_above) }}">
             <span class="sort-radio"></span>
             IMDb rating ascending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'date_added_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_desc', submenu='sortSubmenu') }}">
+        <a class="{% if metadata.sort_by == 'date_added_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_desc', submenu='sortSubmenu', filter_grades_below=metadata.filter_grades_below, filter_grades_above=metadata.filter_grades_above) }}">
             <span class="sort-radio"></span>
             Date added descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'date_added_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_asc', submenu='sortSubmenu') }}">
+        <a class="{% if metadata.sort_by == 'date_added_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_asc', submenu='sortSubmenu', filter_grades_below=metadata.filter_grades_below, filter_grades_above=metadata.filter_grades_above) }}">
             <span class="sort-radio"></span>
             Date added ascending
         </a>
