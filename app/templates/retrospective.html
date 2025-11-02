@@ -57,7 +57,15 @@
         <td class="sideline"></td>
         <td>
             <p class="top-type">Grade histogram</p>
-            <img class="chart" src="{{ url_for('static', filename=payload.grade_dist) }}" width="500px">
+            <img class="chart" src="{{ url_for('static', filename=payload.dist_images.grade_dist) }}" width="500px">
+        </td>
+    </tr>
+    <tr>
+        <td class="icon"><img src="/static/images/statistics/television.png"></td>
+        <td class="sideline"></td>
+        <td>
+            <p class="top-type">Decade histogram</p>
+            <img class="chart" src="{{ url_for('static', filename=payload.dist_images.decade_dist) }}" width="500px">
         </td>
     </tr>
 

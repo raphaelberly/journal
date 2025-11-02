@@ -1,11 +1,11 @@
 import os
-from typing import Dict
+from typing import Dict, Optional, Tuple
 from plotly import graph_objs as go
 
 # get path to current file's folder
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def cleanup_grade_distribution_plots(path_starts_with: str):
+def cleanup_distribution_plots(path_starts_with: str):
     dirname = os.path.dirname(path_starts_with)
     for file in os.listdir(dirname):
         filepath = os.path.join(dirname, file)
@@ -14,18 +14,19 @@ def cleanup_grade_distribution_plots(path_starts_with: str):
             os.remove(filepath)
 
 
-def plot_grade_distribution(grades: Dict[int, int], path: str):
+def plot_distribution(key_values: Dict[int, int], path: str, force_range: Optional[list] = None) -> go.Figure:
     fig = go.Figure(data=[go.Bar(
-        x=list(grades.keys()),
-        y=list(grades.values()),
+        x=list(key_values.keys()),
+        y=list(key_values.values()),
         marker_color='#6caee0'
     )])
+    range_ = force_range or range(min(key_values.keys()), max(key_values.keys()) + 1)
     fig.update_layout(
         plot_bgcolor='white',
         xaxis=dict(
             tickmode='array',
-            tickvals=list(range(1, 11)),
-            ticktext=[str(i) for i in range(1, 11)],
+            tickvals=force_range or range_,
+            ticktext=[str(i) for i in range_],
             tickfont_color='#6caee0',
             tickfont_size=22,
             tickfont_family='Trebuchet MS'

@@ -14,7 +14,7 @@ from app import db, login
 from app.converters import TitleConverter
 from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
-from app.graphutils import plot_grade_distribution, cleanup_grade_distribution_plots
+from app.graphutils import plot_distribution, cleanup_distribution_plots
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
@@ -165,16 +165,23 @@ def add_rank_and_suffix(item, rank):
     item['suffix'] = get_number_suffix(rank)
     return item
 
-def generate_grade_dist_image(grade_dist: dict) -> str:
+def generate_dist_images(grade_dist: dict, decade_dist: dict) -> dict:
     # Cleanup previous grade distribution plots
-    cleanup_grade_distribution_plots(path.join(CURRENT_DIR, f'static/generated/{current_user.username}'))
+    cleanup_distribution_plots(path.join(CURRENT_DIR, f'static/generated/{current_user.username}'))
     # Generate new grade distribution plot
-    image_name = f'generated/{current_user.username}_{datetime.now(UTC).strftime("%Y%m%d%H%M%S")}_grade_dist.png'
-    plot_grade_distribution(
-        grades=grade_dist,
-        path=path.join(CURRENT_DIR, f'static/{image_name}')
+    grade_image_name = f'generated/{current_user.username}_{datetime.now(UTC).strftime("%Y%m%d%H%M%S")}_grade_dist.png'
+    decade_image_name = f'generated/{current_user.username}_{datetime.now(UTC).strftime("%Y%m%d%H%M%S")}_decade_dist.png'
+    plot_distribution(
+        key_values=grade_dist,
+        path=path.join(CURRENT_DIR, f'static/{grade_image_name}'),
+        force_range=list(range(1, 11))
     )
-    return image_name
+    plot_distribution(
+        key_values=decade_dist,
+        path=path.join(CURRENT_DIR, f'static/{decade_image_name}'),
+        force_range=list(range(min(decade_dist.keys()), max(decade_dist.keys()) + 10, 10))
+    )
+    return {'grade_dist': grade_image_name, 'decade_dist': decade_image_name}
 
 
 @app.route('/statistics', methods=['GET'])
@@ -253,6 +260,15 @@ def statistics():
         .with_entities(cast(Record.grade, Integer), func.count(cast(Record.grade, Integer))) \
         .all()
     grade_dist_dict = {grade: count for grade, count in grade_dist}
+    # Generate a decade distribution image
+    decade_expr = cast(cast(func.extract('year', Title.release_date) // 10, Integer) * 10, Integer)
+    decade_dist = db.session \
+        .query(decade_expr, func.count()) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
+        .group_by(decade_expr) \
+        .all()
+    decade_dist_dict = {decade: count for decade, count in decade_dist}
 
     payload = {
         'activity': activity,
@@ -260,7 +276,7 @@ def statistics():
         'tops': tops,
         'movies': movies,
         'year_applicable': year_applicable,
-        'grade_dist': generate_grade_dist_image(grade_dist_dict),
+        'dist_images': generate_dist_images(grade_dist_dict, decade_dist_dict),
     }
     return render_template('statistics.html', payload=payload, metadata={})
 
@@ -298,6 +314,16 @@ def retrospective():
         .with_entities(cast(Record.grade, Integer), func.count(cast(Record.grade, Integer))) \
         .all()
     grade_dist_dict = {grade: count for grade, count in grade_dist}
+    # Generate a decade distribution image
+    decade_expr = cast(cast(func.extract('year', Title.release_date) // 10, Integer) * 10, Integer)
+    decade_dist = db.session \
+        .query(decade_expr, func.count()) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
+        .filter(db.extract('year', Record.date) == year_applicable) \
+        .group_by(decade_expr) \
+        .all()
+    decade_dist_dict = {decade: count for decade, count in decade_dist}
     # Create object to be used by Flask
     movies = [
         {'section': f'Best of {year_applicable}', 'movies': best, 'image': 'best.png'},
@@ -307,7 +333,7 @@ def retrospective():
         'activity': activity,
         'movies': movies,
         'year_applicable': year_applicable,
-        'grade_dist': generate_grade_dist_image(grade_dist_dict),
+        'dist_images': generate_dist_images(grade_dist_dict, decade_dist_dict),
     }
     return render_template('retrospective.html', payload=payload, metadata={})
 
