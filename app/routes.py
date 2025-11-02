@@ -261,7 +261,7 @@ def statistics():
         .all()
     grade_dist_dict = {grade: count for grade, count in grade_dist}
     # Generate a decade distribution image
-    decade_expr = cast(cast(func.extract('year', Title.release_date) // 10, Integer) * 10, Integer)
+    decade_expr = cast(func.floor(func.extract('year', Title.release_date) / 10) * 10, Integer)
     decade_dist = db.session \
         .query(decade_expr, func.count()) \
         .select_from(Record).join(Title) \
@@ -315,7 +315,7 @@ def retrospective():
         .all()
     grade_dist_dict = {grade: count for grade, count in grade_dist}
     # Generate a decade distribution image
-    decade_expr = cast(cast(func.extract('year', Title.release_date) // 10, Integer) * 10, Integer)
+    decade_expr = cast(func.floor(func.extract('year', Title.release_date) / 10) * 10, Integer)
     decade_dist = db.session \
         .query(decade_expr, func.count()) \
         .select_from(Record).join(Title) \
