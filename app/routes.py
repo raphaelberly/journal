@@ -6,7 +6,7 @@ from os import path
 
 from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
-from sqlalchemy import func, cast, Integer
+from sqlalchemy import func, cast, Integer, case, and_
 from werkzeug.utils import redirect
 
 from app import app
@@ -221,9 +221,14 @@ def statistics():
             .filter(db.extract('year', Record.date) == year_applicable) \
             .count()
     # Query best and worst movies from applicable year
+    # Use original title for French movies if user preference is enabled
+    title_expr = case(
+        (and_(current_user.language == 'fr', Title.original_language == 'fr'), Title.original_title),
+        else_=Title.title
+    ).label('title')
     query = db.session \
         .query(Record.date, Record.tmdb_id, Record.grade,
-               Title.title, db.cast(db.extract('year', Title.release_date), db.Integer).label('year'), Title.genres) \
+               title_expr, db.cast(db.extract('year', Title.release_date), db.Integer).label('year'), Title.genres) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
         .filter(Record.include_in_recent == True) \
@@ -294,8 +299,13 @@ def retrospective():
         .first()
     activity = dict(zip(['viewing activity', 'time spent'], totals))
     # Query best and worst movies from applicable year
+    # Use original title for French movies if user preference is enabled
+    title_expr = case(
+        (and_(current_user.language == 'fr', Title.original_language == 'fr'), Title.original_title),
+        else_=Title.title
+    ).label('title')
     query = db.session.query(Record.date, Record.tmdb_id, Record.grade,
-            Title.title, db.cast(db.extract('year', Title.release_date), db.Integer).label('year'), Title.genres) \
+            title_expr, db.cast(db.extract('year', Title.release_date), db.Integer).label('year'), Title.genres) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
         .filter(Record.include_in_recent == True) \
