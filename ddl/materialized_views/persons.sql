@@ -44,7 +44,7 @@ persons_and_roles AS (
     c.person_id,
     p.name,
     array_agg(
-      CASE WHEN t.original_language = u.language THEN t.original_title ELSE t.title END
+      CASE WHEN u.language = 'fr' AND t.original_language = 'fr' THEN t.original_title ELSE t.title END
       ORDER BY r.grade DESC, r.date DESC
     )                                                                                   AS title_names,
     array_agg(c.year ORDER BY r.grade DESC, r.date DESC)                                AS title_years,

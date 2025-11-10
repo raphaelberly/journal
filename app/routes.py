@@ -642,6 +642,7 @@ def settings():
         if original_titles_fr != (current_user.language == 'fr'):
             current_user.language = 'fr' if original_titles_fr else 'en'
             modified = True
+            refresh_materialized_views()
         # If the list of providers was changed, change it in the db
         submitted_providers = {provider: provider in request.form for provider in available_providers}
         if submitted_providers != user_providers:
