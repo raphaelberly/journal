@@ -19,98 +19,88 @@
 
 <center><table>
 
+    <tr class="top-type">
+        <td class="icon"><img src="/static/images/statistics/television.png"></td>
+        <td>Viewing activity</td>
+    {% for timespan in ['month', 'year', 'overall'] %}
     <tr>
-        <td class="icon"><img src="/static/images/statistics/activity.png"></td>
-        <td class="sideline"></td>
+        <td class="big-number">
+            {{ payload.activity[timespan]['values']['viewing activity']|round(1) }}
+        </td>
         <td>
-            <p class="top-type">Viewing activity</p>
-            {% for timespan in ['month', 'year', 'overall'] %}
-                <p><span class="big-number">{{ payload.activity[timespan]['values']['viewing activity']|round(1) }}</span>
-                <br/>{{ payload.activity[timespan].desc }}</p>
-            {% endfor %}
+            <b>{{ payload.activity[timespan].desc }}</b><br/>
+            {{ format_timespan(payload.activity[timespan]['values']['time spent']) }}
         </td>
     </tr>
-    <tr>
-        <td class="icon"><img src="/static/images/statistics/stopwatch.png"></td>
-        <td class="sideline"></td>
-        <td>
-            <p class="top-type">Time spent</p>
-            {% for timespan in ['month', 'year', 'overall'] %}
-                <p><span class="big-title">{{ format_timespan(payload.activity[timespan]['values']['time spent']) }}</span>
-                <br/>{{ payload.activity[timespan].desc }}</p>
-            {% endfor %}
-        </td>
-    </tr>
+    {% endfor %}
 
     {% for element in payload.movies %}
+    <tr class="top-type">
         <td class="icon"><img src="/static/images/statistics/{{ element['image'] }}"></td>
-        <td class="sideline"></td>
-        <td>
-            <p class="top-type">{{ element['section'] }}</p>
-            {% for item in element['movies'] %}
-
-            <p><span class="big-number">{{ item['rank'] }}</span>{{ item['suffix'] }}
-                <br/><span class="top-name"><a href="{{ url_for('movie', tmdb_id=item['tmdb_id']) }}">{{ item['title'] }} ({{ item['year'] }})</a></span>
-            <br/>{{ ', '.join(item['genres'][:3]) }}
-            <br/>{{ [item['grade']|int, item['grade']]|max }}/10
-
-            {% endfor %}
-        </p>
-
-        </td>
+        <td>{{ element['section'] }}</td>
     </tr>
-    {% endfor %}
-
-
-{% for element in payload.tops %}
-
-    <tr>
-    <td class="icon"><img src="/static/images/statistics/{{ element }}.png"></td>
-    <td class="sideline"></td>
-    <td>
-    <p class="top-type">Top {{ element }}</p>
-
-    {% for top in payload.tops[element] %}
-
-        <p><span class="big-number">{{ "%.1f"|format(top.grade) }}</span>
-        {% if element == 'genres' %}
-        <br/><span class="top-name">{{ top.name }}</span>
-        {% else %}
-        <br/><span class="top-name"><a href="{{ url_for('people', person_id=top.person_id) }}">{{ top.name }}</a></span>
-        {% endif %}
-        <br/>Top {{ top.top_3_movie_names|length }} movies ({{ top.count }} in total):
-        <ul>
-        {% for title, id in zip(top.top_3_movie_names, top.top_3_movie_ids) %}
-            <li class="top-movies"><span><a href="{{ url_for('movie', tmdb_id=id) }}">{{ title }}</a></span></li>
+        {% for item in element['movies'] %}
+        <tr>
+            <td class="big-number">
+                {{ item['rank'] }}<sup><span class="suffix">{{ item['suffix'] }}</span></sup>
+            </td>
+            <td>
+                <b><span class="top-name"><a href="{{ url_for('movie', tmdb_id=item['tmdb_id']) }}">{{ item['title'] }} ({{ item['year'] }})</a></span></b>
+                    <br/>{{ ', '.join(item['genres'][:3]) }}
+                    <br/>{{ [item['grade']|int, item['grade']]|max }}/10
+            </td>
+        </tr>
         {% endfor %}
-        </ul>
-        </p>
-
     {% endfor %}
 
-    </td>
+
+    {% for element in payload.tops %}
+    <tr class="top-type">
+        <td class="icon"><img src="/static/images/statistics/{{ element }}.png"></td>
+        <td>Top {{ element }}</td>
     </tr>
+        {% for top in payload.tops[element] %}
+        <tr>
+            {% if top.grade < 10 %}
+            <td class="big-number">{{ "%.1f"|format(top.grade) }}</td>
+            {% else %}
+            <td class="big-number">{{ "%.0f"|format(top.grade) }}</td>
+            {% endif %}
+            <td>
+                {% if element == 'genres' %}
+                    <b><span class="top-name">{{ top.name }}</span></b>
+                {% else %}
+                    <b><span class="top-name"><a href="{{ url_for('people', person_id=top.person_id) }}">{{ top.name }}</a></span></b>
+                {% endif %}
+                <br/>{{ top.count }} movie{% if top.count > 1 %}s{% endif %}{% if top.count > 3 %}, including{% endif %}:
+                <ul>
+                {% for title, id in zip(top.top_3_movie_names, top.top_3_movie_ids) %}
+                    <li class="top-movies"><span><a href="{{ url_for('movie', tmdb_id=id) }}">{{ title }}</a></span></li>
+                {% endfor %}
+                </ul>
+            </td>
+        </tr>
+        {% endfor %}
+    {% endfor %}
 
-{% endfor %}
-
-    <tr>
+    <tr class="top-type">
         <td class="icon"><img src="/static/images/statistics/activity.png"></td>
-        <td class="sideline"></td>
-        <td>
-            <p class="top-type">Grade histogram</p>
-            <img class="chart" src="{{ url_for('static', filename=payload.dist_images.grade_dist) }}" width="500px">
-        </td>
+        <td>Volume analysis</td>
     </tr>
-
-    <tr>
-        <td class="icon"><img src="/static/images/statistics/television.png"></td>
-        <td class="sideline"></td>
-        <td>
-            <p class="top-type">Decade histogram</p>
-            <img class="chart" src="{{ url_for('static', filename=payload.dist_images.decade_dist) }}" width="500px">
-        </td>
-    </tr>
-
+</table>
+<table class="volume-analysis">
+    <tr><td>
+        <img class="chart" src="{{ url_for('static', filename=payload.dist_images.grade_dist) }}">
+    </td></tr>
+    <tr><td>
+        Grade histogram
+    </td></tr>
+    <tr><td>
+        <img class="chart" src="{{ url_for('static', filename=payload.dist_images.decade_dist) }}">
+    </td></tr>
+    <tr><td>
+        Decade histogram
+    </td></tr>
 </table></center>
 
 </div>
