@@ -69,7 +69,13 @@ ul, li .top-movies {
 
 .volume-analysis {
     text-align: center;
+    margin-top: 15px;
     margin-bottom: 30px;
+}
+
+.volume-analysis td {
+    padding-top: 0px;
+    padding-bottom: 10px;
 }
 
 img.chart {
