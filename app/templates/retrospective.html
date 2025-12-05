@@ -34,6 +34,15 @@
             {{ format_timespan(payload.activity['time spent']) }}
         </td>
     </tr>
+    <tr>
+        <td class="big-number">
+            {{ payload.activity['average grade']|round(1) }}
+        </td>
+        <td>
+            <b>average grade</b><br/>
+            out of 10
+        </td>
+    </tr>
 
     {% for element in payload.movies %}
     <tr class="top-type">

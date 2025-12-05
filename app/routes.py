@@ -291,13 +291,13 @@ def retrospective():
     # Year applicable = this year if today > January 31st, else last year
     year_applicable = (date.today() - timedelta(days=31)).year
     # Compute totals for the applicable year
-    totals = db.session.query(func.coalesce(func.count(Title.title), 0), func.coalesce(func.sum(Title.runtime), 0),) \
+    totals = db.session.query(func.coalesce(func.count(Title.title), 0), func.coalesce(func.sum(Title.runtime), 0), func.coalesce(func.avg(Record.grade), 0)) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
         .filter(db.extract('year', Record.date) == year_applicable) \
         .filter(Record.include_in_recent == True) \
         .first()
-    activity = dict(zip(['viewing activity', 'time spent'], totals))
+    activity = dict(zip(['viewing activity', 'time spent', 'average grade'], totals))
     # Query best and worst movies from applicable year
     # Use original title for French movies if user preference is enabled
     title_expr = case(
