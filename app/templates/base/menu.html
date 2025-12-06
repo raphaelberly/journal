@@ -26,7 +26,7 @@
         <a href="{{ url_for('recos') }}">Recos</a>
         {% set current_date = now().strftime("%m-%d") %}
         {% if '12-01' <= current_date <= '12-31' or '01-01' <= current_date <= '01-31' %}
-        <a href="{{ url_for('retrospective') }}">Retrospective<sup style="font-size:30%">BÊTA</sup></a>
+        <a href="{{ url_for('retrospective') }}">Retrospective</a>
         {% endif %}
     </td></tr>
     <tr class="bottom"><td>
