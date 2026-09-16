@@ -83,24 +83,30 @@
         {% endfor %}
     {% endfor %}
 
+    {% if payload.dist_images %}
     <tr class="top-type">
         <td class="icon"><img src="/static/images/statistics/activity.png"></td>
         <td>Volume analysis</td>
     </tr>
+    {% endif %}
 </table>
 <table class="volume-analysis">
+    {% if payload.dist_images.grade_dist %}
     <tr><td>
         <img class="chart" src="{{ url_for('static', filename=payload.dist_images.grade_dist) }}">
     </td></tr>
     <tr><td>
         Grade histogram
     </td></tr>
+    {% endif %}
+    {% if payload.dist_images.decade_dist %}
     <tr><td>
         <img class="chart" src="{{ url_for('static', filename=payload.dist_images.decade_dist) }}">
     </td></tr>
     <tr><td>
         Decade histogram
     </td></tr>
+    {% endif %}
 </table></center>
 
 </div>

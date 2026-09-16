@@ -168,20 +168,26 @@ def add_rank_and_suffix(item, rank):
 def generate_dist_images(grade_dist: dict, decade_dist: dict) -> dict:
     # Cleanup previous grade distribution plots
     cleanup_distribution_plots(path.join(CURRENT_DIR, f'static/generated/{current_user.username}'))
+    # Nothing to plot for an empty distribution: skip it, the template hides the missing chart
+    images = {}
+    timestamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
     # Generate new grade distribution plot
-    grade_image_name = f'generated/{current_user.username}_{datetime.now(UTC).strftime("%Y%m%d%H%M%S")}_grade_dist.png'
-    decade_image_name = f'generated/{current_user.username}_{datetime.now(UTC).strftime("%Y%m%d%H%M%S")}_decade_dist.png'
-    plot_distribution(
-        key_values=grade_dist,
-        path=path.join(CURRENT_DIR, f'static/{grade_image_name}'),
-        force_range=list(range(1, 11))
-    )
-    plot_distribution(
-        key_values=decade_dist,
-        path=path.join(CURRENT_DIR, f'static/{decade_image_name}'),
-        force_range=list(range(min(decade_dist.keys()), max(decade_dist.keys()) + 10, 10))
-    )
-    return {'grade_dist': grade_image_name, 'decade_dist': decade_image_name}
+    if grade_dist:
+        images['grade_dist'] = f'generated/{current_user.username}_{timestamp}_grade_dist.png'
+        plot_distribution(
+            key_values=grade_dist,
+            path=path.join(CURRENT_DIR, f'static/{images["grade_dist"]}'),
+            force_range=list(range(1, 11))
+        )
+    # Generate new decade distribution plot
+    if decade_dist:
+        images['decade_dist'] = f'generated/{current_user.username}_{timestamp}_decade_dist.png'
+        plot_distribution(
+            key_values=decade_dist,
+            path=path.join(CURRENT_DIR, f'static/{images["decade_dist"]}'),
+            force_range=list(range(min(decade_dist.keys()), max(decade_dist.keys()) + 10, 10))
+        )
+    return images
 
 
 @app.route('/statistics', methods=['GET'])
@@ -273,7 +279,7 @@ def statistics():
         .filter(Record.user_id == current_user.id) \
         .group_by(decade_expr) \
         .all()
-    decade_dist_dict = {decade: count for decade, count in decade_dist}
+    decade_dist_dict = {decade: count for decade, count in decade_dist if decade is not None}
 
     payload = {
         'activity': activity,
@@ -333,17 +339,19 @@ def retrospective():
         .filter(db.extract('year', Record.date) == year_applicable) \
         .group_by(decade_expr) \
         .all()
-    decade_dist_dict = {decade: count for decade, count in decade_dist}
+    decade_dist_dict = {decade: count for decade, count in decade_dist if decade is not None}
     # Create object to be used by Flask
+    # Skip the best/worst sections when nothing was logged this year
     movies = [
         {'section': f'Best of {year_applicable}', 'movies': best, 'image': 'best.png'},
         {'section': f'Worst of {year_applicable}', 'movies': worst, 'image': 'worst.png'}
-    ]
+    ] if best else []
     payload = {
         'activity': activity,
         'movies': movies,
         'year_applicable': year_applicable,
         'dist_images': generate_dist_images(grade_dist_dict, decade_dist_dict),
+        'is_empty': not activity['viewing activity'],
     }
     return render_template('retrospective.html', payload=payload, metadata={})
 
