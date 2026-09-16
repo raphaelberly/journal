@@ -7,9 +7,8 @@ owner (and a handful of other users) has watched, with grades, a watchlist, stat
 recommendations. Data comes from **TMDb** (live API) and from the **open IMDb datasets**
 (bulk-loaded via a weekly ETL).
 
-It runs as a PWA on a Raspberry Pi behind a home Livebox, reachable at
-`https://journal.rberly.ovh`. The app is designed mobile-first (iPhone, added to the home
-screen) — every page must look right at phone width.
+It runs as a PWA on a small self-hosted Linux box. The app is designed mobile-first
+(iPhone, added to the home screen) — every page must look right at phone width.
 
 `README.md` has screenshots and the longer origin story; it is somewhat out of date with
 regard to newer pages (Library, Recos, People, Retrospective, Settings).
@@ -53,9 +52,9 @@ Python 3.12 (`.python-version` → pyenv virtualenv `journal3.12.7`). Dependenci
 `requirements.txt`, unpinned. There is no test suite; `tmp/test_*.py` are throwaway
 experiments, not tests.
 
-In production the app is served by gunicorn under supervisor on the Pi. `deploy.sh` (run on
-the Pi) stops supervisor, pulls `master`, restarts it. The ETL, the backup and the provider
-refresh run from cron.
+In production the app is served by gunicorn under supervisor on the host. `deploy.sh` (run
+on the host) stops supervisor, pulls `master`, restarts it. The ETL, the backup and the
+provider refresh run from cron.
 
 ## Configuration and secrets
 
@@ -78,7 +77,7 @@ Two Postgres schemas:
   `watchlist`, `blacklist`, plus materialized views `top_persons`, `top_genres`, `tops`.
 
 There are no migrations. Schema changes mean editing `ddl/` **and** `app/models.py` **and**
-applying the DDL by hand on the Pi.
+applying the DDL by hand on the host.
 
 Every model sets `__table_args__ = {"schema": "journal"}` and carries
 `insert_datetime_utc` / `update_datetime_utc`. Writes to `titles`/`persons`/`credits` go

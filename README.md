@@ -1,92 +1,245 @@
 # Movie Journal
 
-_Since January 2014, I have been keeping an Excel log of movies as I watched them, in order to keep track of what I watch and to compute some basic statistics. I recently decided to upgrade it._
+_Since January 2014, I have been keeping a log of every movie I watch, in order to remember
+what I have seen and to compute a few statistics about it. It started as an Excel file. It is
+now a Postgres database and a web app I can reach from my phone._
 
-This project aims at keeping a journal of the movies I have seen. It takes the form of a Postgres database containing both the logs of all the movies I have seen and [open IMDb data](https://www.imdb.com/interfaces/). This enables me to get a lot of information about the movies I have seen, and also to be able to compute all kinds of useful statistics (proportion of movies watched per genre, favourite directors, actors, writers, etc.)
+The database holds both my own viewing records and a copy of the
+[open IMDb datasets](https://www.imdb.com/interfaces/), which makes it possible to slice the
+data in all sorts of ways: how much I watch, which directors I rate highest, which decades I
+keep coming back to. The web app, powered by [TMDb](https://www.themoviedb.org), is how I
+search for a movie, rate it and keep track of what I still want to see — from anywhere,
+without writing a single SQL query.
 
-In order to rate movies and add them to my database (with their IMDb ID!) conveniently, whenever I want from my phone or my computer, I also built a web app, in the form of a Flask Website, which looks something like this:
+<div align="center"><img src="img/search_page.png" width="225px"/></div>
 
-<div align="center" border="1px"><img src="img/search_page.png" width="225px"/></div>
+## Features
 
-It recently evolved into a more sophisticated web app offering new features, such as a "Recent" page to check the most recent movies seen, a "Watchlist" page to store your movie watch list, and a "Statistics" page.
+- **A journal.** Search a movie, rate it from 1 to 10, and it is logged with the date.
+- **Multi-user.** Everyone gets their own records, watchlist, statistics and preferences.
+- **A watchlist**, showing where each movie can be streamed, filterable by service.
+- **Statistics**: viewing activity, best and worst of the year, favourite directors, actors,
+  actresses and genres, grade and decade distributions.
+- **Recommendations**, based on what other users of the app rated highly.
+- **A people view**: every movie you rated for a given actor, director or composer.
+- **Preferences**: decimal grades, original titles for French movies, streaming services.
+- **Installable.** It is a PWA: added to the home screen, it runs full-screen with its own
+  icon and splash screen, and behaves like a native app.
+
+## The web app
+
+The app is mobile-first — it is meant to be used from a phone, one hand, in the dark, right
+after the credits roll.
+
+### Login
+
+The landing page. "Remember me" is always on, for 90 days. New users can register from the
+"Sign up" link below the form.
+
+<div align="center"><img src="img/login_page.png" width="225px"/></div>
+
+### Search
+
+The home page of the app. Type a title, and each result shows its poster, genres, director,
+main cast, runtime and IMDb rating — along with the grade you gave it, if you already have.
+From there a movie can be graded (which logs it in the journal) or pushed to the watchlist.
+
+<div align="center"><img src="img/search_page.png" width="225px"/></div>
+
+The icon at the top left always brings you back to an empty search page; the one at the top
+right opens the menu, which is how you reach every other page.
+
+<div align="center"><img src="img/search_page_menu.png" width="225px"/></div>
+
+### Recent
+
+The last movies you watched, as a timeline.
+
+<div align="center"><img src="img/recent_page.png" width="225px"/></div>
+
+### Library
+
+Everything you ever logged, sortable by grade, IMDb rating or date added, and filterable by
+grade range.
+
+<div align="center"><img src="img/library_page.png" width="225px"/></div>
+
+### People
+
+Search for an actor, director or composer and get every movie of theirs you rated, with the
+grade you gave it.
+
+<div align="center"><img src="img/people_page.png" width="225px"/></div>
+
+### Watchlist
+
+The movies you still want to see, most recently added first. Each one shows the services it
+is currently streaming on, and the list can be filtered down to the services you subscribe
+to. Grading a movie from here removes it from the watchlist automatically.
+
+<div align="center"><img src="img/watchlist_page.png" width="225px"/></div>
+
+### Statistics
+
+How much you watched this month, this year and since the beginning, your best and worst
+movies of the year, and the directors, actors, actresses and genres you rate highest — the
+last one being genuinely useful, since it surfaces people you like without knowing it.
+
+<div align="center"><img src="img/statistics_page.png" width="225px"/></div>
+
+### Recos
+
+Movies you have not seen, rated highly by other users of the app. Anything that does not
+appeal can be hidden for good.
+
+<div align="center"><img src="img/recos_page.png" width="225px"/></div>
+
+### Settings
+
+Decimal grades, original titles for French movies, and the streaming services used to filter
+the watchlist.
+
+<div align="center"><img src="img/settings_page.png" width="225px"/></div>
+
+## Architecture
+
+```
+app/       the Flask web app: routes, models, Jinja templates, CSS and JS
+lib/       everything that is not the web app: TMDb client, IMDb ETL, helpers
+config/    YAML configuration
+ddl/       the database schema, applied by hand
+```
+
+The app is a plain Flask application — no front-end framework, no build step — served in
+production by gunicorn, with Postgres as the only datastore.
+
+Two schemas live in that database:
+
+- **`imdb`** — a copy of the open IMDb datasets (titles, ratings, persons, crew, principals),
+  truncated and reloaded by the ETL. Only the ratings are read by the app.
+- **`journal`** — the actual data: `users`, `titles`, `persons`, `credits`, `records`,
+  `watchlist`, `blacklist`, plus the materialized views behind the Statistics page. Those
+  views are refreshed in the background whenever a record is added, updated or deleted.
+
+Movie metadata (posters, cast, runtime, genres) comes from TMDb at request time and is
+cached in `journal.titles` as movies get logged; IMDb ratings are joined in from the
+bulk-loaded dataset.
+
+There is no migration tool: the schema lives in `ddl/` and changes are applied by hand.
+
+## The IMDb ETL
+
+`run_imdb_etl.py` loads the open IMDb datasets into the `imdb` schema:
+
+```bash
+python run_imdb_etl.py -t titles      # one dataset
+python run_imdb_etl.py -a             # all of them
+python run_imdb_etl.py -a --use-cache # reuse the files already downloaded
+```
+
+Each run downloads the GZIP dataset, streams it row by row — filtering, renaming columns and
+dropping incomplete rows on the way — then truncates the target table and re-inserts
+everything in batches. It is written to run on a small machine, so the file is never loaded
+into memory as a whole. Which datasets exist, where they are downloaded from and how their
+columns map to the database is all declared in `config/etl.yaml`.
+
+A push notification is sent if a run fails.
+
+## Getting started
+
+Requires Python 3.12 and a Postgres instance.
+
+```bash
+pip install -r requirements.txt
+psql -d <database> -f ddl/tables/imdb.sql
+psql -d <database> -f ddl/tables/journal.sql
+psql -d <database> -f ddl/materialized_views/persons.sql
+psql -d <database> -f ddl/materialized_views/genres.sql
+psql -d <database> -f ddl/materialized_views/tops.sql
+```
+
+Then create `config/credentials.yaml`, which is not versioned:
+
+```yaml
+db:
+  type: postgresql+psycopg2
+  host: localhost
+  port: 5432
+  db: <database>
+  user: <user>
+  password: <password>
+  schema: journal
+
+tmdb:
+  api_key: <your TMDb API key>
+
+push:
+  user_key: <push notification user key>
+  api_token: <push notification api token>
+```
+
+...along with `config/app.py`, which is not versioned either, and holds the Flask
+configuration:
+
+```python
+from lib.tools import read_config, get_db_uri
+
+credentials = read_config('config/credentials.yaml')
 
 
-### 1. ETL
+class Config(object):
+    CSRF_ENABLED = True
+    SECRET_KEY = '<a random secret>'
+    SQLALCHEMY_DATABASE_URI = get_db_uri(**credentials['db'])
+```
 
-The ETL part of the project aims at inserting the open IMDb data into the database. To do so, one can use the script `main_etl.py`.
+Load the IMDb data (`python run_imdb_etl.py -a`), then run the app:
 
-Usage example: `python main_etl.py -t titles`
+```bash
+python run_journal.py
+```
 
-The process is automated on my Raspberry Pi via a cron job, which purpose is to refresh the IMDb data on the database every week (to get updated rankings, new titles, etc.)
+It will be served on `http://localhost:8088`. All scripts expect to be run from the root of
+the repository.
 
-The `ETL` class (defined in `lib/etl.py`) is used and the process follows the three inherent steps of an ETL process:
+## Operations
 
-- **Extract:** download the GZIP files from [open IMDb data](https://www.imdb.com/interfaces/), unzip them and split them into chunks. Chunking the file is necessary since the next two steps require the dataset to be loaded into memory (since I run this on my Raspberry Pi, which has little memory).
+The app is meant to live on a small always-on Linux machine. The examples below are just
+that — examples — but they reflect how it is actually run.
 
-Then, for each chunk:
+Served by gunicorn behind a reverse proxy:
 
-- **Transform:** load the chunk in memory and apply transformations, such as filtering, columns renaming, NA handling, etc.
-- **Load:** load the resulting dataframe into the database. This process is performed by batch, each of which is loaded to the database using a bulk insert version of pandas `to_sql` function.
+```bash
+gunicorn --workers 3 --bind 127.0.0.1:8000 'app:app'
+```
 
+kept alive by supervisor:
 
-### 2. Flask App
+```ini
+[program:journal]
+command=/srv/journal/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 'app:app'
+directory=/srv/journal
+user=journal
+autostart=true
+autorestart=true
+```
 
-Before creating this web-app, the Journal took the form of a database containing the open IMDb data, and the movies I watched identified by their IMDb ID. But this was not convenient:
+and updated with `deploy.sh`, which stops the service, pulls the latest `master` and starts
+it back up.
 
-- I did not have an easy access to the IMDb ID of the movies I wanted to add to the journal.
-- Once I had the ID, I still could not add the movie from any device, or even from my phone, since it required to write an "insert" SQL query.
-- I could not check easily which movies I had watched recently or compute basic statistics. It also required an SQL query.
+Three jobs run on a schedule:
 
-This is why I built a Flask web-app, which enables me to do these things I cannot do easily, and more. 
+```cron
+# refresh the IMDb datasets, every Monday at 3am
+0 3 * * 1  cd /srv/journal && venv/bin/python run_imdb_etl.py -a
 
-The web-app code (routes, HTML templates, CSS code, etc.) can be found in the `app` folder. It is hosted on my Raspberry Pi so I can reach it at any time from my phone or computer.
+# back up the journal tables to CSV, every night
+30 2 * * *  cd /srv/journal && venv/bin/python backup.py
 
-This web-app is powered by [TMDb](https://www.themoviedb.org), which provides a free API to access its entire movie database (including IMDb IDs).
+# refresh the streaming availability of watchlist movies, every night
+0 4 * * *  cd /srv/journal && venv/bin/python update_watchlist_providers.py
+```
 
-**Important Note:** 
-
-**The Flask application must be run on a python 3.6+ environment**, since it uses the fact that basic python dicts are ordered. Using it with a lower Python version will result in search page malfunctions.
-
-#### 2.1 Login page
-
-This page is the landing page of the web app. As its existence suggests, the app supports multiple users, each of which will get its own history, statistics and watchlist.
-
-<div align="center" border="1px"><img src="img/login_page.png" width="225px"/></div>
-
-Once logged in, the user is redirected to the Search page. The "Remember Me" option is automatically set to True for a period of 90 days.
-
-At the bottom of the Login page, there is a "Sign up" link leading to a page where the user can sign up if not done yet. 
-
-#### 2.2 Search page
-
-The "Search" page enables the user to have a proper interface for searching and adding movies to my journal, from anywhere and without the need to write an SQL query.
-
-<div align="center" border="1px"><img src="img/search_page_menu.png" width="470px"/></div>
-
-Clicking on the top-left icon will always bring you back to an empty search page, while the top-right icon is the menu, it enables the user to acces the other pages.
-
-#### 2.3 Recent page
-
-The "Recent" page aims at enabling the user to have an easy access to the last movies that he or she watched.
-
-<div align="center" border="1px"><img src="img/recent_page.png" width="225px"/></div>
-
-The timeline was made using a combination of images, CSS styling and HTML table.
-
-#### 2.4 Watchlist page
-
-The watchlist page gathers the movies the user added to his or her watchlist, using the "Watchlist" button displayed on each search result.
-
-<div align="center" border="1px"><img src="img/watchlist_page.png" width="225px"/></div>
-
-Movies can be added to the journal directly from the watchlist, through the "Add" button. They can be removed from the watchlist with the "Unlist" button.
-
-**Note:** adding a movie (from both the Search page and the Watchlist page) removes the movie from the watchlist, when applicable.
-
-#### 2.5 Statistics page
-
-The "Statistics" page aims at providing the user with some statistics regarding his or her activity and tastes.
-
-Some statistics are really basic, such as the number of movies seen within the last month, or year. But some statistics are more interesting, such as the best directors, best actors, etc. For instance, if a user did not know a lot about directors, so he might have liked very much several movies of a specific director and not know him! This would show him within the list that you can see below:
-
-<div align="center" border="1px"><img src="img/statistics_page.png" width="225px"/></div>
+`backup.py` dumps each table listed in `config/backup.yaml` into a dated folder and deletes
+the folders older than the configured retention. Both it and the ETL send a push
+notification when something goes wrong.
