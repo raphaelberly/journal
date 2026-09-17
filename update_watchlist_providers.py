@@ -1,6 +1,5 @@
 import argparse
 import logging
-from datetime import datetime
 from time import sleep
 
 import yaml
@@ -11,6 +10,7 @@ from app.models import WatchlistItem
 from lib.overseerr import Overseerr
 from lib.push import Push
 from lib.tmdb import Tmdb
+from lib.tools import utcnow
 
 
 LOGGER = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ try:
             updated_providers.append('plex')
         if set(updated_providers) != set(item.providers):
             item.providers = updated_providers
-            item.update_datetime_utc = datetime.utcnow()
+            item.update_datetime_utc = utcnow()
             # Commit straight away to avoid IdleInTransactionSessionTimeout
             db.session.commit()
             i += 1

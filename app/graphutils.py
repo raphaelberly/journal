@@ -6,7 +6,9 @@ from plotly import graph_objs as go
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def cleanup_distribution_plots(path_starts_with: str):
+    # The folder is gitignored, so it may not exist yet on a fresh checkout
     dirname = os.path.dirname(path_starts_with)
+    os.makedirs(dirname, exist_ok=True)
     for file in os.listdir(dirname):
         filepath = os.path.join(dirname, file)
         if filepath.startswith(path_starts_with):

@@ -1,4 +1,3 @@
-from datetime import datetime
 from threading import Thread
 from typing import List, Optional, Iterable
 
@@ -9,11 +8,12 @@ from sqlalchemy.ext.declarative import DeclarativeMeta
 from app import db
 from app.converters import TitleConverter, CrewConverter
 from app.models import Title, Person, Credit
+from lib.tools import utcnow
 
 
 def _execute_in_thread(conn, query):
     try:
-        sql = text(query.replace(':', '\:'))
+        sql = text(query.replace(':', r'\:'))
         conn.execute(sql)
     finally:
         conn.close()
@@ -26,7 +26,7 @@ def async_execute_text(query: str):
 
 
 def execute_text(query: str):  # expects an SQL Alchemy Text object
-    sql = text(query.replace(':', '\:'))
+    sql = text(query.replace(':', r'\:'))
     with db.engine.connect() as conn:
         return conn.execute(sql)
 
@@ -35,7 +35,7 @@ def _upsert(table_model: DeclarativeMeta, records: Iterable[dict], exclude: Opti
     # Get list of primary keys
     primary_keys = [key.name for key in inspect(table_model).primary_key]
     # Assemble upsert statement
-    statement = insert(table_model).values([{**record, 'update_datetime_utc': datetime.utcnow()} for record in records])
+    statement = insert(table_model).values([{**record, 'update_datetime_utc': utcnow()} for record in records])
     cols_to_update = {
         col.name: col for col in statement.excluded if (not col.primary_key and col.name not in (exclude or []))
     }

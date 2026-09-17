@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db, login
 from app.converters import TitleConverter
+from lib.tools import utcnow
 
 
 @login.user_loader
@@ -23,8 +24,8 @@ class User(UserMixin, db.Model):
     grade_as_int = db.Column(db.Boolean)
     language = db.Column(db.String(4))
     providers = db.Column(db.ARRAY(db.String(128)))
-    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
-    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "users"
@@ -65,8 +66,8 @@ class Title(db.Model):
     budget = db.Column(db.BigInteger)
     tagline = db.Column(db.String(1024))
     imdb_rating = db.Column(db.Float)
-    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
-    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "titles"
@@ -84,12 +85,12 @@ class Title(db.Model):
 
 class Person(db.Model):
 
-    id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     gender = db.Column(db.Integer)
     profile_path = db.Column(db.String(1024))
-    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
-    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "persons"
@@ -105,23 +106,23 @@ class Credit(db.Model):
     person_id = db.Column(db.Integer, db.ForeignKey(Person.id))
     role = db.Column(db.String(128))
     cast_rank = db.Column(db.SmallInteger, nullable=True)
-    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
-    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "credits"
 
     def __repr__(self):
-        return f'<Credit: person {self.cast_id} in title {self.tmdb_id}>'
+        return f'<Credit: person {self.person_id} in title {self.tmdb_id}>'
 
 
 class WatchlistItem(db.Model):
 
-    user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
     providers = db.Column(db.ARRAY(db.String(64)))
-    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
-    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "watchlist"
@@ -142,9 +143,9 @@ class WatchlistItem(db.Model):
 
 class BlacklistItem(db.Model):
 
-    user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
-    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "blacklist"
@@ -159,14 +160,14 @@ class BlacklistItem(db.Model):
 
 class Record(db.Model):
 
-    user_id = db.Column(db.String(32), db.ForeignKey(User.id), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
     grade = db.Column(db.Float)
     date = db.Column(db.Date)
     include_in_recent = db.Column(db.Boolean)
     include_in_top_persons = db.Column(db.Boolean)
-    insert_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
-    update_datetime_utc = db.Column(db.DateTime, default=datetime.utcnow)
+    insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
+    update_datetime_utc = db.Column(db.DateTime, default=utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "records"

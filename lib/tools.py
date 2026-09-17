@@ -2,9 +2,14 @@
 import os
 import shutil
 import sys
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, UTC
 
 import yaml
+
+
+def utcnow() -> datetime:
+    """Naive UTC timestamp, to match the TIMESTAMP (without time zone) columns of the DDL."""
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 def get_db_uri(type, host, port, db, user, password, **kwargs):

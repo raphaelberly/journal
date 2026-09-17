@@ -1,5 +1,4 @@
 import re
-import sys
 import traceback
 from datetime import date, datetime, timedelta, UTC
 from os import path
@@ -19,7 +18,7 @@ from app.models import Record, Title, Top, WatchlistItem, User, Person, Blacklis
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
 from lib.tmdb import Tmdb
-from lib.tools import get_time_ago_string, get_time_spent_string
+from lib.tools import get_time_ago_string, get_time_spent_string, utcnow
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
 
@@ -39,8 +38,7 @@ app.jinja_env.globals.update(intersect=intersect)
 @app.errorhandler(Exception)
 def handle_exceptions(e):
     flash('Wops, something went wrong', category='error')
-    etype, value, tb = sys.exc_info()
-    app.logger.error(str(traceback.print_exception(etype, value, tb)))
+    app.logger.error(traceback.format_exc())
     return redirect(request.referrer or url_for('search'))
 
 
@@ -90,6 +88,7 @@ def login():
         if 'username' in request.form:
             user = User.query.filter_by(username=get_post_result('username')).first()
             if user is None or not user.check_password(get_post_result('password')):
+                flash('Wrong username or password', category='error')
                 return redirect(url_for('login'))
             login_user(user, remember=True, duration=timedelta(days=90))
             flash(f'Welcome, {user.username}!', category='success')
@@ -440,8 +439,8 @@ def remove_from_watchlist(tmdb_id):
 def move_to_top_of_watchlist(tmdb_id):
     items = WatchlistItem.query.filter_by(tmdb_id=tmdb_id, user_id=current_user.id).all()
     for item in items:
-        item.insert_datetime_utc = datetime.utcnow()  # We simulate a re-insert in the watchlist
-        item.update_datetime_utc = datetime.utcnow()
+        item.insert_datetime_utc = utcnow()  # We simulate a re-insert in the watchlist
+        item.update_datetime_utc = utcnow()
     db.session.commit()
 
 
@@ -451,7 +450,7 @@ def watchlist():
 
     if request.method == 'POST':
         if 'remove_from_watchlist' in request.form:
-            tmdb_id = get_post_result('remove_from_watchlist')
+            tmdb_id = int(get_post_result('remove_from_watchlist'))
             remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist', category='success')
         if 'request_on_plex' in request.form:
@@ -516,13 +515,14 @@ def movie(tmdb_id):
 
     if request.method == 'POST':
 
+        # Every form posts exactly one action key, so the branches are mutually exclusive
         if 'add_to_watchlist' in request.form:
             add_to_watchlist(tmdb_id)
             flash('Movie added to watchlist', category='success')
-        if 'remove_from_watchlist' in request.form:
+        elif 'remove_from_watchlist' in request.form:
             remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist', category='success')
-        if 'move_to_top_of_watchlist' in request.form:
+        elif 'move_to_top_of_watchlist' in request.form:
             move_to_top_of_watchlist(tmdb_id)
             flash('Moved to the top of the watchlist', category='success')
 
@@ -550,7 +550,7 @@ def movie(tmdb_id):
                 Record.query \
                     .filter_by(user_id=current_user.id, tmdb_id=tmdb_id) \
                     .update({
-                        'grade': grade, 'include_in_recent': include_in_recent, 'update_datetime_utc': datetime.utcnow()
+                        'grade': grade, 'include_in_recent': include_in_recent, 'update_datetime_utc': utcnow()
                     })
             else:
                 action = 'added'
@@ -562,7 +562,7 @@ def movie(tmdb_id):
                 # Remove from watchlist (if in it)
                 remove_from_watchlist(tmdb_id)
                 # Update the title element
-                title['date'] = datetime.utcnow().date()
+                title['date'] = utcnow().date()
             # Commit add/update changes
             db.session.commit()
             flash(f'Movie successfully {action}', category='success')
@@ -596,10 +596,12 @@ def people():
             sql = f.read().format(query=clean_query, user_id=current_user.id)
 
     else:
-        metadata = {'person_id': request.args.get('person_id')}
+        # Cast to int: the query is built by .format(), so it must never see raw request input
+        person_id = int(request.args.get('person_id'))
+        metadata = {'person_id': person_id}
         # Generate SQL request
         with open(path.join(CURRENT_DIR, 'queries/people_search_by_id.sql')) as f:
-            sql = f.read().format(person_id=request.args.get('person_id'), user_id=current_user.id)
+            sql = f.read().format(person_id=person_id, user_id=current_user.id)
 
     # Execute SQL request
     response = execute_text(sql)
@@ -659,7 +661,7 @@ def settings():
             modified = True
         # Apply changes if any
         if modified:
-            current_user.update_datetime_utc = datetime.utcnow()
+            current_user.update_datetime_utc = utcnow()
             db.session.commit()
             flash('Settings were successfully updated', category='success')
         else:
@@ -725,7 +727,7 @@ def recos():
     titles_enriched = enrich_titles(title_ids)[:nb_results]
     for title in titles_enriched:
         providers = tmdb.providers(title['id'])
-        if overseerr.request_status(title['id']) == 5:
+        if overseerr.is_available and overseerr.request_status(title['id']) == 5:
             providers.append('plex')
         title['providers'] = providers
 
