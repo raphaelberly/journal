@@ -1,24 +1,30 @@
+# Web app
 Flask
 Flask-CacheBuster
 Flask-Login
 Flask-SQLAlchemy
 Flask-WTF
-email_validator
-gunicorn
-Jinja2
-JustWatch
-pandas
+WTForms
+Werkzeug
+
+# Database
 psycopg2-binary
-PyYAML
+SQLAlchemy
+
+# External services
 request-boost
 requests
-SQLAlchemy
+git+https://github.com/Wyattjoh/pushover
+
+# ETL, backup and charts
+numpy
+pandas
+plotly
+PyYAML
 toolz
 tqdm
-urllib3
-Werkzeug
-git+https://github.com/Wyattjoh/pushover
-plexapi
-cachetools
-plotly
-kaleido
+
+# Not imported directly, but required at runtime
+email_validator   # wtforms Email() validator
+gunicorn          # production server, run under supervisor
+kaleido           # plotly write_image backend
