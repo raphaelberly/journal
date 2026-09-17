@@ -385,15 +385,16 @@ def search():
         return render_template('search.html', metadata={})
 
     if request.method == 'POST':
+        # Every form posts exactly one action key, so the branches are mutually exclusive
         if 'add_to_watchlist' in request.form:
             tmdb_id = int(get_post_result('add_to_watchlist'))
             add_to_watchlist(tmdb_id)
             flash('Movie added to watchlist', category='success')
-        if 'remove_from_watchlist' in request.form:
+        elif 'remove_from_watchlist' in request.form:
             tmdb_id = int(get_post_result('remove_from_watchlist'))
             remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist', category='success')
-        if 'move_to_top_of_watchlist' in request.form:
+        elif 'move_to_top_of_watchlist' in request.form:
             tmdb_id = int(get_post_result('move_to_top_of_watchlist'))
             move_to_top_of_watchlist(tmdb_id)
             flash('Moved to the top of the watchlist', category='success')
@@ -449,15 +450,16 @@ def move_to_top_of_watchlist(tmdb_id):
 def watchlist():
 
     if request.method == 'POST':
+        # Every form posts exactly one action key, so the branches are mutually exclusive
         if 'remove_from_watchlist' in request.form:
             tmdb_id = int(get_post_result('remove_from_watchlist'))
             remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist', category='success')
-        if 'request_on_plex' in request.form:
+        elif 'request_on_plex' in request.form:
             tmdb_id = int(get_post_result('request_on_plex'))
             overseerr.request_title(tmdb_id)
             flash('Movie requested on Plex', category='success')
-        if 'move_to_top_of_watchlist' in request.form:
+        elif 'move_to_top_of_watchlist' in request.form:
             tmdb_id = int(get_post_result('move_to_top_of_watchlist'))
             move_to_top_of_watchlist(tmdb_id)
             flash('Moved to the top of the watchlist', category='success')
@@ -697,15 +699,16 @@ def enrich_titles(title_ids):
 def recos():
 
     if request.method == 'POST':
+        # Every form posts exactly one action key, so the branches are mutually exclusive
         if 'add_to_watchlist' in request.form:
             tmdb_id = int(get_post_result('add_to_watchlist'))
             add_to_watchlist(tmdb_id)
             flash('Movie added to watchlist', category='success')
-        if 'remove_from_watchlist' in request.form:
+        elif 'remove_from_watchlist' in request.form:
             tmdb_id = int(get_post_result('remove_from_watchlist'))
             remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist', category='success')
-        if 'blacklist' in request.form:
+        elif 'blacklist' in request.form:
             tmdb_id = int(get_post_result('blacklist'))
             item = BlacklistItem(current_user.id, tmdb_id)
             db.session.add(item)
