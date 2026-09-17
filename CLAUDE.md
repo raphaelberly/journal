@@ -10,8 +10,9 @@ recommendations. Data comes from **TMDb** (live API) and from the **open IMDb da
 It runs as a PWA on a small self-hosted Linux box. The app is designed mobile-first
 (iPhone, added to the home screen) — every page must look right at phone width.
 
-`README.md` has screenshots and the longer origin story; it is somewhat out of date with
-regard to newer pages (Library, Recos, People, Retrospective, Settings).
+`README.md` has screenshots and the longer origin story, and covers every page (Search,
+Recent, Watchlist, Library, Recos, People, Statistics, Retrospective, Settings). A new page
+or a visible redesign means updating it, screenshots included.
 
 ## Layout
 
@@ -25,11 +26,11 @@ app/            Flask app (the web-app)
   dbutils.py    upsert helpers + raw-SQL execution (sync and fire-and-forget async)
   converters.py TMDb JSON <-> DB row <-> template payload conversions
   titles.py     TitleCollector: TMDb fetch + IMDb rating lookup
-  graphutils.py plotly bar charts written to PNG (statistics / retrospective)
+  graphutils.py hand-written SVG bar charts (statistics / retrospective), no plotting library
   forms.py      only the signup form is a WTForm; every other form is raw HTML
   queries/      raw .sql files loaded at request time
   templates/    Jinja2, one file per page + templates/base/{head,menu,alert}.html
-  static/       css/, js/, images/, generated/ (runtime PNGs, gitignored)
+  static/       css/, js/, images/, generated/ (runtime charts, gitignored)
 config/         *.yaml configuration + app.py (Flask Config object)
 lib/            non-web code: tmdb, overseerr, etl, push (Pushover), tools
 ddl/            hand-maintained CREATE TABLE / CREATE MATERIALIZED VIEW statements
@@ -48,11 +49,14 @@ python update_all_title_metadata.py   # re-pull TMDb metadata for every stored t
 ```
 
 All scripts are run from the repo root — config paths (`config/…`, `tmp/…`) are relative to
-the CWD, not to the script.
+the CWD, not to the script. Each of them wraps its work in `with app.app_context():`, since
+the app package pushes no context of its own.
 
 Python 3.12 (`.python-version` → pyenv virtualenv `journal3.12.7`). Dependencies are in
-`requirements.txt`, unpinned. There is no test suite; `tmp/test_*.py` are throwaway
-experiments, not tests.
+`requirements.txt`, unpinned, grouped by area and kept in sync with what is actually
+imported — the few that are not imported directly (`gunicorn`, `email_validator`) sit in
+their own section with a comment saying why. There is no test suite; `tmp/test_*.py` are
+throwaway experiments, not tests.
 
 In production the app is served by gunicorn under supervisor on the host. `deploy.sh` (run
 on the host) stops supervisor, pulls `master`, restarts it. The ETL, the backup and the
@@ -85,6 +89,11 @@ Every model sets `__table_args__ = {"schema": "journal"}` and carries
 through `app.dbutils.upsert` / `upsert_bulk` / `upsert_title_metadata`, which exclude
 `insert_datetime_utc` from the update set and bump `update_datetime_utc`.
 
+Timestamps always come from `lib.tools.utcnow()` — a naive UTC `datetime`, to match the
+`TIMESTAMP` (without time zone) columns of the DDL. Never `datetime.utcnow()` (deprecated in
+3.12) nor a timezone-aware `datetime.now(UTC)`, which Postgres would shift. Likewise prefer
+`db.session.get(Model, pk)` to the legacy `Model.query.get()`.
+
 The engine runs in `AUTOCOMMIT` isolation with a small pool (see `config/app.py`); long
 loops that write should `db.session.commit()` each iteration to avoid idle-in-transaction
 timeouts (see `update_watchlist_providers.py`).
@@ -96,8 +105,8 @@ Statistics come from the materialized views, so any write that changes records m
 `app.dbutils.execute_text` / `async_execute_text` escape `:` before handing the SQL to
 SQLAlchemy `text()`, because the raw queries contain colons that are not bind parameters.
 Raw `.sql` files under `app/queries/` are read at request time and `.format()`-ed with the
-user id — keep interpolation limited to values that come from the session, never from
-request arguments.
+user id — keep interpolation limited to values that come from the session. When a request
+argument has to reach one (`people?person_id=`), cast it to its expected type first.
 
 ## Route conventions
 
@@ -105,7 +114,9 @@ request arguments.
 
 1. handle the POST actions by checking for a key in `request.form`
    (`add_to_watchlist`, `remove_from_watchlist`, `move_to_top_of_watchlist`, `blacklist`,
-   `remove`, `gradeRange`, …), `flash()` a message, then fall through to the GET rendering;
+   `remove`, `gradeRange`, …), `flash()` a message, then fall through to the GET rendering.
+   A form posts exactly one action key, so those branches are `if` / `elif`, never a chain
+   of independent `if`s;
 2. build a **`payload`** (the data) and a **`metadata`** dict (UI state: `scroll_to`,
    `show_more_button`, `sort_by`, filters, current user preferences);
 3. `render_template('<page>.html', payload=payload, metadata=metadata)`.
@@ -118,6 +129,12 @@ Other conventions worth keeping:
   `scroll_to` (set by `static/js/scroll.js`) restores the scroll position.
 - All pages are `@login_required`; unauthorised access redirects to `/login`. Sessions are
   remembered for 90 days.
+- `CSRFProtect` guards every POST. Because the forms are raw HTML rather than WTForms, each
+  `<form method="post">` must carry
+  `<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">` — a new form without
+  it fails with a 400. Tokens live as long as the session (`WTF_CSRF_TIME_LIMIT = None`),
+  because pages stay open for days in the standalone web-app; a `CSRFError` handler flashes
+  "Your session expired" and redirects.
 - A global `@app.errorhandler(Exception)` flashes "Wops, something went wrong", logs the
   traceback and redirects to the referrer. `/error` raises on purpose to test it.
 - Per-user display preferences live on `User`: `language` (titles are shown in the original
@@ -144,19 +161,26 @@ Other conventions worth keeping:
 - Splash screens are per-device-size `<link rel="apple-touch-startup-image">` entries in
   `base/head.html`; a new iPhone size means a new PNG in `static/images/splashscreens/`
   and a new line there.
-- `static/generated/` holds per-user PNG charts named
-  `<username>_<UTC timestamp>_<kind>.png`; the timestamp defeats caching and
-  `cleanup_distribution_plots` deletes the user's previous ones on each render.
+- `static/generated/` holds per-user SVG charts named
+  `<username>_<UTC timestamp>_<kind>.svg`; the timestamp defeats caching and
+  `cleanup_distribution_plots` deletes the user's previous ones on each render (it still
+  sweeps the `.png` left over from the plotly era). An empty distribution produces no file
+  and the template hides the chart.
 
 ## External services
 
 - **TMDb** (`lib/tmdb.py`) — search, movie details (`append_to_response=credits`) and watch
   providers. `search`/`get` are `lru_cache`d per process; `get_bulk` fan-outs with
   `request_boost`. Careful with the cache: a cached dict is mutated by callers, hence the
-  `.copy()` in `TitleCollector.collect`.
+  `.copy()` in `TitleCollector.collect`. There is a single instance for the whole app, on
+  `title_collector.tmdb` (`routes.py` builds one module-level `TitleCollector` and one
+  `Overseerr`) — `lru_cache` on a method is keyed by `self`, so a second `Tmdb` means a
+  second, empty cache.
 - **Overseerr** (`lib/overseerr.py`) — used to request movies on the household Plex. It may
-  be unreachable; the client sets `is_available = False` instead of raising, and every call
-  site must check it.
+  be unreachable, and the client never raises: it logs in at construction, and
+  `is_available` is a property that retries that login at most once every 5 minutes, so the
+  service can come back without restarting the app. Any failing call flags it unavailable
+  again. Every call site must check `overseerr.is_available` first.
 - **Pushover** (`lib/push.py`) — alerts from the cron scripts on failure.
 - **IMDb datasets** — downloaded by `lib/etl.py`, which truncates the target `imdb.*` table
   and re-inserts in batches of 1000 with generated INSERT statements. It is written to run
