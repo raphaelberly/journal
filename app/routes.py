@@ -177,7 +177,7 @@ def generate_dist_images(grade_dist: dict, decade_dist: dict) -> dict:
     timestamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
     # Generate new grade distribution plot
     if grade_dist:
-        images['grade_dist'] = f'generated/{current_user.username}_{timestamp}_grade_dist.png'
+        images['grade_dist'] = f'generated/{current_user.username}_{timestamp}_grade_dist.svg'
         plot_distribution(
             key_values=grade_dist,
             path=path.join(CURRENT_DIR, f'static/{images["grade_dist"]}'),
@@ -185,7 +185,7 @@ def generate_dist_images(grade_dist: dict, decade_dist: dict) -> dict:
         )
     # Generate new decade distribution plot
     if decade_dist:
-        images['decade_dist'] = f'generated/{current_user.username}_{timestamp}_decade_dist.png'
+        images['decade_dist'] = f'generated/{current_user.username}_{timestamp}_decade_dist.svg'
         plot_distribution(
             key_values=decade_dist,
             path=path.join(CURRENT_DIR, f'static/{images["decade_dist"]}'),

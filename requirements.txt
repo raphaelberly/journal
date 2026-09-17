@@ -16,10 +16,9 @@ request-boost
 requests
 git+https://github.com/Wyattjoh/pushover
 
-# ETL, backup and charts
+# ETL and backup
 numpy
 pandas
-plotly
 PyYAML
 toolz
 tqdm
@@ -27,4 +26,3 @@ tqdm
 # Not imported directly, but required at runtime
 email_validator   # wtforms Email() validator
 gunicorn          # production server, run under supervisor
-kaleido           # plotly write_image backend

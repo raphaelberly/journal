@@ -1,9 +1,18 @@
 import os
-from typing import Dict, Optional, Tuple
-from plotly import graph_objs as go
+from typing import Dict, Optional
 
-# get path to current file's folder
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Chart geometry, kept from the previous plotly rendering: a 700x500 canvas whose bars
+# sit on a baseline 28px above the bottom, in evenly spread slots filled at 80%
+WIDTH = 700
+HEIGHT = 500
+BASELINE_Y = 472
+BAR_FILL = 0.8
+TOP_PADDING = 34
+LABEL_GAP = 10
+THEME_COLOUR = '#6caee0'
+FONT_FAMILY = 'Trebuchet MS, Helvetica, sans-serif'
+FONT_SIZE = 22
+
 
 def cleanup_distribution_plots(path_starts_with: str):
     # The folder is gitignored, so it may not exist yet on a fresh checkout
@@ -12,36 +21,37 @@ def cleanup_distribution_plots(path_starts_with: str):
     for file in os.listdir(dirname):
         filepath = os.path.join(dirname, file)
         if filepath.startswith(path_starts_with):
-            assert filepath.endswith('.png')
+            # .png covers the charts generated before the switch to SVG
+            assert filepath.endswith(('.svg', '.png'))
             os.remove(filepath)
 
 
-def plot_distribution(key_values: Dict[int, int], path: str, force_range: Optional[list] = None) -> go.Figure:
-    fig = go.Figure(data=[go.Bar(
-        x=list(key_values.keys()),
-        y=list(key_values.values()),
-        marker_color='#6caee0'
-    )])
-    range_ = force_range or range(min(key_values.keys()), max(key_values.keys()) + 1)
-    fig.update_layout(
-        plot_bgcolor='white',
-        xaxis=dict(
-            tickmode='array',
-            tickvals=force_range or range_,
-            ticktext=[str(i) for i in range_],
-            tickfont_color='#6caee0',
-            tickfont_size=22,
-            tickfont_family='Trebuchet MS'
-        ),
-        yaxis=dict(showticklabels=False),
-    )
-    fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
-    # Show value of each column on top of it in color #6caee0 and size 16
-    fig.update_traces(
-        texttemplate='%{y}',
-        textposition='outside',
-        textfont_color='#6caee0',
-        textfont_size=22,
-        textfont_family='Trebuchet MS'
-    )
-    fig.write_image(path)
+def plot_distribution(key_values: Dict[int, int], path: str, force_range: Optional[list] = None) -> None:
+    keys = force_range or sorted(key_values)
+    slot = WIDTH / len(keys)
+    bar_width = slot * BAR_FILL
+    plot_height = BASELINE_Y - TOP_PADDING
+    highest = max(key_values.values())
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {HEIGHT}" '
+        f'width="{WIDTH}" height="{HEIGHT}">',
+        f'<rect width="{WIDTH}" height="{HEIGHT}" fill="white"/>',
+        f'<g font-family="{FONT_FAMILY}" font-size="{FONT_SIZE}" fill="{THEME_COLOUR}" text-anchor="middle">',
+    ]
+    # Draw each bar with its value above it and its key underneath
+    for i, key in enumerate(keys):
+        centre = i * slot + slot / 2
+        parts.append(f'<text x="{centre:.1f}" y="{HEIGHT - 6}">{key}</text>')
+        value = key_values.get(key, 0)
+        if not value:
+            continue
+        height = value / highest * plot_height
+        top = BASELINE_Y - height
+        parts.append(
+            f'<rect x="{centre - bar_width / 2:.1f}" y="{top:.1f}" '
+            f'width="{bar_width:.1f}" height="{height:.1f}" fill="{THEME_COLOUR}"/>'
+        )
+        parts.append(f'<text x="{centre:.1f}" y="{top - LABEL_GAP:.1f}">{value}</text>')
+    parts += ['</g>', '</svg>']
+    with open(path, 'w') as f:
+        f.write(''.join(parts))
