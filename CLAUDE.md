@@ -64,8 +64,7 @@ or add secrets to tracked files. `config/app.py` builds the Flask `Config`; the 
 from `lib.tools.get_db_uri(**credentials['db'])`.
 
 The other yaml files are tracked: `etl.yaml` (IMDb dataset URLs, column mappings, filters),
-`providers.yaml` (supported streaming providers + country), `backup.yaml`, `search.yaml`
-(legacy IMDb-scraping config, only used by the unused `bs4_helper`).
+`providers.yaml` (supported streaming providers + country) and `backup.yaml`.
 
 ## Database
 
