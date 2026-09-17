@@ -18,14 +18,12 @@ from app.graphutils import plot_distribution, cleanup_distribution_plots
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
-from lib.tmdb import Tmdb
 from lib.tools import get_time_ago_string, get_time_spent_string, utcnow
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
 
 title_collector = TitleCollector()
 overseerr = Overseerr()
-tmdb = Tmdb()
 
 def intersect(a, b):
     return set(a) & set(b)
@@ -736,7 +734,7 @@ def recos():
     # Check providers of the results
     titles_enriched = enrich_titles(title_ids)[:nb_results]
     for title in titles_enriched:
-        providers = tmdb.providers(title['id'])
+        providers = title_collector.tmdb.providers(title['id'])
         if overseerr.is_available and overseerr.request_status(title['id']) == 5:
             providers.append('plex')
         title['providers'] = providers
