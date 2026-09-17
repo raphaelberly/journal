@@ -4,6 +4,7 @@
     padding-top: 50px;
     padding-top: calc(50px + constant(safe-area-inset-top));
     padding-top: calc(50px + env(safe-area-inset-top));
+    padding-bottom: 30px;
 }
 
 .statistics table {
@@ -70,7 +71,6 @@ ul, li .top-movies {
 .volume-analysis {
     text-align: center;
     margin-top: 15px;
-    margin-bottom: 30px;
 }
 
 .volume-analysis td {
