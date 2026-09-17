@@ -10,7 +10,7 @@ from lib.tools import utcnow
 
 @login.user_loader
 def load_user(id_):
-    user = User.query.get(id_)
+    user = db.session.get(User, id_)
     # DEBUG: logging.getLogger('gunicorn.error').error(f'LOADING USER "{id_}" => {user}')
     return user
 

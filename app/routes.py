@@ -760,12 +760,12 @@ def library():
         .filter(Record.user_id == current_user.id)
 
     # FILTER RECORDS
-    filter_grades_below = request.args.get('filter_grades_below', None)
-    filter_grades_above = request.args.get('filter_grades_above', None)
-    if filter_grades_below is not None:
-        records = records.filter(Record.grade >= float(filter_grades_below))
-    if filter_grades_above is not None:
-        records = records.filter(Record.grade <= float(filter_grades_above))
+    filter_grades_min = request.args.get('filter_grades_min', None)
+    filter_grades_max = request.args.get('filter_grades_max', None)
+    if filter_grades_min is not None:
+        records = records.filter(Record.grade >= float(filter_grades_min))
+    if filter_grades_max is not None:
+        records = records.filter(Record.grade <= float(filter_grades_max))
 
     # ORDER RECORDS
     sort_by = request.args.get('sort_by', 'grade_desc')
@@ -795,8 +795,8 @@ def library():
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'sort_by': sort_by,
         'submenu': request.args.get('submenu', 'inactive'),
-        'filter_grades_below': filter_grades_below,
-        'filter_grades_above': filter_grades_above,
+        'filter_grades_min': filter_grades_min,
+        'filter_grades_max': filter_grades_max,
         'show_more_button': show_more_button,
         'grade_as_int': current_user.grade_as_int,
     }
