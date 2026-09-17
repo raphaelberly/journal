@@ -10,10 +10,11 @@ from config.app import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Initialise DB
+# Initialise DB. Note: no app context is pushed here on purpose -- one pushed at import
+# is reused by every request, so Flask-Login's cached user leaks between them. Standalone
+# scripts push their own
 db = SQLAlchemy()
 db.init_app(app)
-app.app_context().push()
 
 # Initialise login manager
 login = LoginManager()

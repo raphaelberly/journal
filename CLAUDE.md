@@ -17,7 +17,9 @@ regard to newer pages (Library, Recos, People, Retrospective, Settings).
 
 ```
 app/            Flask app (the web-app)
-  __init__.py   app/db/login/cache-buster initialisation — imports routes & models at the end
+  __init__.py   app/db/login/csrf/cache-buster initialisation — imports routes & models at the end
+                (pushes no app context: one pushed at import leaks Flask-Login's cached
+                user between requests under a sync worker — scripts push their own)
   routes.py     every route, ~800 lines, single module (no blueprints)
   models.py     SQLAlchemy models, all in the `journal` schema (plus imdb.ratings)
   dbutils.py    upsert helpers + raw-SQL execution (sync and fire-and-forget async)

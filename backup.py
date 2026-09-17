@@ -53,18 +53,19 @@ if not os.path.exists(folder_path):
 
 # Backup each table
 fail_list = []
-for table_name in table_names:
-    try:
-        # Fetch table into a Pandas dataframe
-        table_ref = f'{credentials["db"]["schema"]}.{table_name}'
-        df = pd.read_sql_query(text(f'SELECT * FROM {table_ref}'), db.engine.connect())
-        # Backup table as CSV
-        backup_path = os.path.join(folder_path, f'{table_name}.csv')
-        df.to_csv(backup_path, header=True, index=False)
-        LOGGER.info(f'Successful backup of {table_ref} table to: {backup_path}')
-    except Exception as e:
-        fail_list.append(table_name)
-        LOGGER.error(str(e))
+with app.app_context():
+    for table_name in table_names:
+        try:
+            # Fetch table into a Pandas dataframe
+            table_ref = f'{credentials["db"]["schema"]}.{table_name}'
+            df = pd.read_sql_query(text(f'SELECT * FROM {table_ref}'), db.engine.connect())
+            # Backup table as CSV
+            backup_path = os.path.join(folder_path, f'{table_name}.csv')
+            df.to_csv(backup_path, header=True, index=False)
+            LOGGER.info(f'Successful backup of {table_ref} table to: {backup_path}')
+        except Exception as e:
+            fail_list.append(table_name)
+            LOGGER.error(str(e))
 
 if fail_list:
     notifier.send_message(
