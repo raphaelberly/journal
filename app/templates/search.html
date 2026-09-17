@@ -84,6 +84,7 @@
             </td>
             <td class="right">
                 <form onsubmit="this.action=add_scroll('{{ url_for('search', query=metadata.query, nb_results=payload|length) }}');" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="add_to_watchlist" value="{{ item.id }}">
                     <input class="styled-button empty" type="submit" value="Watchlist">
                 </form>
@@ -95,6 +96,7 @@
             </td>
             <td class="right">
                 <form onsubmit="this.action=add_scroll('{{ url_for('search', query=metadata.query, nb_results=payload|length) }}');" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="move_to_top_of_watchlist" value="{{ item.id }}">
                     <input class="styled-button empty" type="submit" value="Move up" onclick="javascript:if (window.confirm('Move to the top of the watchlist?')) {return true;} else {return false;}">
                 </form>
@@ -102,6 +104,7 @@
             </table>
             <tr><td>
                 <form onsubmit="this.action=add_scroll('{{ url_for('search', query=metadata.query, nb_results=payload|length) }}');" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="remove_from_watchlist" value="{{ item.id }}">
                     <div class="mentions blacklist"><input type="submit" value="Remove from Watchlist" onclick="javascript:if (window.confirm('Remove from Watchlist?')) {return true;} else {return false;}"></div>
                 </form>

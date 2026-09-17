@@ -80,6 +80,7 @@
         </td>
         <td class="right">
             <form onsubmit="this.action=add_scroll('{{ url_for('recos', nb_results=payload.titles|length) }}');" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             {% if not title.in_watchlist %}
                 <input type="hidden" name="add_to_watchlist" value="{{ title.id }}">
                 <input class="styled-button empty" type="submit" value="Watchlist">
@@ -93,6 +94,7 @@
     </td></tr>
     <tr><td>
         <form onsubmit="this.action=add_scroll('{{ url_for('recos', nb_results=payload.titles|length) }}');" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="blacklist" value="{{ title.id }}">
             <div class="mentions blacklist"><input type="submit" value="Hide from Recos" onclick="javascript:if (window.confirm('Hide from recos?')) {return true;} else {return false;}"></div>
         </form>

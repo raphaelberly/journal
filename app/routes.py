@@ -5,6 +5,7 @@ from os import path
 
 from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
+from flask_wtf.csrf import CSRFError
 from sqlalchemy import func, cast, Integer, case, and_
 from werkzeug.utils import redirect
 
@@ -33,6 +34,12 @@ def intersect(a, b):
 # Add zip support for jinja2
 app.jinja_env.globals.update(zip=zip)
 app.jinja_env.globals.update(intersect=intersect)
+
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    flash('Your session expired, please try again', category='error')
+    return redirect(request.referrer or url_for('search'))
 
 
 @app.errorhandler(Exception)
