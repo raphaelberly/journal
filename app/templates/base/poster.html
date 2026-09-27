@@ -1,5 +1,6 @@
 <button type="button" class="poster" popovertarget="poster-{{ title.id }}"><img src="{{ title.poster_url }}"></button>
 <div popover id="poster-{{ title.id }}" class="fullscreen-poster">
     <button type="button" popovertarget="poster-{{ title.id }}" popovertargetaction="hide"><img src="/static/images/icon_close_menu.png"></button>
+    <img src="{{ title.poster_url }}">
     <img loading="lazy" src="{{ title.fullscreen_poster_url }}">
 </div>

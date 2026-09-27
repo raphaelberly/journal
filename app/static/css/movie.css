@@ -54,9 +54,9 @@
 }
 
 .fullscreen-poster:popover-open {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    grid-template: 100% / 100%;
+    place-items: center;
 }
 
 .fullscreen-poster button {
@@ -75,7 +75,9 @@
     width: 18px;
 }
 
+/* Stack the w780 over the w500, already in cache, which shows while the w780 loads */
 .fullscreen-poster > img {
+    grid-area: 1 / 1;
     position: relative;
     max-width: 100%;
     max-height: 100%;
