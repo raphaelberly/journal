@@ -166,6 +166,11 @@ Other conventions worth keeping:
   `cleanup_distribution_plots` deletes the user's previous ones on each render (it still
   sweeps the `.png` left over from the plotly era). An empty distribution produces no file
   and the template hides the chart.
+- Posters are rendered by `base/poster.html` (with a `title` in scope): the w500 poster is a
+  button opening a w780 copy full screen through the HTML popover API, without JS. The
+  copy is `loading="lazy"`, so it is only downloaded on open. Safari iOS ignores taps outside
+  a popover, so the dark background is itself the close button. Browsers without popovers
+  (iOS 16) keep it hidden and the tap does nothing.
 
 ## External services
 
