@@ -39,7 +39,7 @@ class TitleConverter(object):
             'director_names': item['director_names'],
             'director_ids': item['director_ids'],
             'duration': f'{item["runtime"] // 60}h {item["runtime"] % 60}min' if item.get('runtime') else None,
-            'poster_url': 'https://image.tmdb.org/t/p/w200' + item['poster_path'] if item.get('poster_path') else None,
+            'poster_url': 'https://image.tmdb.org/t/p/w500' + item['poster_path'] if item.get('poster_path') else None,
             'imdb_rating': item.get('imdb_rating'),
         }
         return title
@@ -57,7 +57,7 @@ class TitleConverter(object):
             'director_names': [item['name'] for item in item['credits'].get('crew', []) if item['job'] == 'Director'],
             'director_ids': [item['id'] for item in item['credits'].get('crew', []) if item['job'] == 'Director'],
             'duration': f'{item["runtime"] // 60}h {item["runtime"] % 60}min' if item.get('runtime') else None,
-            'poster_url': 'https://image.tmdb.org/t/p/w200' + item['poster_path'] if item.get('poster_path') else None,
+            'poster_url': 'https://image.tmdb.org/t/p/w500' + item['poster_path'] if item.get('poster_path') else None,
             'imdb_rating': item.get('imdb_rating'),
         }
         return title

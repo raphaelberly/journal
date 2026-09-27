@@ -26,9 +26,11 @@
     padding-bottom: 8px;
 }
 
+/* Scale posters with the screen height (180px on an iPhone 8), within the width available */
 .movies img {
-    max-width: 180px;
-    width: 55%;
+    width: 180px;
+    width: clamp(150px, 27vh, 300px);
+    max-width: 70%;
 }
 
 .movies a {
