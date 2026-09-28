@@ -170,8 +170,10 @@ Other conventions worth keeping:
   button opening a w780 copy full screen through the HTML popover API, without JS. The
   copy is `loading="lazy"`, so it is only downloaded on open; until it arrives, the w500
   (already in cache) shows in the same grid cell beneath it. Safari iOS ignores taps outside
-  a popover, so the dark background is itself the close button. Browsers without popovers
-  (iOS 16) keep it hidden and the tap does nothing.
+  a popover, so the dark background is itself the close button, and the images let taps
+  through to it (`pointer-events: none`). The page does not scroll while a poster is open
+  (`html:has(:popover-open)`). Browsers without popovers (iOS 16) keep it hidden and the
+  tap does nothing.
 
 ## External services
 
