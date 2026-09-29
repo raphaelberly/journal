@@ -12,7 +12,6 @@ psycopg2-binary
 SQLAlchemy
 
 # External services
-request-boost
 requests
 git+https://github.com/Wyattjoh/pushover
 

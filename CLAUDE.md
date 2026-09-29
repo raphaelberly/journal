@@ -167,9 +167,11 @@ Other conventions worth keeping:
   sweeps the `.png` left over from the plotly era). An empty distribution produces no file
   and the template hides the chart.
 - Posters are rendered by `base/poster.html` (with a `title` in scope): the w500 poster is a
-  button opening a w780 copy full screen through the HTML popover API, without JS. The
-  copy is `loading="lazy"`, so it is only downloaded on open; until it arrives, the w500
-  (already in cache) shows in the same grid cell beneath it. Safari iOS ignores taps outside
+  button opening a w780 copy full screen through the HTML popover API, without JS. Every
+  image there is `loading="lazy"`: a list only downloads the posters scrolled to (their 2:3
+  height is reserved in `movie.css`, so `scroll_to` still lands right), and the w780 only
+  on open; until it arrives, the w500 (already in cache) shows in the same grid cell
+  beneath it. Safari iOS ignores taps outside
   a popover, so the dark background is itself the close button, and the images let taps
   through to it (`pointer-events: none`). The page does not scroll while a poster is open
   (`html:has(:popover-open)`). Browsers without popovers (iOS 16) keep it hidden and the
@@ -178,9 +180,13 @@ Other conventions worth keeping:
 ## External services
 
 - **TMDb** (`lib/tmdb.py`) — search, movie details (`append_to_response=credits`) and watch
-  providers. `search`/`get` are `lru_cache`d per process; `get_bulk` fan-outs with
-  `request_boost`. Careful with the cache: a cached dict is mutated by callers, hence the
-  `.copy()` in `TitleCollector.collect`. There is a single instance for the whole app, on
+  providers. All calls share one `requests.Session`, whose kept-alive, gzipped connections
+  are most of a search's speed (a new TLS connection per call used to double it).
+  `search`/`get` are `lru_cache`d per process; `get_bulk` fans out on a thread pool and
+  bypasses that cache on purpose (a detail with credits weighs up to 600 KB in memory,
+  and TMDb's CDN serves a repeat in ~20 ms). Firing more than ~50 calls a second gets
+  throttled by TMDb, so keep fan-outs to a search's worth (20). Careful with the cache: a
+  cached dict is mutated by callers, hence the `.copy()` in `TitleCollector.collect`. There is a single instance for the whole app, on
   `title_collector.tmdb` (`routes.py` builds one module-level `TitleCollector` and one
   `Overseerr`) — `lru_cache` on a method is keyed by `self`, so a second `Tmdb` means a
   second, empty cache.

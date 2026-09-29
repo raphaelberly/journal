@@ -32,11 +32,13 @@
     background: none;
 }
 
-/* Scale posters with the screen height (180px on an iPhone 8), within the width available */
+/* Scale posters with the screen height (180px on an iPhone 8), within the width available.
+   Reserve their 2:3 height before they load (lazily), so scroll_to lands where it should */
 .poster img {
     width: 180px;
     width: clamp(150px, 27vh, 300px);
     max-width: 70vw;
+    aspect-ratio: auto 2 / 3;
 }
 
 /* Show the poster full screen (iOS 17+), over a dark background that closes it when tapped */

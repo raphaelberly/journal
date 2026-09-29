@@ -405,7 +405,7 @@ def search():
             flash('Moved to the top of the watchlist', category='success')
 
     query = request.args['query']
-    nb_results = int(request.args.get('nb_results', 3))
+    nb_results = int(request.args.get('nb_results', 10))
     result_ids = title_collector.tmdb.search(query)
     payload = enrich_results(title_collector.collect_bulk(result_ids[:nb_results]))
     metadata = {
