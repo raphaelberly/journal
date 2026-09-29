@@ -18,6 +18,7 @@ from app.graphutils import plot_distribution, cleanup_distribution_plots
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
+from lib.tmdb import Tmdb
 from lib.tools import get_time_ago_string, get_time_spent_string, utcnow
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
@@ -766,6 +767,9 @@ def library():
         records = records.filter(Record.grade >= float(filter_grades_min))
     if filter_grades_max is not None:
         records = records.filter(Record.grade <= float(filter_grades_max))
+    filter_genre = request.args.get('filter_genre') or None
+    if filter_genre is not None:
+        records = records.filter(Title.genres.any(filter_genre))
 
     # ORDER RECORDS
     sort_by = request.args.get('sort_by', 'grade_desc')
@@ -797,6 +801,8 @@ def library():
         'submenu': request.args.get('submenu', 'inactive'),
         'filter_grades_min': filter_grades_min,
         'filter_grades_max': filter_grades_max,
+        'filter_genre': filter_genre,
+        'genres': Tmdb.GENRES,
         'show_more_button': show_more_button,
         'grade_as_int': current_user.grade_as_int,
     }

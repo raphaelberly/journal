@@ -78,3 +78,17 @@ button.right {
     color: #6caee0;
     display: inline-flex;
 }
+
+.genre-picker {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    font: bold 15px Trebuchet MS;
+    color: #6caee0;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236caee0' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 20px center / 12px 8px;
+    border: 1px solid #6caee0;
+    border-radius: 2px;
+    padding: 13px 20px;
+    outline: none;
+    cursor: pointer;
+}

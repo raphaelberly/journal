@@ -18,6 +18,12 @@ class Tmdb(object):
     # A search returns at most 20 titles, all fetched at once by get_bulk
     MAX_PARALLEL_REQUESTS = 20
     TIMEOUT = 10
+    # Every movie genre of TMDb (GET /genre/movie/list), in alphabetical order, as stored in journal.titles
+    GENRES = [
+        'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy',
+        'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'TV Movie', 'War',
+        'Western',
+    ]
 
     def __init__(self, config_path: str = 'config'):
         credentials = read_config(os.path.join(config_path, 'credentials.yaml'))
