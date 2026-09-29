@@ -49,6 +49,15 @@
             <br/>{{ title.duration }}
         {% endif %}
     </td></tr>
+    {% if intersect(title.providers, metadata.providers) %}
+    <tr><td>
+        <div class="providers">
+        {% for provider in intersect(title.providers, metadata.providers) %}
+            <img src="{{ url_for('static', filename='images/providers/' ~ provider ~ '.png') }}">
+        {% endfor %}
+        </div>
+    </td></tr>
+    {% endif %}
 
     {% if metadata.mode == 'show_slider' %}
     <form action="{{ url_for('movie', tmdb_id=title.id) }}" method="post">

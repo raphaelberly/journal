@@ -91,6 +91,17 @@ html:has(.fullscreen-poster:popover-open) {
     pointer-events: none;
 }
 
+.providers {
+  height: 20px;
+  margin-top: -5px;
+  margin-bottom: -2px;
+}
+
+.providers img {
+  height: 100%;
+  width: auto;
+}
+
 .movies a {
     color: black;
     text-decoration: none;

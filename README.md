@@ -43,7 +43,8 @@ The landing page. "Remember me" is always on, for 90 days. New users can registe
 The home page of the app. Type a title, and each result shows its poster, genres, director,
 main cast, runtime and IMDb rating — along with the grade you gave it, if you already have.
 From there a movie can be graded (which logs it in the journal) or pushed to the watchlist.
-Tapping a poster shows it full screen; tapping the title opens the movie's page.
+Tapping a poster shows it full screen; tapping the title opens the movie's page, which also
+shows the services it is currently streaming on.
 
 <div align="center"><img src="img/search_page.png" width="225px"/></div>
 

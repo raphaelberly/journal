@@ -29,17 +29,6 @@
   width: auto;
 }
 
-.providers {
-  height: 20px;
-  margin-top: -5px;
-  margin-bottom: -2px;
-}
-
-.providers img {
-  height: 100%;
-  width: auto;
-}
-
 .pending-request-on-plex {
     font: normal 10px Trebuchet MS;
     color: #cb7800cc;

@@ -425,12 +425,18 @@ def get_watchlist_ids():
     return [_id for _id, in ids]
 
 
-def add_to_watchlist(tmdb_id):
-    title = title_collector.collect(tmdb_id)
-    upsert_title_metadata(title)
+def get_providers(tmdb_id):
+    # Get the streaming providers from TMDb, plus Plex if the movie is available there
     providers = title_collector.tmdb.providers(tmdb_id)
     if overseerr.is_available and overseerr.request_status(tmdb_id) == 5:
         providers.append('plex')
+    return providers
+
+
+def add_to_watchlist(tmdb_id):
+    title = title_collector.collect(tmdb_id)
+    upsert_title_metadata(title)
+    providers = get_providers(tmdb_id)
     item = WatchlistItem(user_id=current_user.id, tmdb_id=tmdb_id, providers=providers)
     db.session.add(item)
     db.session.commit()
@@ -511,8 +517,9 @@ def movie(tmdb_id):
     tmdb_id = int(tmdb_id)
     _title = title_collector.collect(tmdb_id)
     title = enrich_results([_title])[0]
+    title['providers'] = get_providers(tmdb_id)
 
-    metadata = {}
+    metadata = {'providers': current_user.providers}
 
     if request.method == 'GET' and request.args.get('show_slider', False):
         metadata.update({
@@ -735,10 +742,7 @@ def recos():
     # Check providers of the results
     titles_enriched = enrich_titles(title_ids)[:nb_results]
     for title in titles_enriched:
-        providers = title_collector.tmdb.providers(title['id'])
-        if overseerr.is_available and overseerr.request_status(title['id']) == 5:
-            providers.append('plex')
-        title['providers'] = providers
+        title['providers'] = get_providers(title['id'])
 
     # Prepare payload and metadata
     payload = {'titles': titles_enriched}
