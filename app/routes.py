@@ -27,7 +27,9 @@ title_collector = TitleCollector()
 overseerr = Overseerr()
 
 def intersect(a, b):
-    return set(a) & set(b)
+    # Keep the order of b (unlike a set, whose order changes with each process), so that the providers of the
+    # user always show in the order of the settings page
+    return [item for item in b if item in a]
 
 
 # Add zip support for jinja2
@@ -425,10 +427,18 @@ def get_watchlist_ids():
     return [_id for _id, in ids]
 
 
-def get_providers(tmdb_id):
-    # Get the streaming providers from TMDb, plus Plex if the movie is available there
+def get_plex_status(tmdb_id):
+    # Get the status of the movie on Overseerr: 2 to 4 once requested, 5 once available on Plex, else 1 or -1
+    return overseerr.request_status(tmdb_id) if overseerr.is_available else -1
+
+
+def get_providers(tmdb_id, plex_status=None):
+    # Get the streaming providers from TMDb, plus Plex if the movie is available there. The status on Plex is
+    # looked up, unless the caller already has it
     providers = title_collector.tmdb.providers(tmdb_id)
-    if overseerr.is_available and overseerr.request_status(tmdb_id) == 5:
+    if plex_status is None:
+        plex_status = get_plex_status(tmdb_id)
+    if plex_status == 5:
         providers.append('plex')
     return providers
 
@@ -517,16 +527,6 @@ def movie(tmdb_id):
     tmdb_id = int(tmdb_id)
     _title = title_collector.collect(tmdb_id)
     title = enrich_results([_title])[0]
-    title['providers'] = get_providers(tmdb_id)
-
-    metadata = {'providers': current_user.providers}
-
-    if request.method == 'GET' and request.args.get('show_slider', False):
-        metadata.update({
-            'mode': 'show_slider',
-            'grade_as_int': current_user.grade_as_int,
-        })
-        return render_template('movie.html', payload=title, metadata=metadata)
 
     if request.method == 'POST':
 
@@ -540,6 +540,12 @@ def movie(tmdb_id):
         elif 'move_to_top_of_watchlist' in request.form:
             move_to_top_of_watchlist(tmdb_id)
             flash('Moved to the top of the watchlist', category='success')
+        elif 'request_on_plex' in request.form:
+            if overseerr.is_available:
+                overseerr.request_title(tmdb_id)
+                flash('Movie requested on Plex', category='success')
+            else:
+                flash('Plex requests are unavailable for now', category='error')
 
         elif 'remove' in request.form:
             # Delete the movie from the database
@@ -585,6 +591,23 @@ def movie(tmdb_id):
             title['grade'] = grade
             # Start statistics refresh
             refresh_materialized_views()
+
+    # Get the streaming providers and the status on Plex, once any request on Plex was made
+    plex_status = get_plex_status(tmdb_id)
+    title['providers'] = get_providers(tmdb_id, plex_status)
+    metadata = {
+        'providers': current_user.providers,
+        'overseerr_available': overseerr.is_available,
+        'plex_request_pending': 2 <= plex_status <= 4,
+    }
+
+    if request.method == 'GET' and request.args.get('show_slider', False):
+        metadata.update({
+            'mode': 'show_slider',
+            'grade_as_int': current_user.grade_as_int,
+        })
+        return render_template('movie.html', payload=title, metadata=metadata)
+
     # Prepare page and title metadata
     title['in_watchlist'] = tmdb_id in get_watchlist_ids()
     metadata.update({

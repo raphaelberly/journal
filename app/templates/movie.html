@@ -57,6 +57,20 @@
         {% endfor %}
         </div>
     </td></tr>
+    {% elif 'plex' in metadata.providers and metadata.overseerr_available %} <!-- When none of user's providers has the movie, but plex is one of them -->
+        {% if not metadata.plex_request_pending %} <!-- Then add a button to make a request, in its own form: above the slider's, so it never posts a grade -->
+    <tr><td>
+        <form action="{{ url_for('movie', tmdb_id=title.id) }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="request_on_plex" value="{{ title.id }}">
+            <div class="request-on-plex"><input type="submit" value="Request on Plex" onclick="javascript:if (window.confirm('Request on Plex?')) {return true;} else {return false;}"></div>
+        </form>
+    </td></tr>
+        {% else %} <!-- Else confirm that a request exists -->
+    <tr><td>
+        <div class="pending-request-on-plex">Pending request on Plex</div>
+    </td></tr>
+        {% endif %}
     {% endif %}
 
     {% if metadata.mode == 'show_slider' %}
