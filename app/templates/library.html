@@ -8,7 +8,6 @@
     <script type=text/javascript src="{{ url_for('static', filename='js/scroll.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/recent.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/library.css')}}">
 </head>
@@ -49,7 +48,7 @@
 </table></center>
 
 {% if metadata.show_more_button %}
-<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_scroll_and_load('{{ url_for('library', sort_by=metadata.sort_by, filter_grades_min=metadata.filter_grades_min, filter_grades_max=metadata.filter_grades_max, filter_genre=metadata.filter_genre, nb_results=payload|length+20) }}')" value="More">
+<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_scroll_and_load('{{ url_for('library', sort_by=metadata.sort_by, filter_genre=metadata.filter_genre, nb_results=payload|length+20) }}')" value="More">
 {% endif %}
 
 </div>
@@ -57,37 +56,37 @@
 <div id="sortSubmenu" class="submenu">
 <table>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='sortSubmenu', filter_grades_min=metadata.filter_grades_min, filter_grades_max=metadata.filter_grades_max, filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
             <span class="sort-radio"></span>
             Grade descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'grade_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_asc', submenu='sortSubmenu', filter_grades_min=metadata.filter_grades_min, filter_grades_max=metadata.filter_grades_max, filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'grade_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_asc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
             <span class="sort-radio"></span>
             Grade ascending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'imdb_rating_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_desc', submenu='sortSubmenu', filter_grades_min=metadata.filter_grades_min, filter_grades_max=metadata.filter_grades_max, filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'imdb_rating_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_desc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
             <span class="sort-radio"></span>
             IMDb rating descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'imdb_rating_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_asc', submenu='sortSubmenu', filter_grades_min=metadata.filter_grades_min, filter_grades_max=metadata.filter_grades_max, filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'imdb_rating_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_asc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
             <span class="sort-radio"></span>
             IMDb rating ascending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'date_added_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_desc', submenu='sortSubmenu', filter_grades_min=metadata.filter_grades_min, filter_grades_max=metadata.filter_grades_max, filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'date_added_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_desc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
             <span class="sort-radio"></span>
             Date added descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'date_added_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_asc', submenu='sortSubmenu', filter_grades_min=metadata.filter_grades_min, filter_grades_max=metadata.filter_grades_max, filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'date_added_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_asc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
             <span class="sort-radio"></span>
             Date added ascending
         </a>
@@ -98,18 +97,11 @@
 <a href="javascript:void(0)" onclick="closeSubmenu('sortSubmenu')"><div class="submenu-back" id="sortSubmenuBack"></div></a>
 
 <div id="filterSubmenu" class="submenu filter-submenu">
-<!-- Refresh on slider release ("change", not "input") and on genre pick -->
+<!-- Refresh on genre pick -->
 <form method="get" action="{{ url_for('library') }}" onchange="this.submit()">
 <input type="hidden" name="sort_by" value="{{ metadata.sort_by }}">
 <input type="hidden" name="submenu" value="filterSubmenu">
 <table>
-    <tr><td>
-        <div class="mentions">Grades between <b><span id="gradeLowerBoundValue"></span>/10</b> and <b><span id="gradeUpperBoundValue"></span>/10</b></div>
-        <div class="dual-slider">
-            <input id="gradeLowerBound" name="filter_grades_min" type="range" min="{{ 1 if metadata.grade_as_int else 0 }}" max="10" value="{{ metadata.filter_grades_min or (1 if metadata.grade_as_int else 0) |string }}" step="{{ 1 if metadata.grade_as_int else 0.5 }}" class="slider">
-            <input id="gradeUpperBound" name="filter_grades_max" type="range" min="{{ 1 if metadata.grade_as_int else 0 }}" max="10" value="{{ metadata.filter_grades_max or 10 }}" step="{{ 1 if metadata.grade_as_int else 0.5 }}" class="slider">
-        </div>
-    </td></tr>
     <tr><td>
         <select class="genre-picker" name="filter_genre">
             <option value="">All genres</option>
@@ -120,32 +112,6 @@
     </td></tr>
 </table>
 </form>
-<script type="text/javascript">
-// Update gradeLowerBoundValue and gradeUpperBoundValue when sliders move
-(function() {
-    var lower = document.getElementById('gradeLowerBound');
-    var upper = document.getElementById('gradeUpperBound');
-    var lowerVal = document.getElementById('gradeLowerBoundValue');
-    var upperVal = document.getElementById('gradeUpperBoundValue');
-    if (lower && upper && lowerVal && upperVal) {
-        function update() {
-            // Prevent lower slider from exceeding upper slider
-            if (parseFloat(lower.value) > parseFloat(upper.value)) {
-                lower.value = upper.value;
-            }
-            // Prevent upper slider from going below lower slider
-            if (parseFloat(upper.value) < parseFloat(lower.value)) {
-                upper.value = lower.value;
-            }
-            lowerVal.textContent = parseFloat(lower.value).toFixed({{ 0 if metadata.grade_as_int else 1 }});
-            upperVal.textContent = parseFloat(upper.value).toFixed({{ 0 if metadata.grade_as_int else 1 }});
-        }
-        lower.addEventListener('input', update);
-        upper.addEventListener('input', update);
-        update();
-    }
-})();
-</script>
 </div>
 
 <a href="javascript:void(0)" onclick="closeSubmenu('filterSubmenu')"><div class="submenu-back" id="filterSubmenuBack"></div></a>

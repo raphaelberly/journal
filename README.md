@@ -61,8 +61,8 @@ The last movies you watched, as a timeline.
 
 ### Library
 
-Everything you ever logged, sortable by grade, IMDb rating or date added, and filterable by
-grade range and genre.
+Everything you ever logged, sortable by grade, IMDb rating or date added, and
+filterable by genre.
 
 <div align="center"><img src="img/library_page.png" width="225px"/></div>
 

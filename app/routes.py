@@ -788,12 +788,6 @@ def library():
         .filter(Record.user_id == current_user.id)
 
     # FILTER RECORDS
-    filter_grades_min = request.args.get('filter_grades_min', None)
-    filter_grades_max = request.args.get('filter_grades_max', None)
-    if filter_grades_min is not None:
-        records = records.filter(Record.grade >= float(filter_grades_min))
-    if filter_grades_max is not None:
-        records = records.filter(Record.grade <= float(filter_grades_max))
     filter_genre = request.args.get('filter_genre') or None
     if filter_genre is not None:
         records = records.filter(Title.genres.any(filter_genre))
@@ -826,11 +820,8 @@ def library():
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'sort_by': sort_by,
         'submenu': request.args.get('submenu', 'inactive'),
-        'filter_grades_min': filter_grades_min,
-        'filter_grades_max': filter_grades_max,
         'filter_genre': filter_genre,
         'genres': Tmdb.GENRES,
         'show_more_button': show_more_button,
-        'grade_as_int': current_user.grade_as_int,
     }
     return render_template('library.html', payload=payload, metadata=metadata)
