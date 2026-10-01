@@ -5,7 +5,7 @@
     </td>
     <td>
         <span style="cursor:pointer" onclick="topFunction()">
-            {{page_title or 'Journal'}}{% if beta is defined %}{% if beta %}<sup style="font-size:30%">BÊTA</sup>{% endif %}{% endif %}
+            {{page_title or 'Journal'}}
         </span>
     </td>
     <td class="right">
@@ -19,7 +19,7 @@
         <a href="javascript:void(0)" onclick="closeNav()"><img src="/static/images/icon_close_menu.png" class="closebtn"></a>
         <a href="{{ url_for('search') }}">Search</a>
         <a href="{{ url_for('recent') }}">Recent</a>
-        <a href="{{ url_for('library') }}">Library<sup style="font-size:30%">BÊTA</sup></a>
+        <a href="{{ url_for('library') }}">Library</a>
         <a href="{{ url_for('people') }}">People</a>
         <a href="{{ url_for('watchlist') }}">Watchlist</a>
         <a href="{{ url_for('statistics') }}">Statistics</a>
