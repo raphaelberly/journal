@@ -18,7 +18,7 @@ or a visible redesign means updating it, screenshots included.
 
 ```
 app/            Flask app (the web-app)
-  __init__.py   app/db/login/csrf/cache-buster initialisation — imports routes & models at the end
+  __init__.py   app/db/login/csrf initialisation — imports routes & models at the end
                 (pushes no app context: one pushed at import leaks Flask-Login's cached
                 user between requests under a sync worker — scripts push their own)
   routes.py     every route, ~800 lines, single module (no blueprints)
@@ -136,7 +136,10 @@ Other conventions worth keeping:
   because pages stay open for days in the standalone web-app; a `CSRFError` handler flashes
   "Your session expired" and redirects.
 - A global `@app.errorhandler(Exception)` flashes "Wops, something went wrong", logs the
-  traceback and redirects to the referrer. `/error` raises on purpose to test it.
+  traceback and redirects to the referrer. `/error` raises on purpose to test it. HTTP
+  errors on the `static` endpoint stay plain 404s instead: the browser fetches those files
+  in the background (Safari even preloads the assets a page used on its previous visit,
+  URLs gone since included), so a flash would only show up, unexplained, on the next page.
 - Per-user display preferences live on `User`: `language` (titles are shown in the original
   language when it matches the user's), `grade_as_int` (slider precision),
   `providers` (which streaming services to show).
@@ -152,8 +155,10 @@ Other conventions worth keeping:
   manifest, apple-touch icons, the per-device splash screens, `general.css`, `alert.css`),
   then includes `base/menu.html` and `base/alert.html`. New pages must be added to the
   sidenav in `base/menu.html`.
-- `Flask-CacheBuster` hashes `.js`/`.css`/`.json` URLs, so static assets can be edited
-  freely without cache headaches — but only when referenced through `url_for('static', …)`.
+- Static files are served with Flask's default `Cache-Control: no-cache`: browsers check
+  each one on every page load (a body-less `304` when unchanged), so an edited asset shows up
+  at once without versioned URLs. Setting a `max-age` would need versioned URLs back, and
+  they would have to keep serving old versions, which Safari's preloads still request.
 - The theme colour is `#6caee0`; it appears in `manifest.json`, `base/head.html` and
   `graphutils.py`. Change all three together.
 - `static/js/shunt.js` must stay the first script in `<head>`: it keeps links inside the

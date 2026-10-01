@@ -7,6 +7,7 @@ from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFError
 from sqlalchemy import func, cast, Integer, case, and_
+from werkzeug.exceptions import HTTPException
 from werkzeug.utils import redirect
 
 from app import app
@@ -45,6 +46,10 @@ def handle_csrf_error(e):
 
 @app.errorhandler(Exception)
 def handle_exceptions(e):
+    # Leave a missing static file a plain 404: the browser fetched it in the background, so
+    # a flash would only show up, unexplained, on the next page
+    if isinstance(e, HTTPException) and request.endpoint == 'static':
+        return e
     flash('Wops, something went wrong', category='error')
     app.logger.error(traceback.format_exc())
     return redirect(request.referrer or url_for('search'))

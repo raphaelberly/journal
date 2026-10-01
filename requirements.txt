@@ -1,6 +1,5 @@
 # Web app
 Flask
-Flask-CacheBuster
 Flask-Login
 Flask-SQLAlchemy
 Flask-WTF

@@ -1,5 +1,4 @@
 from flask import Flask
-from flask_cachebuster import CacheBuster
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
@@ -25,9 +24,5 @@ login.init_app(app)
 app.config['WTF_CSRF_TIME_LIMIT'] = None
 csrf = CSRFProtect()
 csrf.init_app(app)
-
-# Create cache buster
-cache_buster = CacheBuster(config={'extensions': ['.js', '.css', '.json'], 'hash_size': 5})
-cache_buster.init_app(app)
 
 from app import routes, models
