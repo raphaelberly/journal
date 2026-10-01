@@ -62,7 +62,7 @@ The last movies you watched, as a timeline.
 ### Library
 
 Everything you ever logged, sortable by grade, IMDb rating or date added, and
-filterable by genre.
+filterable by genre and country of origin.
 
 <div align="center"><img src="img/library_page.png" width="225px"/></div>
 

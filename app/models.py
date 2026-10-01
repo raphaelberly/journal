@@ -55,6 +55,7 @@ class Title(db.Model):
     release_date = db.Column(db.Date)
     original_title = db.Column(db.String(1024))
     original_language = db.Column(db.String(32))
+    origin_countries = db.Column(db.ARRAY(db.String(2)))
     director_names = db.Column(db.ARRAY(db.String(256)))
     director_ids = db.Column(db.ARRAY(db.Integer))
     genres = db.Column(db.ARRAY(db.String(256)))

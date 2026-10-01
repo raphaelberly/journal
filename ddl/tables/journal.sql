@@ -8,6 +8,7 @@ CREATE TABLE journal.titles (
   release_date          DATE            NOT NULL,
   original_title        TEXT            NOT NULL,
   original_language     VARCHAR(32)     NOT NULL,
+  origin_countries      VARCHAR(2)[],
   director_names        VARCHAR(256)[],
   director_ids          INTEGER[],
   genres                VARCHAR(256)[],

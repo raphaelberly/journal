@@ -48,7 +48,7 @@
 </table></center>
 
 {% if metadata.show_more_button %}
-<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_scroll_and_load('{{ url_for('library', sort_by=metadata.sort_by, filter_genre=metadata.filter_genre, nb_results=payload|length+20) }}')" value="More">
+<input class="styled-button full" type="button" id="more_button" onclick="javascript:add_scroll_and_load('{{ url_for('library', sort_by=metadata.sort_by, filter_genre=metadata.filter_genre, filter_country=metadata.filter_country, nb_results=payload|length+20) }}')" value="More">
 {% endif %}
 
 </div>
@@ -56,37 +56,37 @@
 <div id="sortSubmenu" class="submenu">
 <table>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'grade_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_desc', submenu='sortSubmenu', filter_genre=metadata.filter_genre, filter_country=metadata.filter_country) }}">
             <span class="sort-radio"></span>
             Grade descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'grade_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_asc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'grade_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='grade_asc', submenu='sortSubmenu', filter_genre=metadata.filter_genre, filter_country=metadata.filter_country) }}">
             <span class="sort-radio"></span>
             Grade ascending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'imdb_rating_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_desc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'imdb_rating_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_desc', submenu='sortSubmenu', filter_genre=metadata.filter_genre, filter_country=metadata.filter_country) }}">
             <span class="sort-radio"></span>
             IMDb rating descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'imdb_rating_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_asc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'imdb_rating_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='imdb_rating_asc', submenu='sortSubmenu', filter_genre=metadata.filter_genre, filter_country=metadata.filter_country) }}">
             <span class="sort-radio"></span>
             IMDb rating ascending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'date_added_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_desc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'date_added_desc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_desc', submenu='sortSubmenu', filter_genre=metadata.filter_genre, filter_country=metadata.filter_country) }}">
             <span class="sort-radio"></span>
             Date added descending
         </a>
     </td></tr>
     <tr><td>
-        <a class="{% if metadata.sort_by == 'date_added_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_asc', submenu='sortSubmenu', filter_genre=metadata.filter_genre) }}">
+        <a class="{% if metadata.sort_by == 'date_added_asc' %}selected{% else %}not-selected{% endif %}" href="{{ url_for('library', sort_by='date_added_asc', submenu='sortSubmenu', filter_genre=metadata.filter_genre, filter_country=metadata.filter_country) }}">
             <span class="sort-radio"></span>
             Date added ascending
         </a>
@@ -97,21 +97,55 @@
 <a href="javascript:void(0)" onclick="closeSubmenu('sortSubmenu')"><div class="submenu-back" id="sortSubmenuBack"></div></a>
 
 <div id="filterSubmenu" class="submenu filter-submenu">
-<!-- Refresh on genre pick -->
+<!-- Refresh on genre or country pick -->
 <form method="get" action="{{ url_for('library') }}" onchange="this.submit()">
 <input type="hidden" name="sort_by" value="{{ metadata.sort_by }}">
 <input type="hidden" name="submenu" value="filterSubmenu">
 <table>
     <tr><td>
-        <select class="genre-picker" name="filter_genre">
+        <select class="picker" name="filter_genre">
             <option value="">All genres</option>
             {% for genre in metadata.genres %}
             <option value="{{ genre }}"{% if genre == metadata.filter_genre %} selected{% endif %}>{{ genre }}</option>
             {% endfor %}
         </select>
     </td></tr>
+    <tr><td>
+        <select class="picker" id="countryPicker" name="filter_country">
+            <option value="">All countries</option>
+            {% for country in metadata.countries %}
+            <option value="{{ country }}"{% if country == metadata.filter_country %} selected{% endif %}>{{ country }}</option>
+            {% endfor %}
+        </select>
+    </td></tr>
 </table>
 </form>
+<script type="text/javascript">
+// Label the country codes with their flag and English name, in alphabetical order, without any data to load
+(function() {
+    var picker = document.getElementById('countryPicker');
+    var names = new Intl.DisplayNames(['en'], {type: 'region'});
+    // Former countries TMDb still uses, which the browser names after their successor (or not at all) and have no flag
+    var formerCountries = {
+        AN: 'Netherlands Antilles', BU: 'Burma', CS: 'Serbia and Montenegro', SU: 'Soviet Union', TP: 'East Timor',
+        XC: 'Czechoslovakia', XG: 'East Germany', XI: 'Northern Ireland', YU: 'Yugoslavia', ZR: 'Zaire',
+    };
+    var options = Array.from(picker.querySelectorAll('option:not([value=""])'));
+    options.forEach(function(option) {
+        if (option.value in formerCountries) {
+            option.dataset.name = formerCountries[option.value];
+            option.textContent = option.dataset.name;
+            return;
+        }
+        // A flag emoji is the code spelled in regional indicator letters (A = U+1F1E6)
+        var flag = String.fromCodePoint.apply(null, Array.from(option.value, function(c) { return 0x1F1A5 + c.charCodeAt(0); }));
+        option.dataset.name = names.of(option.value);
+        option.textContent = flag + ' ' + option.dataset.name;
+    });
+    options.sort(function(a, b) { return a.dataset.name.localeCompare(b.dataset.name); });
+    options.forEach(function(option) { picker.appendChild(option); });
+})();
+</script>
 </div>
 
 <a href="javascript:void(0)" onclick="closeSubmenu('filterSubmenu')"><div class="submenu-back" id="filterSubmenuBack"></div></a>

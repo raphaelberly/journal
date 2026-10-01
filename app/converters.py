@@ -12,6 +12,7 @@ class TitleConverter(object):
             'release_date': datetime.strptime(item['release_date'], '%Y-%m-%d'),
             'original_title': item['original_title'],
             'original_language': item['original_language'],
+            'origin_countries': item.get('origin_country', []),
             'director_names': [item['name'] for item in item['credits'].get('crew', []) if item['job'] == 'Director'],
             'director_ids': [item['id'] for item in item['credits'].get('crew', []) if item['job'] == 'Director'],
             'genres': [genre['name'] for genre in item.get('genres', [])],

@@ -791,6 +791,21 @@ def library():
     filter_genre = request.args.get('filter_genre') or None
     if filter_genre is not None:
         records = records.filter(Title.genres.any(filter_genre))
+    filter_country = request.args.get('filter_country') or None
+    if filter_country is not None:
+        records = records.filter(Title.origin_countries.any(filter_country))
+
+    # LIST THE USER'S 20 MOST WATCHED COUNTRIES (THE PAGE NAMES AND SORTS THEM)
+    countries = db.session \
+        .query(func.unnest(Title.origin_countries).label('country')) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
+        .subquery()
+    top_countries = db.session \
+        .query(countries.c.country) \
+        .group_by(countries.c.country) \
+        .order_by(func.count().desc(), countries.c.country) \
+        .limit(20)
 
     # ORDER RECORDS
     sort_by = request.args.get('sort_by', 'grade_desc')
@@ -822,6 +837,8 @@ def library():
         'submenu': request.args.get('submenu', 'inactive'),
         'filter_genre': filter_genre,
         'genres': Tmdb.GENRES,
+        'filter_country': filter_country,
+        'countries': [country for country, in top_countries],
         'show_more_button': show_more_button,
     }
     return render_template('library.html', payload=payload, metadata=metadata)

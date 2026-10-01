@@ -79,7 +79,7 @@ button.right {
     display: inline-flex;
 }
 
-.genre-picker {
+.picker {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
