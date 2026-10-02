@@ -69,7 +69,7 @@ filterable by genre and country of origin.
 ### People
 
 Search for an actor, director or composer and get every movie of theirs you rated, with the
-grade you gave it.
+grade you gave it. Tapping their picture shows it full screen, like a poster.
 
 <div align="center"><img src="img/people_page.png" width="225px"/></div>
 

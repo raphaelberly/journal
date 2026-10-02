@@ -171,14 +171,18 @@ Other conventions worth keeping:
   `cleanup_distribution_plots` deletes the user's previous ones on each render (it still
   sweeps the `.png` left over from the plotly era). An empty distribution produces no file
   and the template hides the chart.
-- Posters are rendered by `base/poster.html` (with a `title` in scope): the w500 poster is a
-  button opening a w780 copy full screen through the HTML popover API, without JS. Every
-  image there is `loading="lazy"`: a list only downloads the posters scrolled to (their 2:3
-  height is reserved in `movie.css`, so `scroll_to` still lands right), and the w780 only
-  on open; until it arrives, the w500 (already in cache) shows in the same grid cell
-  beneath it. Safari iOS ignores taps outside
+- Images that open full screen go through the `fullscreen_image` macro of
+  `base/fullscreen_image.html`, styled by `fullscreen.css` (linked by every page using it):
+  the thumbnail is a button opening a bigger copy through the HTML popover API, without JS.
+  Posters use it via `base/poster.html` (with a `title` in scope: w500 thumbnail, w780
+  copy), and the People page for the person's face (w185, w780). Every image there is
+  `loading="lazy"`: a list only downloads the posters scrolled to (their 2:3 height is
+  reserved in `movie.css`, so `scroll_to` still lands right), and the big copy only on
+  open; until it arrives, the thumbnail (already in cache) shows in the same grid cell
+  beneath it, both fitted to the same box (`object-fit: contain`) so even the w185 face
+  lines up. Safari iOS ignores taps outside
   a popover, so the dark background is itself the close button, and the images let taps
-  through to it (`pointer-events: none`). The page does not scroll while a poster is open
+  through to it (`pointer-events: none`). The page does not scroll while an image is open
   (`html:has(:popover-open)`). Browsers without popovers (iOS 16) keep it hidden and the
   tap does nothing.
 

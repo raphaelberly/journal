@@ -1,3 +1,4 @@
+{% from 'base/fullscreen_image.html' import fullscreen_image %}
 <html>
 
 <head>
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/recent.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/notfound.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fullscreen.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/people.css')}}">
 </head>
 
@@ -57,7 +59,7 @@
 <tr>
     {% if payload.person.image %}
     <td class="profile">
-        <img src="{{ payload.person.image }}" class="rounded">
+        {{ fullscreen_image('profile-picture', payload.person.image, payload.person.fullscreen_image, 'rounded') }}
     </td>
     {% endif %}
     <td>

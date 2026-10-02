@@ -23,7 +23,7 @@ td.profile {
     width: 80px;
 }
 
-img.rounded {
+.rounded img {
   object-fit: cover;
   object-position: 0 35%;
   border-radius: 50%;

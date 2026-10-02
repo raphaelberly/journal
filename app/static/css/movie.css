@@ -26,12 +26,6 @@
     padding-bottom: 8px;
 }
 
-.poster {
-    border: none;
-    padding: 0;
-    background: none;
-}
-
 /* Scale posters with the screen height (180px on an iPhone 8), within the width available.
    Reserve their 2:3 height before they load (lazily), so scroll_to lands where it should */
 .poster img {
@@ -39,56 +33,6 @@
     width: clamp(150px, 27vh, 300px);
     max-width: 70vw;
     aspect-ratio: auto 2 / 3;
-}
-
-/* Show the poster full screen (iOS 17+), over a dark background that closes it when tapped */
-html:has(.fullscreen-poster:popover-open) {
-    overflow: hidden;
-}
-
-.fullscreen-poster {
-    display: none;
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: none;
-    /* Keep the poster clear of the cross */
-    padding: 60px 0;
-    padding: calc(60px + constant(safe-area-inset-top)) 0;
-    padding: calc(60px + env(safe-area-inset-top)) 0;
-}
-
-.fullscreen-poster:popover-open {
-    display: grid;
-    grid-template: 100% / 100%;
-    place-items: center;
-}
-
-.fullscreen-poster button {
-    position: absolute;
-    inset: 0;
-    border: none;
-    background: rgba(0, 0, 0, 0.85);
-}
-
-.fullscreen-poster button img {
-    position: absolute;
-    top: 25px;
-    top: calc(25px + constant(safe-area-inset-top));
-    top: calc(25px + env(safe-area-inset-top));
-    right: 26px;
-    width: 18px;
-}
-
-/* Stack the w780 over the w500, already in cache, which shows while the w780 loads.
-   Let taps through to the background, so the poster closes too */
-.fullscreen-poster > img {
-    grid-area: 1 / 1;
-    position: relative;
-    max-width: 100%;
-    max-height: 100%;
-    pointer-events: none;
 }
 
 .providers {

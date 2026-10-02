@@ -655,7 +655,8 @@ def people():
             person = Person.query.filter_by(id=row._mapping['person_id']).first()
             payload['person']['name'] = person.name
             if person.profile_path:
-                payload['person']['image'] = 'https://image.tmdb.org/t/p/w92' + person.profile_path
+                payload['person']['image'] = 'https://image.tmdb.org/t/p/w185' + person.profile_path
+                payload['person']['fullscreen_image'] = 'https://image.tmdb.org/t/p/w780' + person.profile_path
         title = {k: v for k, v in zip(response._metadata.keys, row)}
         for role in title['roles']:
             payload['person']['roles'][role] = payload['person']['roles'].get(role, 0) + 1

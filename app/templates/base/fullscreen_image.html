@@ -1,0 +1,8 @@
+{% macro fullscreen_image(id, thumbnail_url, fullscreen_url, class) -%}
+<button type="button" class="thumbnail {{ class }}" popovertarget="{{ id }}"><img loading="lazy" src="{{ thumbnail_url }}"></button>
+<div popover id="{{ id }}" class="fullscreen-image">
+    <button type="button" popovertarget="{{ id }}" popovertargetaction="hide"><img src="/static/images/icon_close_menu.png"></button>
+    <img loading="lazy" src="{{ thumbnail_url }}">
+    <img loading="lazy" src="{{ fullscreen_url }}">
+</div>
+{%- endmacro %}

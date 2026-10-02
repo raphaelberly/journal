@@ -1,0 +1,59 @@
+
+/* Show a bare thumbnail, as the button that opens its bigger copy */
+.thumbnail {
+    border: none;
+    padding: 0;
+    background: none;
+}
+
+/* Show the image full screen (iOS 17+), over a dark background that closes it when tapped */
+html:has(.fullscreen-image:popover-open) {
+    overflow: hidden;
+}
+
+.fullscreen-image {
+    display: none;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: none;
+    /* Keep the image clear of the cross */
+    padding: 60px 0;
+    padding: calc(60px + constant(safe-area-inset-top)) 0;
+    padding: calc(60px + env(safe-area-inset-top)) 0;
+}
+
+.fullscreen-image:popover-open {
+    display: grid;
+    grid-template: 100% / 100%;
+    place-items: center;
+}
+
+.fullscreen-image button {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.fullscreen-image button img {
+    position: absolute;
+    top: 25px;
+    top: calc(25px + constant(safe-area-inset-top));
+    top: calc(25px + env(safe-area-inset-top));
+    right: 26px;
+    width: 18px;
+}
+
+/* Stack the big copy over the thumbnail, already in cache, which shows while the big copy loads.
+   Fit both to the same box, so that a smaller thumbnail lines up with it too.
+   Let taps through to the background, so the image closes too */
+.fullscreen-image > img {
+    grid-area: 1 / 1;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}

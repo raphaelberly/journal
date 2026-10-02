@@ -1,6 +1,2 @@
-<button type="button" class="poster" popovertarget="poster-{{ title.id }}"><img loading="lazy" src="{{ title.poster_url }}"></button>
-<div popover id="poster-{{ title.id }}" class="fullscreen-poster">
-    <button type="button" popovertarget="poster-{{ title.id }}" popovertargetaction="hide"><img src="/static/images/icon_close_menu.png"></button>
-    <img loading="lazy" src="{{ title.poster_url }}">
-    <img loading="lazy" src="{{ title.fullscreen_poster_url }}">
-</div>
+{% from 'base/fullscreen_image.html' import fullscreen_image %}
+{{ fullscreen_image('poster-' ~ title.id, title.poster_url, title.fullscreen_poster_url, 'poster') }}
