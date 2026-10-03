@@ -62,11 +62,6 @@ class User(UserMixin, db.Model):
     def reset_session_token(self):
         self.session_token = secrets.token_hex(32)
 
-    @property
-    def usable_providers(self):
-        # Plex counts only with plex_allowed, whatever the setting says: clearing that flag alone revokes it
-        return [provider for provider in self.providers if provider != 'plex' or self.plex_allowed]
-
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 

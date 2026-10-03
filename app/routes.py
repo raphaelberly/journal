@@ -576,7 +576,7 @@ def watchlist():
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     # If the user has plex, the movie is not yet tagged as available on plex in the watchlist, but the user requested
     # it and the request was completed, then add "plex" to the providers
-    if 'plex' in current_user.usable_providers:
+    if 'plex' in current_user.providers:
         for watchlist_item, _ in payload:
             if 'plex' not in watchlist_item['providers']:
                 if request_statuses.get(watchlist_item['tmdb_id'], -1) == 5:
@@ -584,7 +584,7 @@ def watchlist():
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else [],
-        'providers': current_user.usable_providers,
+        'providers': current_user.providers,
         'request_statuses': request_statuses,
         'overseerr_available': overseerr.is_available,
     }
@@ -672,7 +672,7 @@ def movie(tmdb_id):
     plex_status = get_plex_status(tmdb_id)
     title['providers'] = get_providers(tmdb_id, plex_status)
     metadata = {
-        'providers': current_user.usable_providers,
+        'providers': current_user.providers,
         'overseerr_available': overseerr.is_available,
         'plex_request_pending': 2 <= plex_status <= 4,
     }
@@ -748,7 +748,8 @@ def settings():
         'mubi': 'Mubi',
         'universcine': 'Univers Ciné',
     }
-    # Plex is offered only to the accounts allowed on it. Saving the settings drops it for the others
+    # Plex is offered only to the accounts allowed on it: the users_plex_only_if_allowed constraint refuses it in the
+    # providers of the others
     if current_user.plex_allowed:
         available_providers['plex'] = 'Plex'
     user_providers = {provider: provider in current_user.providers for provider in available_providers.keys()}
@@ -851,7 +852,7 @@ def recos():
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'show_more_button': show_more_button,
-        'providers': current_user.usable_providers,
+        'providers': current_user.providers,
     }
 
     return render_template('recos.html', payload=payload, metadata=metadata)

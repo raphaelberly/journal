@@ -61,7 +61,8 @@ CREATE TABLE journal.users (
   session_token         VARCHAR(64)     NOT NULL UNIQUE,
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-  CONSTRAINT "users_pkey" PRIMARY KEY (id)
+  CONSTRAINT "users_pkey" PRIMARY KEY (id),
+  CONSTRAINT "users_plex_only_if_allowed" CHECK (plex_allowed OR NOT 'plex' = ANY(providers))
 );
 
 CREATE TABLE journal.watchlist(

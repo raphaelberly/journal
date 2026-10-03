@@ -161,8 +161,9 @@ Other conventions worth keeping:
   language when it matches the user's), `grade_as_int` (slider precision),
   `providers` (which streaming services to show). Plex is the household's: only accounts
   with `plex_allowed` (set by hand in the database, false for new accounts) see it, look it
-  up or request on it. Use `usable_providers`, which drops Plex for the others, and never
-  `providers` directly.
+  up or request on it. The `users_plex_only_if_allowed` constraint keeps `plex` out of the
+  `providers` of the others, so revoking the right means clearing both in one statement:
+  `SET plex_allowed = FALSE, providers = array_remove(providers, 'plex')`.
 - Titles reaching templates go through `TitleConverter.table_to_front` /
   `json_to_front` (via `Title.export()` / `enrich_results`), which is what produces
   `poster_url`, `duration`, `year` and the language-aware `title`.
