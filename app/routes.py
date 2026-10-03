@@ -137,6 +137,10 @@ def login():
                 # Render rather than redirect, to keep the username in its field
                 metadata = {'username': username, 'error': 'Wrong username or password'}
             else:
+                # Upgrade the hashes made before the switch to scrypt, now that the password is at hand
+                if user.password_needs_rehash:
+                    user.set_password(password)
+                    db.session.commit()
                 login_logger.info(f'Successful login for {user.username} from {client_ip()}')
                 login_user(user, remember=True, duration=timedelta(days=90))
                 flash(f'Welcome, {user.username}!', category='success')

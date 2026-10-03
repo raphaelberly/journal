@@ -52,7 +52,7 @@ CREATE TABLE journal.credits (
 CREATE TABLE journal.users (
   id                    SERIAL          NOT NULL,
   username              VARCHAR(32)     NOT NULL UNIQUE,
-  password_hash         VARCHAR(128)    NOT NULL,
+  password_hash         VARCHAR(256)    NOT NULL,
   email                 VARCHAR(256)    NOT NULL,
   grade_as_int          BOOLEAN         NOT NULL DEFAULT TRUE,
   language              VARCHAR(4)      NOT NULL DEFAULT 'fr',

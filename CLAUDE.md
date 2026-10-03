@@ -134,6 +134,8 @@ Other conventions worth keeping:
   `X-Forwarded-For` value, the one the Pi's haproxy adds. On the Pi, fail2ban's
   `journal-login` jail bans IPs from `Failed login from <ip>` lines (it reuses the
   `accountin-login` filter), so changing that message breaks banning silently.
+- Passwords are hashed with scrypt (`User.set_password`), whose hashes take 162 characters:
+  `password_hash` is a `VARCHAR(256)`. A login with an older PBKDF2 hash upgrades it.
 - `CSRFProtect` guards every POST. Because the forms are raw HTML rather than WTForms, each
   `<form method="post">` must carry
   `<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">` — a new form without

@@ -19,7 +19,7 @@ class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), unique=True)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(256))
     email = db.Column(db.String(256))
     grade_as_int = db.Column(db.Boolean)
     language = db.Column(db.String(4))
@@ -34,7 +34,7 @@ class User(UserMixin, db.Model):
 
     def __init__(self, username, password, email, grade_as_int=True, language='fr', providers=_default_providers):
         self.username = username
-        self.password_hash = generate_password_hash(password, method='pbkdf2')
+        self.set_password(password)
         self.email = email
         self.grade_as_int = grade_as_int
         self.language = language
@@ -45,6 +45,17 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def set_password(self, password):
+        # scrypt is memory-hard, so much costlier to crack on GPUs than PBKDF2, and 10 times faster to check on the Pi
+        # than PBKDF2 at 1M iterations. Its hashes take 162 characters
+        self.password_hash = generate_password_hash(password, method='scrypt')
+        self.update_datetime_utc = utcnow()
+
+    @property
+    def password_needs_rehash(self):
+        # Hashes made before the switch to scrypt are PBKDF2 ones, from 50k to 1M iterations
+        return not self.password_hash.startswith('scrypt:')
 
 
 class Title(db.Model):
