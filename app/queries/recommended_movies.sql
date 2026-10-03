@@ -9,6 +9,7 @@ WHERE r.date >= (now() - INTERVAL '48' MONTH)::DATE
     WHERE r.user_id = '{user_id}'
     UNION ALL
     SELECT tmdb_id FROM journal.blacklist b
+    WHERE b.user_id = '{user_id}'
   )
 GROUP BY 1
 HAVING count(*) >= 3
