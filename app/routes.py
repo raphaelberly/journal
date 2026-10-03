@@ -496,8 +496,22 @@ def get_watchlist_ids():
 
 
 def get_plex_status(tmdb_id):
-    # Get the status of the movie on Overseerr: 2 to 4 once requested, 5 once available on Plex, else 1 or -1
-    return overseerr.request_status(tmdb_id) if overseerr.is_available else -1
+    # Get the status of the movie on Overseerr: 2 to 4 once requested, 5 once available on Plex, else 1 or -1. Only
+    # for the accounts allowed on Plex: the others have no use for it, and each lookup costs a call
+    if not current_user.plex_allowed or not overseerr.is_available:
+        return -1
+    return overseerr.request_status(tmdb_id)
+
+
+def request_on_plex(tmdb_id):
+    # Check the right here, not only in the templates: a hidden button does not stop a POST made by hand
+    if not current_user.plex_allowed:
+        flash('Plex is not available for your account', category='error')
+    elif overseerr.is_available:
+        overseerr.request_title(tmdb_id)
+        flash('Movie requested on Plex', category='success')
+    else:
+        flash('Plex requests are unavailable for now', category='error')
 
 
 def get_providers(tmdb_id, plex_status=None):
@@ -546,9 +560,7 @@ def watchlist():
             remove_from_watchlist(tmdb_id)
             flash('Movie removed from watchlist', category='success')
         elif 'request_on_plex' in request.form:
-            tmdb_id = int(get_post_result('request_on_plex'))
-            overseerr.request_title(tmdb_id)
-            flash('Movie requested on Plex', category='success')
+            request_on_plex(int(get_post_result('request_on_plex')))
         elif 'move_to_top_of_watchlist' in request.form:
             tmdb_id = int(get_post_result('move_to_top_of_watchlist'))
             move_to_top_of_watchlist(tmdb_id)
@@ -560,11 +572,11 @@ def watchlist():
         .filter(WatchlistItem.user_id == current_user.id) \
         .order_by(WatchlistItem.insert_datetime_utc.desc())
 
-    request_statuses = overseerr.request_statuses if overseerr.is_available else {}
+    request_statuses = overseerr.request_statuses if current_user.plex_allowed and overseerr.is_available else {}
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     # If the user has plex, the movie is not yet tagged as available on plex in the watchlist, but the user requested
     # it and the request was completed, then add "plex" to the providers
-    if 'plex' in current_user.providers:
+    if 'plex' in current_user.usable_providers:
         for watchlist_item, _ in payload:
             if 'plex' not in watchlist_item['providers']:
                 if request_statuses.get(watchlist_item['tmdb_id'], -1) == 5:
@@ -572,7 +584,7 @@ def watchlist():
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'filters': request.args.get('providers').split(',') if request.args.get('providers') else [],
-        'providers': current_user.providers,
+        'providers': current_user.usable_providers,
         'request_statuses': request_statuses,
         'overseerr_available': overseerr.is_available,
     }
@@ -609,11 +621,7 @@ def movie(tmdb_id):
             move_to_top_of_watchlist(tmdb_id)
             flash('Moved to the top of the watchlist', category='success')
         elif 'request_on_plex' in request.form:
-            if overseerr.is_available:
-                overseerr.request_title(tmdb_id)
-                flash('Movie requested on Plex', category='success')
-            else:
-                flash('Plex requests are unavailable for now', category='error')
+            request_on_plex(tmdb_id)
 
         elif 'remove' in request.form:
             # Delete the movie from the database
@@ -664,7 +672,7 @@ def movie(tmdb_id):
     plex_status = get_plex_status(tmdb_id)
     title['providers'] = get_providers(tmdb_id, plex_status)
     metadata = {
-        'providers': current_user.providers,
+        'providers': current_user.usable_providers,
         'overseerr_available': overseerr.is_available,
         'plex_request_pending': 2 <= plex_status <= 4,
     }
@@ -739,8 +747,10 @@ def settings():
         'disneyplus': 'Disney+',
         'mubi': 'Mubi',
         'universcine': 'Univers Ciné',
-        'plex': 'Plex',
     }
+    # Plex is offered only to the accounts allowed on it. Saving the settings drops it for the others
+    if current_user.plex_allowed:
+        available_providers['plex'] = 'Plex'
     user_providers = {provider: provider in current_user.providers for provider in available_providers.keys()}
 
     if request.method == 'GET':
@@ -841,7 +851,7 @@ def recos():
     metadata = {
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'show_more_button': show_more_button,
-        'providers': current_user.providers,
+        'providers': current_user.usable_providers,
     }
 
     return render_template('recos.html', payload=payload, metadata=metadata)

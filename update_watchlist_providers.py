@@ -6,7 +6,7 @@ import yaml
 from tqdm import tqdm
 
 from app import app, db
-from app.models import WatchlistItem
+from app.models import WatchlistItem, User
 from lib.overseerr import Overseerr
 from lib.push import Push
 from lib.tmdb import Tmdb
@@ -32,9 +32,11 @@ with app.app_context():
         overseerr = Overseerr(args.config)
         LOGGER.info('Update all watchlist items with outdated providers list')
 
-        for item in tqdm(WatchlistItem.query.all()):
+        items = db.session.query(WatchlistItem, User.plex_allowed).join(User, WatchlistItem.user_id == User.id).all()
+        for item, plex_allowed in tqdm(items):
             updated_providers = tmdb.providers(item.tmdb_id)
-            if overseerr.request_status(item.tmdb_id) == 5:
+            # Look Plex up only for the accounts allowed on it
+            if plex_allowed and overseerr.request_status(item.tmdb_id) == 5:
                 updated_providers.append('plex')
             if set(updated_providers) != set(item.providers):
                 item.providers = updated_providers

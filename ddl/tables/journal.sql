@@ -57,6 +57,7 @@ CREATE TABLE journal.users (
   grade_as_int          BOOLEAN         NOT NULL DEFAULT TRUE,
   language              VARCHAR(4)      NOT NULL DEFAULT 'fr',
   providers             VARCHAR(128)[]  NOT NULL DEFAULT '{netflix,amazonprimevideo}'::character varying[],
+  plex_allowed          BOOLEAN         NOT NULL DEFAULT FALSE,
   session_token         VARCHAR(64)     NOT NULL UNIQUE,
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),

@@ -30,6 +30,7 @@ class User(UserMixin, db.Model):
     grade_as_int = db.Column(db.Boolean)
     language = db.Column(db.String(4))
     providers = db.Column(db.ARRAY(db.String(128)))
+    plex_allowed = db.Column(db.Boolean)
     session_token = db.Column(db.String(64), unique=True)
     insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=utcnow)
@@ -46,6 +47,8 @@ class User(UserMixin, db.Model):
         self.grade_as_int = grade_as_int
         self.language = language
         self.providers = providers
+        # Plex is the household's: the right to use it is only ever granted by hand, in the database
+        self.plex_allowed = False
         self.reset_session_token()
 
     def __repr__(self):
@@ -58,6 +61,11 @@ class User(UserMixin, db.Model):
 
     def reset_session_token(self):
         self.session_token = secrets.token_hex(32)
+
+    @property
+    def usable_providers(self):
+        # Plex counts only with plex_allowed, whatever the setting says: clearing that flag alone revokes it
+        return [provider for provider in self.providers if provider != 'plex' or self.plex_allowed]
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)

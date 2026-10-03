@@ -159,7 +159,10 @@ Other conventions worth keeping:
   URLs gone since included), so a flash would only show up, unexplained, on the next page.
 - Per-user display preferences live on `User`: `language` (titles are shown in the original
   language when it matches the user's), `grade_as_int` (slider precision),
-  `providers` (which streaming services to show).
+  `providers` (which streaming services to show). Plex is the household's: only accounts
+  with `plex_allowed` (set by hand in the database, false for new accounts) see it, look it
+  up or request on it. Use `usable_providers`, which drops Plex for the others, and never
+  `providers` directly.
 - Titles reaching templates go through `TitleConverter.table_to_front` /
   `json_to_front` (via `Title.export()` / `enrich_results`), which is what produces
   `poster_url`, `duration`, `year` and the language-aware `title`.
@@ -221,7 +224,9 @@ Other conventions worth keeping:
   be unreachable, and the client never raises: it logs in at construction, and
   `is_available` is a property that retries that login at most once every 5 minutes, so the
   service can come back without restarting the app. Any failing call flags it unavailable
-  again. Every call site must check `overseerr.is_available` first.
+  again. Every call site must check `overseerr.is_available` first, and
+  `current_user.plex_allowed`: go through `get_plex_status` and `request_on_plex`, which do
+  both.
 - **Pushover** (`lib/push.py`) — alerts from the cron scripts on failure.
 - **IMDb datasets** — downloaded by `lib/etl.py`, which truncates the target `imdb.*` table
   and re-inserts in batches of 1000 with generated INSERT statements. It is written to run
