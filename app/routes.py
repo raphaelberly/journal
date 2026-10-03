@@ -6,7 +6,7 @@ from os import path
 from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFError
-from sqlalchemy import func, cast, Integer, case, and_
+from sqlalchemy import func, cast, Integer, case, and_, or_
 from werkzeug.exceptions import HTTPException
 from werkzeug.utils import redirect
 
@@ -97,17 +97,27 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('search'))
 
+    metadata = {}
     if request.method == 'POST':
         if 'username' in request.form:
-            user = User.query.filter_by(username=get_post_result('username')).first()
-            if user is None or not user.check_password(get_post_result('password')):
-                flash('Wrong username or password', category='error')
-                return redirect(url_for('login'))
-            login_user(user, remember=True, duration=timedelta(days=90))
-            flash(f'Welcome, {user.username}!', category='success')
-            return redirect(url_for('search'))
+            # Accept the username or the email, whatever the case. Several accounts may match an
+            # email (or differ only by case), so keep the one the password opens
+            username = get_post_result('username').strip()
+            password = get_post_result('password')
+            users = User.query.filter(or_(
+                func.lower(User.username) == username.lower(),
+                func.lower(User.email) == username.lower(),
+            )).all()
+            user = next((user for user in users if user.check_password(password)), None)
+            if user is None:
+                # Render rather than redirect, to keep the username in its field
+                metadata = {'username': username, 'error': 'Wrong username or password'}
+            else:
+                login_user(user, remember=True, duration=timedelta(days=90))
+                flash(f'Welcome, {user.username}!', category='success')
+                return redirect(url_for('search'))
 
-    return render_template('login.html')
+    return render_template('login.html', payload={}, metadata=metadata)
 
 
 @app.route('/signup', methods=['GET', 'POST'])

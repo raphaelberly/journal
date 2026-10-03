@@ -3,35 +3,33 @@
 <head>
     <title>Login - Journal</title>
     {% include 'base/head.html' %}
+    <script type=text/javascript src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css')}}">
 </head>
 
 <body ontouchstart="">
 
 {% include 'base/alert.html' %}
 
-<div class="login">
-  <table align="center">
-
-  <form method="post">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <tr><td>
-    <input id="username" name="username" placeholder="Username" type="text">
-  </td></tr>
-  <tr><td>
-    <input id="password" name="password" placeholder="Password" type="password">
-  </td></tr>
-  <tr><td>
+<form class="auth" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field">
+        <input id="username" name="username" placeholder="Username or email" type="text" value="{{ metadata.username }}"
+               required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+        <span class="field-error"></span>
+    </div>
+    <div class="field">
+        <div class="password">
+            <input id="password" name="password" placeholder="Password" type="password"
+                   required autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+            <button class="reveal" type="button">Show</button>
+        </div>
+        <span class="field-error">{{ metadata.error }}</span>
+    </div>
     <button class="styled-button empty" type="submit">Log in</button>
-  </td></tr>
-  <tr><td>
-    <p><a href="{{url_for('signup')}}">Sign up</a></p>
-  </td></tr>
-  </form>
-
-  </table>
-</div>
+    <a href="{{ url_for('signup') }}">Sign up</a>
+</form>
 
 </body>
 </html>

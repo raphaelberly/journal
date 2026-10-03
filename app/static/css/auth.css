@@ -1,0 +1,98 @@
+
+body {
+    background-color: #6caee0;
+    overflow: hidden;
+}
+
+.auth {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 240px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.auth input {
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: 2px;
+    background-color: #88B5DF;
+    padding: 14px 15px 14px 20px;
+    border: 1px solid #6caee0;
+    outline: none;
+    -webkit-appearance: none;
+    font: 15px Trebuchet MS;
+    color: #fff;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Rules shown before typing, replaced by the error when there is one */
+.field-hint {
+    padding-left: 21px;
+    font: 13px Trebuchet MS, sans-serif;
+    color: #fff;
+}
+
+.field:has(.field-error:not(:empty)) .field-hint {
+    display: none;
+}
+
+.field-error {
+    border-radius: 2px;
+    background-color: #B3261E;
+    padding: 6px 10px 6px 21px;
+    font: 14px Trebuchet MS, sans-serif;
+    color: #fff;
+}
+
+.field-error:empty {
+    display: none;
+}
+
+/* Show/Hide button, inside the password field */
+.password {
+    position: relative;
+}
+
+.password input {
+    padding-right: 60px;
+}
+
+.reveal {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 15px;
+    border: none;
+    background: none;
+    -webkit-appearance: none;
+    font: 13px Trebuchet MS, sans-serif;
+    color: #fff;
+    cursor: pointer;
+}
+
+.auth .styled-button {
+    align-self: center;
+    margin-top: 30px;
+}
+
+.auth a {
+    align-self: center;
+    margin-top: 5px;
+    color: white;
+    text-decoration: none;
+}
+
+::placeholder {
+    color: #C3D9EF;
+}

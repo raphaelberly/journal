@@ -33,8 +33,10 @@ after the credits roll.
 
 ### Login
 
-The landing page. "Remember me" is always on, for 90 days. New users can register from the
-"Sign up" link below the form.
+The landing page. Log in with your username or your email, whatever the case; "Remember me"
+is always on, for 90 days. New users can register from the "Sign up" link below the form,
+with a username, an email and a password: the rules show under each field, which is checked
+as you type.
 
 <div align="center"><img src="img/login_page.png" width="225px"/></div>
 
