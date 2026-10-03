@@ -69,7 +69,7 @@ provider refresh run from cron.
 ## Configuration and secrets
 
 `config/credentials.yaml` and `config/app.py` are **gitignored** and hold real secrets (DB
-password, TMDb API key, Pushover, Plex, Overseerr). Never print their contents, commit them,
+password, TMDb API key, Pushover, Overseerr). Never print their contents, commit them,
 or add secrets to tracked files. `config/app.py` builds the Flask `Config`; the DB URI comes
 from `lib.tools.get_db_uri(**credentials['db'])`.
 
