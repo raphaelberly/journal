@@ -14,9 +14,10 @@ DUMMY_PASSWORD_HASH = generate_password_hash(secrets.token_hex(), method='scrypt
 
 
 @login.user_loader
-def load_user(id_):
-    user = db.session.get(User, id_)
-    # DEBUG: logging.getLogger('gunicorn.error').error(f'LOADING USER "{id_}" => {user}')
+def load_user(session_token):
+    # Cookies hold the session token (see User.get_id): those holding the bare user id, issued before, match no one
+    user = User.query.filter_by(session_token=session_token).first()
+    # DEBUG: logging.getLogger('gunicorn.error').error(f'LOADING USER "{session_token}" => {user}')
     return user
 
 
@@ -29,6 +30,7 @@ class User(UserMixin, db.Model):
     grade_as_int = db.Column(db.Boolean)
     language = db.Column(db.String(4))
     providers = db.Column(db.ARRAY(db.String(128)))
+    session_token = db.Column(db.String(64), unique=True)
     insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=utcnow)
 
@@ -44,9 +46,18 @@ class User(UserMixin, db.Model):
         self.grade_as_int = grade_as_int
         self.language = language
         self.providers = providers
+        self.reset_session_token()
 
     def __repr__(self):
         return f'<User {self.id}: {self.username}>'
+
+    def get_id(self):
+        # Sessions and remember-me cookies hold this token rather than the user id, so that resetting it revokes them
+        # all, copies included. A cookie holding the id would open the account for good
+        return self.session_token
+
+    def reset_session_token(self):
+        self.session_token = secrets.token_hex(32)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)

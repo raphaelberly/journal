@@ -129,7 +129,10 @@ Other conventions worth keeping:
 - Pagination is "show more": the page passes a bigger `nb_results` query arg and re-renders;
   `scroll_to` (set by `static/js/scroll.js`) restores the scroll position.
 - All pages are `@login_required`; unauthorised access redirects to `/login`. Sessions are
-  remembered for 90 days.
+  remembered for 90 days. The session and remember-me cookies hold `User.session_token`
+  (`get_id`), not the user id, and logging out resets it: that logs the account out of every
+  device, stolen cookies included. Both cookies are `Secure` and `SameSite=Lax`;
+  `run_journal.py` drops `Secure` for the plain-HTTP dev server.
 - Every login is written to `log/app_logins.log`, with the client IP taken from the last
   `X-Forwarded-For` value, the one the Pi's haproxy adds. On the Pi, fail2ban's
   `journal-login` jail bans IPs from `Failed login from <ip>` lines (it reuses the

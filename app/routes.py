@@ -173,8 +173,12 @@ def signup():
 
 @app.route('/logout')
 def logout():
+    # Reset the session token: it logs the account out of every device, stolen cookies included
+    if current_user.is_authenticated:
+        current_user.reset_session_token()
+        db.session.commit()
     logout_user()
-    flash('You were successfully logged out', category='success')
+    flash('You were logged out of all your devices', category='success')
     return redirect(url_for('login'))
 
 

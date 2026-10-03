@@ -15,9 +15,16 @@ app.config.from_object(Config)
 db = SQLAlchemy()
 db.init_app(app)
 
-# Initialise login manager
+# Initialise login manager. Send the session and remember-me cookies over HTTPS only, and not along cross-site
+# requests (run_journal.py lets them through on the plain-HTTP dev server)
 login = LoginManager()
 login.init_app(app)
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    REMEMBER_COOKIE_SECURE=True,
+    REMEMBER_COOKIE_SAMESITE='Lax',
+)
 
 # Protect every POST against CSRF. Tokens last as long as the session rather than the
 # default hour: pages stay open for days in the standalone web-app
