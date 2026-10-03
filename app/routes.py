@@ -28,6 +28,9 @@ from lib.tools import get_time_ago_string, get_time_spent_string, utcnow
 CURRENT_DIR = path.dirname(path.abspath(__file__))
 # Logins are written to their own file, read by the Pi's fail2ban `journal-login` jail: keep the line format in sync
 LOGIN_LOG_PATH = path.join(path.dirname(CURRENT_DIR), 'log', 'app_logins.log')
+# Most recos a page lists, whatever the query string asks: each one costs a call to TMDb and one to Overseerr, made
+# one after the other (~180 ms on the Pi)
+MAX_RECOS = 50
 
 title_collector = TitleCollector()
 overseerr = Overseerr()
@@ -825,8 +828,8 @@ def recos():
     title_ids = [title_id for title_id, in response]
 
     # Check whether we need to display "More" button
-    nb_results = int(request.args.get('nb_results', 5))
-    show_more_button = len(title_ids) > nb_results
+    nb_results = min(int(request.args.get('nb_results', 5)), MAX_RECOS)
+    show_more_button = nb_results < min(len(title_ids), MAX_RECOS)
 
     # Check providers of the results
     titles_enriched = enrich_titles(title_ids)[:nb_results]

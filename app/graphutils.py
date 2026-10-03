@@ -1,4 +1,5 @@
 import os
+from contextlib import suppress
 from typing import Dict, Optional
 
 # Chart geometry, kept from the previous plotly rendering: a 700x500 canvas whose bars
@@ -22,7 +23,9 @@ def cleanup_distribution_plots(path_starts_with: str):
         filepath = os.path.join(dirname, file)
         if filepath.startswith(path_starts_with):
             assert filepath.endswith('.svg')
-            os.remove(filepath)
+            # Another gunicorn worker, rendering the same page at the same time, may have removed it first
+            with suppress(FileNotFoundError):
+                os.remove(filepath)
 
 
 def plot_distribution(key_values: Dict[int, int], path: str, force_range: Optional[list] = None) -> None:

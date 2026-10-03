@@ -59,8 +59,11 @@ imported — the few that are not imported directly (`gunicorn`, `email_validato
 their own section with a comment saying why. There is no test suite; `tmp/test_*.py` are
 throwaway experiments, not tests.
 
-In production the app is served by gunicorn under supervisor on the host. `deploy.sh` (run
-on the host) stops supervisor, pulls `master`, restarts it. The ETL, the backup and the
+In production the app is served by gunicorn under supervisor on the host, with 2 sync
+workers (`-w 2` in `/etc/supervisor/conf.d/journal.conf`), so that one slow request does not
+hold up everyone. Each worker is a process of its own, with its own caches and Overseerr
+session: nothing in memory is shared between two requests. `deploy.sh` (run on the host)
+stops supervisor, pulls `master`, restarts it. The ETL, the backup and the
 provider refresh run from cron.
 
 ## Configuration and secrets
@@ -127,7 +130,8 @@ Both `payload` and `metadata` are always passed, even when empty (`metadata={}`)
 Other conventions worth keeping:
 
 - Pagination is "show more": the page passes a bigger `nb_results` query arg and re-renders;
-  `scroll_to` (set by `static/js/scroll.js`) restores the scroll position.
+  `scroll_to` (set by `static/js/scroll.js`) restores the scroll position. Recos caps it at
+  `MAX_RECOS`, since each reco costs two API calls.
 - All pages are `@login_required`; unauthorised access redirects to `/login`. Sessions are
   remembered for 90 days. The session and remember-me cookies hold `User.session_token`
   (`get_id`), not the user id, and logging out resets it: that logs the account out of every
@@ -209,7 +213,7 @@ Other conventions worth keeping:
   bypasses that cache on purpose (a detail with credits weighs up to 600 KB in memory,
   and TMDb's CDN serves a repeat in ~20 ms). Firing more than ~50 calls a second gets
   throttled by TMDb, so keep fan-outs to a search's worth (20). Careful with the cache: a
-  cached dict is mutated by callers, hence the `.copy()` in `TitleCollector.collect`. There is a single instance for the whole app, on
+  cached dict is mutated by callers, hence the `.copy()` in `TitleCollector.collect`. There is a single instance per worker process, on
   `title_collector.tmdb` (`routes.py` builds one module-level `TitleCollector` and one
   `Overseerr`) — `lru_cache` on a method is keyed by `self`, so a second `Tmdb` means a
   second, empty cache.
