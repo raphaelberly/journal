@@ -21,8 +21,7 @@ def cleanup_distribution_plots(path_starts_with: str):
     for file in os.listdir(dirname):
         filepath = os.path.join(dirname, file)
         if filepath.startswith(path_starts_with):
-            # .png covers the charts generated before the switch to SVG
-            assert filepath.endswith(('.svg', '.png'))
+            assert filepath.endswith('.svg')
             os.remove(filepath)
 
 

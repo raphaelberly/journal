@@ -172,10 +172,11 @@ Other conventions worth keeping:
   `base/head.html`; a new iPhone size means a new PNG in `static/images/splashscreens/`
   and a new line there.
 - `static/generated/` holds per-user SVG charts named
-  `<username>_<UTC timestamp>_<kind>.svg`; the timestamp defeats caching and
-  `cleanup_distribution_plots` deletes the user's previous ones on each render (it still
-  sweeps the `.png` left over from the plotly era). An empty distribution produces no file
-  and the template hides the chart.
+  `<user id>_<UTC timestamp>_<kind>.svg`; the timestamp defeats caching and
+  `cleanup_distribution_plots` deletes the user's previous ones on each render. Never put
+  the username in a file path: it is user input (it used to name these files, and a
+  `../` username could delete files outside the folder). An empty distribution produces no
+  file and the template hides the chart.
 - Images that open full screen go through the `fullscreen_image` macro of
   `base/fullscreen_image.html`, styled by `fullscreen.css` (linked by every page using it):
   the thumbnail is a button opening a bigger copy through the HTML popover API, without JS.

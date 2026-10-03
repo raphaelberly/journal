@@ -213,14 +213,17 @@ def add_rank_and_suffix(item, rank):
     return item
 
 def generate_dist_images(grade_dist: dict, decade_dist: dict) -> dict:
+    # Name the files after the user id, never the username, which is user input. The underscore keeps the cleanup
+    # of user 1 off the files of user 12
+    prefix = f'generated/{current_user.id}_'
     # Cleanup previous grade distribution plots
-    cleanup_distribution_plots(path.join(CURRENT_DIR, f'static/generated/{current_user.username}'))
+    cleanup_distribution_plots(path.join(CURRENT_DIR, f'static/{prefix}'))
     # Nothing to plot for an empty distribution: skip it, the template hides the missing chart
     images = {}
     timestamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
     # Generate new grade distribution plot
     if grade_dist:
-        images['grade_dist'] = f'generated/{current_user.username}_{timestamp}_grade_dist.svg'
+        images['grade_dist'] = f'{prefix}{timestamp}_grade_dist.svg'
         plot_distribution(
             key_values=grade_dist,
             path=path.join(CURRENT_DIR, f'static/{images["grade_dist"]}'),
@@ -228,7 +231,7 @@ def generate_dist_images(grade_dist: dict, decade_dist: dict) -> dict:
         )
     # Generate new decade distribution plot
     if decade_dist:
-        images['decade_dist'] = f'generated/{current_user.username}_{timestamp}_decade_dist.svg'
+        images['decade_dist'] = f'{prefix}{timestamp}_decade_dist.svg'
         plot_distribution(
             key_values=decade_dist,
             path=path.join(CURRENT_DIR, f'static/{images["decade_dist"]}'),
