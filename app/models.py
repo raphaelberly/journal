@@ -1,3 +1,4 @@
+import secrets
 from datetime import datetime
 
 from flask_login import UserMixin
@@ -6,6 +7,10 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app import db, login
 from app.converters import TitleConverter
 from lib.tools import utcnow
+
+# Hash of a throwaway password, checked when a login matches no account, so that an unknown username takes as long
+# to reject as a known one
+DUMMY_PASSWORD_HASH = generate_password_hash(secrets.token_hex(), method='scrypt')
 
 
 @login.user_loader

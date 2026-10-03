@@ -9,6 +9,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFError
 from sqlalchemy import func, cast, Integer, case, and_, or_
 from werkzeug.exceptions import HTTPException
+from werkzeug.security import check_password_hash
 from werkzeug.utils import redirect
 
 from app import app
@@ -17,7 +18,7 @@ from app.converters import TitleConverter
 from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
 from app.graphutils import plot_distribution, cleanup_distribution_plots
-from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem
+from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem, DUMMY_PASSWORD_HASH
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
 from lib.tmdb import Tmdb
@@ -132,6 +133,9 @@ def login():
                 func.lower(User.email) == username.lower(),
             )).all()
             user = next((user for user in users if user.check_password(password)), None)
+            if not users:
+                # Check a hash all the same, so that the time taken does not tell which usernames exist
+                check_password_hash(DUMMY_PASSWORD_HASH, password)
             if user is None:
                 login_logger.warning(f'Failed login from {client_ip()}')
                 # Render rather than redirect, to keep the username in its field
