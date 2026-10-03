@@ -35,6 +35,7 @@ config/         *.yaml configuration + app.py (Flask Config object)
 lib/            non-web code: tmdb, overseerr, etl, push (Pushover), tools
 ddl/            hand-maintained CREATE TABLE / CREATE MATERIALIZED VIEW statements
 tmp/            scratch: ETL downloads, backups, old experiments — gitignored
+log/            cron script logs and app_logins.log (read by fail2ban) — gitignored
 ```
 
 ## Running things
@@ -129,6 +130,10 @@ Other conventions worth keeping:
   `scroll_to` (set by `static/js/scroll.js`) restores the scroll position.
 - All pages are `@login_required`; unauthorised access redirects to `/login`. Sessions are
   remembered for 90 days.
+- Every login is written to `log/app_logins.log`, with the client IP taken from the last
+  `X-Forwarded-For` value, the one the Pi's haproxy adds. On the Pi, fail2ban's
+  `journal-login` jail bans IPs from `Failed login from <ip>` lines (it reuses the
+  `accountin-login` filter), so changing that message breaks banning silently.
 - `CSRFProtect` guards every POST. Because the forms are raw HTML rather than WTForms, each
   `<form method="post">` must carry
   `<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">` — a new form without

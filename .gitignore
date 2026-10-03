@@ -9,6 +9,9 @@
 
 tmp/
 
+# Logs (cron scripts, app logins)
+log/
+
 config/credentials.yaml
 config/app.py
 app/static/generated

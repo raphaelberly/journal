@@ -1,7 +1,8 @@
+import logging
 import re
 import traceback
 from datetime import date, datetime, timedelta, UTC
-from os import path
+from os import makedirs, path
 
 from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
@@ -23,9 +24,21 @@ from lib.tmdb import Tmdb
 from lib.tools import get_time_ago_string, get_time_spent_string, utcnow
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
+# Logins are written to their own file, read by the Pi's fail2ban `journal-login` jail: keep the line format in sync
+LOGIN_LOG_PATH = path.join(path.dirname(CURRENT_DIR), 'log', 'app_logins.log')
 
 title_collector = TitleCollector()
 overseerr = Overseerr()
+
+# Open the login log on the first login only (delay): the backup, run as root, imports this module too, and a file
+# it created would be out of the app's reach
+login_logger = logging.getLogger('journal.logins')
+makedirs(path.dirname(LOGIN_LOG_PATH), exist_ok=True)
+login_handler = logging.FileHandler(LOGIN_LOG_PATH, delay=True)
+login_handler.setFormatter(logging.Formatter('%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+login_logger.addHandler(login_handler)
+login_logger.setLevel(logging.INFO)
+login_logger.propagate = False
 
 def intersect(a, b):
     # Keep the order of b (unlike a set, whose order changes with each process), so that the providers of the
@@ -57,6 +70,16 @@ def handle_exceptions(e):
 
 def get_post_result(key):
     return request.form.to_dict()[key]
+
+
+# Address of the browser, as seen by haproxy
+def client_ip():
+    # haproxy adds its own X-Forwarded-For header last: earlier values come from the client and can be forged
+    forwarded = request.headers.get('X-Forwarded-For')
+    if forwarded:
+        return forwarded.split(',')[-1].strip()
+    # Not behind haproxy (dev server)
+    return request.remote_addr
 
 
 @app.route('/favicon.ico')
@@ -110,9 +133,11 @@ def login():
             )).all()
             user = next((user for user in users if user.check_password(password)), None)
             if user is None:
+                login_logger.warning(f'Failed login from {client_ip()}')
                 # Render rather than redirect, to keep the username in its field
                 metadata = {'username': username, 'error': 'Wrong username or password'}
             else:
+                login_logger.info(f'Successful login for {user.username} from {client_ip()}')
                 login_user(user, remember=True, duration=timedelta(days=90))
                 flash(f'Welcome, {user.username}!', category='success')
                 return redirect(url_for('search'))
