@@ -17,7 +17,7 @@
     {{ form.hidden_tag() }}
     <div class="field">
         {{ form.username() }}
-        <span class="field-hint">3 to 32 characters</span>
+        <span class="field-hint">3 to 32 letters, digits, dots, dashes or underscores</span>
         <span class="field-error">{{ form.username.errors[0] if form.username.errors }}</span>
     </div>
     <div class="field">

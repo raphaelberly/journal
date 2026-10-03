@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from sqlalchemy import func
 from wtforms import StringField, EmailField, PasswordField, SubmitField
-from wtforms.validators import ValidationError, DataRequired, Email, Length
+from wtforms.validators import ValidationError, DataRequired, Email, Length, Regexp
 from app.models import User
 
 
@@ -12,12 +12,17 @@ def strip(value: str | None) -> str | None:
 
 class RegistrationForm(FlaskForm):
 
-    # Keep the hints of signup.html in line with these rules
+    # Keep the hints of signup.html, and the messages of auth.js, in line with these rules
     username = StringField(
         label='Username',
         filters=[strip],
-        validators=[DataRequired('Required'), Length(3, 32, 'Must be 3 to 32 characters long')],
-        render_kw={'placeholder': 'Username', 'autocomplete': 'username',
+        validators=[
+            DataRequired('Required'),
+            Length(3, 32, 'Must be 3 to 32 characters long'),
+            # Letters may be accented. The pattern below is the same rule, for the browser to check as you type
+            Regexp(r'^[\w.-]+$', message='Only letters, digits, dots, dashes and underscores'),
+        ],
+        render_kw={'placeholder': 'Username', 'autocomplete': 'username', 'pattern': r'[\p{L}\p{N}_.\-]+',
                    'autocapitalize': 'none', 'autocorrect': 'off', 'spellcheck': 'false'}
     )
     email = EmailField(

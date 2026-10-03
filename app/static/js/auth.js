@@ -5,6 +5,7 @@ function fieldError(input) {
     if (input.validity.valueMissing) return 'Required';
     if (input.validity.typeMismatch) return 'Not a valid email address';
     if (input.validity.tooShort) return `Must be at least ${input.minLength} characters long`;
+    if (input.validity.patternMismatch) return 'Only letters, digits, dots, dashes and underscores';
     return '';
 }
 
