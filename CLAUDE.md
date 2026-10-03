@@ -131,7 +131,8 @@ Other conventions worth keeping:
 - All pages are `@login_required`; unauthorised access redirects to `/login`. Sessions are
   remembered for 90 days. The session and remember-me cookies hold `User.session_token`
   (`get_id`), not the user id, and logging out resets it: that logs the account out of every
-  device, stolen cookies included. Both cookies are `Secure` and `SameSite=Lax`;
+  device, stolen cookies included. Hence logout is a POST, from a form in the menu, so that no
+  link can trigger it. Both cookies are `Secure` and `SameSite=Lax`;
   `run_journal.py` drops `Secure` for the plain-HTTP dev server.
 - Every login is written to `log/app_logins.log`, with the client IP taken from the last
   `X-Forwarded-For` value, the one the Pi's haproxy adds. On the Pi, fail2ban's

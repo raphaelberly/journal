@@ -31,7 +31,11 @@
     </td></tr>
     <tr class="bottom"><td>
         <a href="{{ url_for('settings') }}"><img src="/static/images/settings.png"></a>
-        <a href="{{ url_for('logout') }}"><img src="/static/images/logout.png"></a>
+        <!-- A form rather than a link: logging out signs out every device, so a link from anywhere must not do it -->
+        <form action="{{ url_for('logout') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit"><img src="/static/images/logout.png"></button>
+        </form>
     </td></tr>
 </table>
 </div>

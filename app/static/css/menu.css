@@ -85,6 +85,19 @@
     transition: 0.2s;
 }
 
+/* The logout button, laid out like the links above it */
+.sidenav form {
+    margin: 20px 25px;
+    text-align: right;
+}
+
+.sidenav button {
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
 .sidenav .closebtn {
     position: absolute;
     top: 25px;

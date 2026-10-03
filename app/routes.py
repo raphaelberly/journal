@@ -181,7 +181,7 @@ def signup():
     return render_template('signup.html', form=form)
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     # Reset the session token: it logs the account out of every device, stolen cookies included
     if current_user.is_authenticated:
