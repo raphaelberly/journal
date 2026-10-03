@@ -3,6 +3,7 @@ import re
 import traceback
 from datetime import date, datetime, timedelta, UTC
 from os import makedirs, path
+from urllib.parse import urlsplit
 
 from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
@@ -52,10 +53,18 @@ app.jinja_env.globals.update(zip=zip)
 app.jinja_env.globals.update(intersect=intersect)
 
 
+def redirect_back():
+    # Go back to the page the request came from, if it is one of ours: any site linking here sets the Referer, so
+    # following it blindly would send the visitor wherever that site wants
+    if request.referrer and urlsplit(request.referrer).netloc == request.host:
+        return redirect(request.referrer)
+    return redirect(url_for('search'))
+
+
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
     flash('Your session expired, please try again', category='error')
-    return redirect(request.referrer or url_for('search'))
+    return redirect_back()
 
 
 @app.errorhandler(Exception)
@@ -66,7 +75,7 @@ def handle_exceptions(e):
         return e
     flash('Wops, something went wrong', category='error')
     app.logger.error(traceback.format_exc())
-    return redirect(request.referrer or url_for('search'))
+    return redirect_back()
 
 
 def get_post_result(key):
@@ -89,6 +98,7 @@ def favicon():
 
 
 @app.route('/error')
+@login_required
 def error():
     raise Exception('A test exception was raised')
 

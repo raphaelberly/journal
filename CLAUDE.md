@@ -146,7 +146,9 @@ Other conventions worth keeping:
   because pages stay open for days in the standalone web-app; a `CSRFError` handler flashes
   "Your session expired" and redirects.
 - A global `@app.errorhandler(Exception)` flashes "Wops, something went wrong", logs the
-  traceback and redirects to the referrer. `/error` raises on purpose to test it. HTTP
+  traceback and redirects to the referrer (`redirect_back`, which only follows a Referer
+  of our own host: any site linking here sets it). `/error`, behind the login like every
+  page, raises on purpose to test it. HTTP
   errors on the `static` endpoint stay plain 404s instead: the browser fetches those files
   in the background (Safari even preloads the assets a page used on its previous visit,
   URLs gone since included), so a flash would only show up, unexplained, on the next page.
