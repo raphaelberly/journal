@@ -5,6 +5,7 @@ supported_providers:
   - canal
   - mubi
   - universcine
+  - arte
   - plex
 
 country: FR

@@ -78,9 +78,12 @@ class Tmdb(object):
         response = self._get_json(self.URL_PROVIDERS.format(title_id=title_id))
         if response.get('success', True) is False:
             raise RuntimeError(f'Could not find providers for title: {title_id}')
+        # Read the subscriptions and the free services (Arte), but not the ones with ads: TMDb lists there the free
+        # catalogue of Plex, which is not the household's server
+        country = response['results'].get('FR', {})
         results = [
             self._clean_name(item['provider_name'])
-            for item in response['results'].get('FR', {}).get('flatrate', [])
+            for item in country.get('flatrate', []) + country.get('free', [])
             if self._clean_name(item['provider_name']) in self._supported_providers
         ]
         return results
