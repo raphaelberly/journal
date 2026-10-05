@@ -144,6 +144,14 @@ Other conventions worth keeping:
   `accountin-login` filter), so changing that message breaks banning silently.
 - Passwords are hashed with scrypt (`User.set_password`), whose hashes take 162 characters:
   `password_hash` is a `VARCHAR(256)`. A login with an older PBKDF2 hash upgrades it.
+- Sign-up is by invitation only. Accounts with `can_invite` (set by hand in the database,
+  false for new accounts) get an "Invite a friend" button in Settings, which shares a
+  `/signup?invite=<token>` link. The token is the inviter's id, signed by `invite_serializer`
+  (itsdangerous, `SECRET_KEY` salted with `invite`), so nothing is stored: a link lets any
+  number of friends in for `INVITE_MAX_AGE` (a week), and only while its inviter keeps
+  `can_invite`, which is how to void them all. A new account records `invited_by` and sends
+  the owner a Pushover message (`notify`, from a thread so that Pushover never holds up or
+  fails the request).
 - `CSRFProtect` guards every POST. Because the forms are raw HTML rather than WTForms, each
   `<form method="post">` must carry
   `<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">` — a new form without

@@ -3,11 +3,13 @@ import re
 import traceback
 from datetime import date, datetime, timedelta, UTC
 from os import makedirs, path
+from threading import Thread
 from urllib.parse import urlsplit
 
 from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFError
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from sqlalchemy import func, cast, Integer, case, and_, or_
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import check_password_hash
@@ -22,8 +24,9 @@ from app.graphutils import plot_distribution, cleanup_distribution_plots
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem, DUMMY_PASSWORD_HASH
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
+from lib.push import Push
 from lib.tmdb import Tmdb
-from lib.tools import get_time_ago_string, get_time_spent_string, utcnow
+from lib.tools import get_time_ago_string, get_time_spent_string, read_config, utcnow
 
 CURRENT_DIR = path.dirname(path.abspath(__file__))
 # Logins are written to their own file, read by the Pi's fail2ban `journal-login` jail: keep the line format in sync
@@ -31,6 +34,10 @@ LOGIN_LOG_PATH = path.join(path.dirname(CURRENT_DIR), 'log', 'app_logins.log')
 # Most recos a page lists, whatever the query string asks: each one costs a call to TMDb and one to Overseerr, made
 # one after the other (~180 ms on the Pi)
 MAX_RECOS = 50
+# Invitation links are signed rather than stored, so one may serve several friends until it expires, a week later
+# (in seconds: itsdangerous takes no timedelta)
+INVITE_MAX_AGE = 7 * 24 * 60 * 60
+invite_serializer = URLSafeTimedSerializer(app.secret_key, salt='invite')
 
 title_collector = TitleCollector()
 overseerr = Overseerr()
@@ -83,6 +90,18 @@ def handle_exceptions(e):
 
 def get_post_result(key):
     return request.form.to_dict()[key]
+
+
+# Push a message to the owner's phone
+def notify(message):
+    # From a thread: the Pushover client waits for its server without a timeout, and a failure must not fail the
+    # request that sent it
+    def send():
+        try:
+            Push(**read_config('config/credentials.yaml')['push']).send_message(message, title='Journal')
+        except Exception:
+            app.logger.error(traceback.format_exc())
+    Thread(target=send, daemon=True).start()
 
 
 # Address of the browser, as seen by haproxy
@@ -172,11 +191,26 @@ def signup():
     if current_user.is_authenticated:
         return redirect(url_for('search'))
 
+    # Sign up only with an invitation link: it holds the id of the inviter, signed, which must still have the right to
+    # invite (taking it away voids every link the account sent). The form posts to the same URL, link included
+    try:
+        inviter_id = invite_serializer.loads(request.args.get('invite', ''), max_age=INVITE_MAX_AGE)
+    except SignatureExpired:
+        flash('This invitation has expired, ask for a new one', category='error')
+        return redirect(url_for('login'))
+    except BadSignature:
+        inviter_id = None
+    inviter = db.session.get(User, inviter_id) if inviter_id is not None else None
+    if inviter is None or not inviter.can_invite:
+        flash('Sign-up is by invitation only', category='error')
+        return redirect(url_for('login'))
+
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(form.username.data, form.password.data, form.email.data)
+        user = User(form.username.data, form.password.data, form.email.data, invited_by=inviter.id)
         db.session.add(user)
         db.session.commit()
+        notify(f'New account: {user.username}, invited by {inviter.username}')
         login_user(user, remember=True, duration=timedelta(days=90))
         flash(f'Welcome, {user.username}!', category='success')
         return redirect(url_for('search'))
@@ -786,11 +820,15 @@ def settings():
         else:
             flash('No settings were changed', category='error')
 
+    # Make a new invitation link on each visit, valid for a week from then
+    invite_url = url_for('signup', invite=invite_serializer.dumps(current_user.id)) if current_user.can_invite else None
+
     payload = {
         'decimal_grades': decimal_grades,
         'original_titles_fr': original_titles_fr,
         'providers': user_providers,
         'provider_names': available_providers,
+        'invite_url': invite_url,
     }
 
     return render_template('settings.html', payload=payload, metadata={})

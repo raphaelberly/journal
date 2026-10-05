@@ -58,10 +58,13 @@ CREATE TABLE journal.users (
   language              VARCHAR(4)      NOT NULL DEFAULT 'fr',
   providers             VARCHAR(128)[]  NOT NULL DEFAULT '{netflix,amazonprimevideo}'::character varying[],
   plex_allowed          BOOLEAN         NOT NULL DEFAULT FALSE,
+  can_invite            BOOLEAN         NOT NULL DEFAULT FALSE,
+  invited_by            INTEGER         NULL,
   session_token         VARCHAR(64)     NOT NULL UNIQUE,
   insert_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   update_datetime_utc   TIMESTAMP       NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   CONSTRAINT "users_pkey" PRIMARY KEY (id),
+  CONSTRAINT "users_fkey_invited_by" FOREIGN KEY (invited_by) REFERENCES journal.users(id) ON DELETE SET NULL,
   CONSTRAINT "users_plex_only_if_allowed" CHECK (plex_allowed OR NOT 'plex' = ANY(providers))
 );
 

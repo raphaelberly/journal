@@ -34,8 +34,9 @@ after the credits roll.
 ### Login
 
 The landing page. Log in with your username or your email, whatever the case; "Remember me"
-is always on, for 90 days, and logging out signs you out of all your devices. New users can register from the "Sign up" link below the form,
-with a username, an email and a password: the rules show under each field, which is checked
+is always on, for 90 days, and logging out signs you out of all your devices. Sign-up is by
+invitation only: new users register from a link sent from the Settings page, valid for a week,
+with a username, an email and a password. The rules show under each field, which is checked
 as you type.
 
 <div align="center"><img src="img/login_page.png" width="225px"/></div>
@@ -101,7 +102,8 @@ appeal can be hidden for good.
 ### Settings
 
 Decimal grades, original titles for French movies, and the streaming services used to filter
-the watchlist.
+the watchlist. Accounts allowed to invite also get a button that shares a sign-up link with a
+friend, through the share sheet of the phone.
 
 <div align="center"><img src="img/settings_page.png" width="225px"/></div>
 

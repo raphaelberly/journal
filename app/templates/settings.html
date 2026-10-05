@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/switch.css')}}">
+    {% if payload.invite_url %}
+    <!-- Only the accounts allowed to invite get the invitation button -->
+    <script type=text/javascript src="{{ url_for('static', filename='js/invite.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
+    {% endif %}
 </head>
 
 <body ontouchstart="">
@@ -48,6 +53,13 @@
 </table>
 
 </form>
+
+<!-- Out of the form above, which every switch submits -->
+{% if payload.invite_url %}
+<h2>Invitations</h2>
+<p>Send a friend a link to sign up. It works for 7 days.</p>
+<button class="styled-button empty" type="button" data-url="{{ payload.invite_url }}" onclick="shareInvite(this)">Invite a friend</button>
+{% endif %}
 
 </div>
 </center>

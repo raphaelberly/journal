@@ -4,6 +4,10 @@
     padding-top: calc(100px + env(safe-area-inset-top));
     padding-right: 30px;
     padding-left: 30px;
+    /* Room below the last section, so that it does not touch the bottom of the screen */
+    padding-bottom: 30px;
+    padding-bottom: calc(30px + constant(safe-area-inset-bottom));
+    padding-bottom: calc(30px + env(safe-area-inset-bottom));
 }
 
 .settings table {
@@ -34,6 +38,13 @@
     color: 6caee0;
     font-size: 22px;
     font-weight:normal;
+    width: 100%;
+    max-width: 400px;
+}
+
+.settings p {
+    margin: 0 0 20px 0;
+    text-align: left;
     width: 100%;
     max-width: 400px;
 }

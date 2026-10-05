@@ -31,6 +31,8 @@ class User(UserMixin, db.Model):
     language = db.Column(db.String(4))
     providers = db.Column(db.ARRAY(db.String(128)))
     plex_allowed = db.Column(db.Boolean)
+    can_invite = db.Column(db.Boolean)
+    invited_by = db.Column(db.Integer)
     session_token = db.Column(db.String(64), unique=True)
     insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=utcnow)
@@ -40,7 +42,8 @@ class User(UserMixin, db.Model):
 
     _default_providers = ('netflix', 'amazonprimevideo')
 
-    def __init__(self, username, password, email, grade_as_int=True, language='fr', providers=_default_providers):
+    def __init__(self, username, password, email, invited_by, grade_as_int=True, language='fr',
+                 providers=_default_providers):
         self.username = username
         self.set_password(password)
         self.email = email
@@ -49,6 +52,9 @@ class User(UserMixin, db.Model):
         self.providers = providers
         # Plex is the household's: the right to use it is only ever granted by hand, in the database
         self.plex_allowed = False
+        # So is the right to invite: sign-up is open only to the holders of an invitation link
+        self.can_invite = False
+        self.invited_by = invited_by
         self.reset_session_token()
 
     def __repr__(self):
