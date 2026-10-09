@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+**Before writing, changing or reviewing code here, load the `anthropic-skills:raphael-python-style` skill.** It holds the house style and the rule to keep diffs minimal.
+
 ## What this is
 
 A personal movie journal: a Flask web app + Postgres database that tracks the movies the
