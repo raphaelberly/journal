@@ -153,10 +153,11 @@ A push notification is sent if a run fails.
 
 ## Getting started
 
-Requires Python 3.12 and a Postgres instance.
+Requires [uv](https://docs.astral.sh/uv/) and a Postgres instance. `uv sync` installs
+Python 3.14 and every dependency, at the versions of `uv.lock`, in `.venv`.
 
 ```bash
-pip install -r requirements.txt
+uv sync
 psql -d <database> -f ddl/tables/imdb.sql
 psql -d <database> -f ddl/tables/journal.sql
 psql -d <database> -f ddl/materialized_views/persons.sql
@@ -206,7 +207,7 @@ python run_journal.py
 ```
 
 It will be served on `http://localhost:8088`. All scripts expect to be run from the root of
-the repository.
+the repository, with `.venv` activated (or prefixed with `uv run`).
 
 ## Operations
 
@@ -223,27 +224,27 @@ kept alive by supervisor:
 
 ```ini
 [program:journal]
-command=/srv/journal/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 'app:app'
+command=/srv/journal/.venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 'app:app'
 directory=/srv/journal
 user=journal
 autostart=true
 autorestart=true
 ```
 
-and updated with `deploy.sh`, which stops the service, pulls the latest `master` and starts
-it back up.
+and updated with `deploy.sh`, which stops the service, pulls the latest `master`, syncs
+`.venv` to `uv.lock` and starts it back up.
 
 Three jobs run on a schedule:
 
 ```cron
 # refresh the IMDb datasets, every Monday at 3am
-0 3 * * 1  cd /srv/journal && venv/bin/python run_imdb_etl.py -a
+0 3 * * 1  cd /srv/journal && .venv/bin/python run_imdb_etl.py -a
 
 # back up the journal tables to CSV, every night
-30 2 * * *  cd /srv/journal && venv/bin/python backup.py
+30 2 * * *  cd /srv/journal && .venv/bin/python backup.py
 
 # refresh the streaming availability of watchlist movies, every night
-0 4 * * *  cd /srv/journal && venv/bin/python update_watchlist_providers.py
+0 4 * * *  cd /srv/journal && .venv/bin/python update_watchlist_providers.py
 ```
 
 `backup.py` dumps each table listed in `config/backup.yaml` into a dated folder and deletes

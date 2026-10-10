@@ -5,7 +5,7 @@
 **/*.pyc
 .idea/
 .claude/
-.python-version
+.venv/
 
 tmp/
 

@@ -55,18 +55,30 @@ All scripts are run from the repo root — config paths (`config/…`, `tmp/…`
 the CWD, not to the script. Each of them wraps its work in `with app.app_context():`, since
 the app package pushes no context of its own.
 
-Python 3.12 (`.python-version` → pyenv virtualenv `journal3.12.7`). Dependencies are in
-`requirements.txt`, unpinned, grouped by area and kept in sync with what is actually
-imported — the few that are not imported directly (`gunicorn`, `email_validator`) sit in
-their own section with a comment saying why. There is no test suite; `tmp/test_*.py` are
-throwaway experiments, not tests.
+The commands above assume `.venv` is activated (`source .venv/bin/activate`), otherwise
+prefix them with `uv run`. There is no test suite; `tmp/test_*.py` are throwaway
+experiments, not tests.
+
+## Environment
+
+Dependencies are managed with uv: `pyproject.toml` lists them, grouped by area and kept in
+sync with what is actually imported — the few that are not imported directly (`gunicorn`,
+`email-validator`) sit in their own section with a comment saying why. `uv.lock` pins every
+package (indirect ones and the pushover git commit included), and `.python-version` pins
+Python 3.14. `uv sync` creates or updates `.venv` to match the lock exactly; to upgrade,
+`uv lock --upgrade` then `uv sync`. The app, `lib/` and the scripts share that single
+environment.
+
+The lock covers both macOS and the Pi (Linux aarch64). Before adding or upgrading a package,
+check that it ships a Linux aarch64 wheel for the locked Python, or the Pi would have to
+build it from source.
 
 In production the app is served by gunicorn under supervisor on the host, with 2 sync
 workers (`-w 2` in `/etc/supervisor/conf.d/journal.conf`), so that one slow request does not
 hold up everyone. Each worker is a process of its own, with its own caches and Overseerr
 session: nothing in memory is shared between two requests. `deploy.sh` (run on the host)
-stops supervisor, pulls `master`, restarts it. The ETL, the backup and the
-provider refresh run from cron.
+stops supervisor, pulls `master`, syncs `.venv` to the lock, restarts it. The ETL, the
+backup and the provider refresh run from cron, with `.venv/bin/python`.
 
 ## Configuration and secrets
 
