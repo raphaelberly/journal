@@ -909,10 +909,10 @@ def library():
     # FILTER RECORDS
     filter_genre = request.args.get('filter_genre') or None
     if filter_genre is not None:
-        records = records.filter(Title.genres.any(filter_genre))
+        records = records.filter(Title.genres.any_() == filter_genre)
     filter_country = request.args.get('filter_country') or None
     if filter_country is not None:
-        records = records.filter(Title.origin_countries.any(filter_country))
+        records = records.filter(Title.origin_countries.any_() == filter_country)
 
     # LIST THE USER'S 20 MOST WATCHED COUNTRIES (THE PAGE NAMES AND SORTS THEM)
     countries = db.session \
