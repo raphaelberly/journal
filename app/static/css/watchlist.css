@@ -24,8 +24,9 @@
     padding-right: 0px;
 }
 
+/* Reserve their height before they load, so scroll_to lands where it should */
 .filters img {
-  max-height: 20px;
+  height: 20px;
   width: auto;
 }
 
