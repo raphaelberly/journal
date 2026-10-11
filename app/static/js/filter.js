@@ -27,6 +27,11 @@ function getActivatedFilters() {
   return x;
 }
 
+// Add activated filters to url, for the page to come back with them
+function addFilters(url) {
+  return url.concat('?providers=', getActivatedFilters().join(','));
+}
+
 // Filter out all elements not matching the activated filter(s)
 function filterSelection() {
   var x, y, i, j, k;

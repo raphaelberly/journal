@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/watchlist.css')}}">
 </head>
 
-<body ontouchstart="" onload="filterSelection();">
+<body ontouchstart="">
 
 {% with page_title = 'Watchlist' %}
     {% include 'base/menu.html' %}
@@ -90,7 +90,7 @@
         {% if 'plex' in metadata.providers and metadata.overseerr_available %} <!-- If plex is one of user's providers -->
             {% if not metadata.request_statuses.get(watchlist_item.tmdb_id) %} <!-- Then add a button to make a request if no request exists and overseerr is available-->
     <tr><td>
-        <form onsubmit="this.action=add_scroll('{{ url_for('watchlist') }}');" method="post">
+        <form onsubmit="this.action=add_scroll(addFilters('{{ url_for('watchlist') }}'));" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="request_on_plex" value="{{ title.id }}">
             <div class="request-on-plex"><input type="submit" value="Request on Plex" onclick="javascript:if (window.confirm('Request on Plex?')) {return true;} else {return false;}"></div>
@@ -109,7 +109,7 @@
             <input class="styled-button full" type="button" onclick="location.href='{{ url_for('movie', tmdb_id=title.id, show_slider=True) }}'" value="Add">
         </td>
         <td class="right">
-            <form onsubmit="this.action=add_scroll('{{ url_for('watchlist') }}');" method="post">
+            <form onsubmit="this.action=add_scroll(addFilters('{{ url_for('watchlist') }}'));" method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="move_to_top_of_watchlist" value="{{ title.id }}">
                 <input class="styled-button empty" type="submit" value="Move up" onclick="javascript:if (window.confirm('Move to the top of the watchlist?')) {return true;} else {return false;}">
@@ -118,7 +118,7 @@
         </tr></table>
     </td></tr>
     <tr><td>
-        <form onsubmit="this.action=add_scroll('{{ url_for('watchlist') }}');" method="post">
+        <form onsubmit="this.action=add_scroll(addFilters('{{ url_for('watchlist') }}'));" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="remove_from_watchlist" value="{{ title.id }}">
             <div class="mentions blacklist"><input type="submit" value="Remove from Watchlist" onclick="javascript:if (window.confirm('Remove from Watchlist?')) {return true;} else {return false;}"></div>
@@ -131,6 +131,8 @@
 
 </div>
 
+<!-- Filter before scrolling: scroll_to was measured on the filtered list -->
+<script type = "text/javascript"> filterSelection(); </script>
 {% if metadata.scroll_to %}
 <script type = "text/javascript"> window.scrollTo(0, {{ metadata.scroll_to }}); </script>
 {% endif %}
