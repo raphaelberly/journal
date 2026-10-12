@@ -4,6 +4,7 @@
     <title>{% if metadata.query %}{{ metadata.query }} - Journal{% else %}Search - Journal{% endif %}</title>
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/fullscreen.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='js/scroll.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">

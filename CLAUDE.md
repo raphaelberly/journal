@@ -228,7 +228,9 @@ Other conventions worth keeping:
   a popover, so the dark background is itself the close button, and the images let taps
   through to it (`pointer-events: none`). The page does not scroll while an image is open
   (`html:has(:popover-open)`). Browsers without popovers (iOS 16) keep it hidden and the
-  tap does nothing.
+  tap does nothing. Swiping the image down also closes it, as in iOS apps: that is the one
+  piece of JS, `static/js/fullscreen.js`, linked by the same pages as `fullscreen.css`; it
+  cancels the click a swipe ends with, so that the background button only sees real taps.
 
 ## External services
 
