@@ -782,6 +782,7 @@ def settings():
         'mubi': 'Mubi',
         'universcine': 'Univers Ciné',
         'arte': 'Arte',
+        'appletv': 'Apple TV',
     }
     # Plex is offered only to the accounts allowed on it: the users_plex_only_if_allowed constraint refuses it in the
     # providers of the others

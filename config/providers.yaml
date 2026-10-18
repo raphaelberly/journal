@@ -6,6 +6,7 @@ supported_providers:
   - mubi
   - universcine
   - arte
+  - appletv
   - plex
 
 country: FR

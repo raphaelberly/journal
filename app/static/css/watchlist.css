@@ -56,6 +56,9 @@
 .OFF.arte img {
   content:url('/static/images/providers/arte_gray.png');
 }
+.OFF.appletv img {
+  content:url('/static/images/providers/appletv_gray.png');
+}
 .OFF.plex img {
   content:url('/static/images/providers/plex_gray.png');
 }
