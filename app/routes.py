@@ -1,6 +1,7 @@
 import logging
 import re
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, UTC
 from os import makedirs, path
 from threading import Thread
@@ -41,6 +42,7 @@ invite_serializer = URLSafeTimedSerializer(app.secret_key, salt='invite')
 
 title_collector = TitleCollector()
 overseerr = Overseerr()
+plex_executor = ThreadPoolExecutor(1, thread_name_prefix='plex')
 
 # Open the login log on the first login only (delay): the backup, run as root, imports this module too, and a file
 # it created would be out of the app's reach
@@ -482,6 +484,7 @@ def enrich_results(results):
             'date': records.get(res['id'], {}).get('date'),
             'include_in_recent': records.get(res['id'], {}).get('include_in_recent', True),  # default to True
             'in_watchlist': res['id'] in watchlist_ids,
+            'providers': res.get('providers', []),
         })
     return output
 
@@ -511,12 +514,19 @@ def search():
 
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 10))
+    plex_lookup = start_plex_lookup()
     result_ids = title_collector.tmdb.search(query)
     payload = enrich_results(title_collector.collect_bulk(result_ids[:nb_results]))
+    # Add Plex to the providers of the movies available there
+    available_on_plex = plex_lookup.result() if plex_lookup else set()
+    for title in payload:
+        if title['id'] in available_on_plex:
+            title['providers'].append('plex')
     metadata = {
         'query': query,
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
-        'show_more_button': nb_results < len(result_ids)
+        'show_more_button': nb_results < len(result_ids),
+        'providers': current_user.providers,
     }
     return render_template('search.html', payload=payload, metadata=metadata)
 
@@ -535,6 +545,14 @@ def get_plex_status(tmdb_id):
     if not current_user.plex_allowed or not overseerr.is_available:
         return -1
     return overseerr.request_status(tmdb_id)
+
+
+def start_plex_lookup():
+    # Start listing the movies available on Plex in the background, so that it runs while the page waits for TMDb.
+    # Only for the accounts allowed on Plex that show it
+    if not current_user.plex_allowed or 'plex' not in current_user.providers or not overseerr.is_available:
+        return None
+    return plex_executor.submit(overseerr.available_movies)
 
 
 def request_on_plex(tmdb_id):
@@ -606,7 +624,7 @@ def watchlist():
         .filter(WatchlistItem.user_id == current_user.id) \
         .order_by(WatchlistItem.insert_datetime_utc.desc())
 
-    request_statuses = overseerr.request_statuses if current_user.plex_allowed and overseerr.is_available else {}
+    request_statuses = overseerr.request_statuses() if current_user.plex_allowed and overseerr.is_available else {}
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
     # If the user has plex, the movie is not yet tagged as available on plex in the watchlist, but the user requested
     # it and the request was completed, then add "plex" to the providers

@@ -48,8 +48,8 @@ class Tmdb(object):
         response = self._get_json(self.URL_SEARCH, query=query)
         return [item['id'] for item in response['results']]
 
-    def _get(self, title_id: int) -> dict:
-        response = self._get_json(self.URL_MOVIE.format(title_id=title_id), append_to_response='credits')
+    def _get(self, title_id: int, append: str = 'credits') -> dict:
+        response = self._get_json(self.URL_MOVIE.format(title_id=title_id), append_to_response=append)
         if response.get('success', True) is False:
             raise RuntimeError(f'Could not find title: {title_id}')
         return response
@@ -60,15 +60,19 @@ class Tmdb(object):
 
     def _get_or_none(self, title_id: int) -> Optional[dict]:
         try:
-            return self._get(title_id)
+            return self._get(title_id, 'credits,watch/providers')
         except (requests.RequestException, RuntimeError):
             return None
 
     def get_bulk(self, title_ids: List[int]) -> List[dict]:
-        # Fetch in parallel and skip the titles that fail. Bypass the cache of get: search results would fill it
-        # with dicts of up to 600 KB each, while TMDb's CDN serves a title fetched again in ~20 ms
+        # Fetch in parallel, with the streaming providers, and skip the titles that fail. Bypass the cache of get:
+        # search results would fill it with dicts of up to 600 KB each, while TMDb's CDN serves a title fetched again
+        # in ~20 ms
         results = self._executor.map(self._get_or_none, title_ids)
-        return [result for result in results if result is not None]
+        return [
+            {**result, 'providers': self._read_providers(result['watch/providers'])}
+            for result in results if result is not None
+        ]
 
     @staticmethod
     def _clean_name(name):
@@ -78,6 +82,9 @@ class Tmdb(object):
         response = self._get_json(self.URL_PROVIDERS.format(title_id=title_id))
         if response.get('success', True) is False:
             raise RuntimeError(f'Could not find providers for title: {title_id}')
+        return self._read_providers(response)
+
+    def _read_providers(self, response: dict) -> List[str]:
         # Read the subscriptions and the free services (Arte), but not the ones with ads: TMDb lists there the free
         # catalogue of Plex, which is not the household's server
         country = response['results'].get('FR', {})

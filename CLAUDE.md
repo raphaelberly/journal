@@ -240,8 +240,12 @@ Other conventions worth keeping:
   `search`/`get` are `lru_cache`d per process; `get_bulk` fans out on a thread pool and
   bypasses that cache on purpose (a detail with credits weighs up to 600 KB in memory,
   and TMDb's CDN serves a repeat in ~20 ms). Firing more than ~50 calls a second gets
-  throttled by TMDb, so keep fan-outs to a search's worth (20). Careful with the cache: a
-  cached dict is mutated by callers, hence the `.copy()` in `TitleCollector.collect`. There is a single instance per worker process, on
+  throttled by TMDb, so keep fan-outs to a search's worth (20). `get_bulk` also appends
+  `watch/providers`, which the Search page shows, at no extra call: TMDb answers some titles
+  with `max-age=0`, more often with the providers appended, so a repeat search waits ~115 ms
+  for its slowest title instead of ~30 (a first search, ~175 ms, is unchanged). The movie
+  page keeps calling `providers` apart, since the details of `get` stay cached. Careful
+  with the cache: a cached dict is mutated by callers, hence the `.copy()` in `TitleCollector.collect`. There is a single instance per worker process, on
   `title_collector.tmdb` (`routes.py` builds one module-level `TitleCollector` and one
   `Overseerr`) — `lru_cache` on a method is keyed by `self`, so a second `Tmdb` means a
   second, empty cache.
@@ -250,8 +254,13 @@ Other conventions worth keeping:
   `is_available` is a property that retries that login at most once every 5 minutes, so the
   service can come back without restarting the app. Any failing call flags it unavailable
   again. Every call site must check `overseerr.is_available` first, and
-  `current_user.plex_allowed`: go through `get_plex_status` and `request_on_plex`, which do
-  both.
+  `current_user.plex_allowed`: go through `get_plex_status`, `start_plex_lookup` and
+  `request_on_plex`, which do both. The server is actually Jellyseerr, whose API is
+  Overseerr's. `available_movies` (for the Search page) lists the whole library once a day
+  per worker (`media?filter=available`, ~1 MB, TV shows included and filtered out), then
+  lets the last 10 requests of the account override it, so that a request becoming
+  available shows at once; every journal request goes through that one account. The search
+  starts it on `plex_executor` before calling TMDb, and reads it once the titles are in.
 - **Pushover** (`lib/push.py`) — alerts from the cron scripts on failure.
 - **IMDb datasets** — downloaded by `lib/etl.py`, which truncates the target `imdb.*` table
   and re-inserts in batches of 1000 with generated INSERT statements. It is written to run
