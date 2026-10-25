@@ -691,32 +691,42 @@ def movie(tmdb_id):
         elif 'gradeRange' in request.form:
             # Get submitted grade
             grade = float(get_post_result('gradeRange'))
-            include_in_recent = 'include_in_recent' in request.form
+            # Get the watch date: a movie watched long ago stays out of Recent, with the date it was added
+            watched = request.form['watched']
+            include_in_recent = watched != 'long'
+            if watched == 'date':
+                watched_date = min(date.fromisoformat(request.form['watched_date']), date.today())
+            elif watched == 'yesterday':
+                watched_date = date.today() - timedelta(days=1)
+            else:
+                watched_date = date.today()
             # If there is already a grade, then it's an update. Otherwise it's an addition
             if title.get('grade') is not None:
                 action = 'updated'
-                # Update the movie in the records table
+                # Update the movie in the records table, keeping the date of a movie watched long ago
+                values = {'grade': grade, 'include_in_recent': include_in_recent, 'update_datetime_utc': utcnow()}
+                if include_in_recent:
+                    values['date'] = title['date'] = watched_date
                 Record.query \
                     .filter_by(user_id=current_user.id, tmdb_id=tmdb_id) \
-                    .update({
-                        'grade': grade, 'include_in_recent': include_in_recent, 'update_datetime_utc': utcnow()
-                    })
+                    .update(values)
             else:
                 action = 'added'
                 # Add the movie to the titles table
                 upsert_title_metadata(_title)
                 # Add the movie to the records table
-                record = Record(current_user.id, tmdb_id, grade, include_in_recent=include_in_recent)
+                record = Record(current_user.id, tmdb_id, grade, date=watched_date, include_in_recent=include_in_recent)
                 db.session.add(record)
                 # Remove from watchlist (if in it)
                 remove_from_watchlist(tmdb_id)
                 # Update the title element
-                title['date'] = utcnow().date()
+                title['date'] = watched_date
             # Commit add/update changes
             db.session.commit()
             flash(f'Movie successfully {action}', category='success')
             # Update title element
             title['grade'] = grade
+            title['include_in_recent'] = include_in_recent
             # Start statistics refresh
             refresh_materialized_views()
 
@@ -730,9 +740,23 @@ def movie(tmdb_id):
     }
 
     if request.method == 'GET' and request.args.get('show_slider', False):
+        # Preselect the watch date of the record, if any
+        today = date.today()
+        if title.get('grade') is None:
+            watched = 'today'
+        elif not title['include_in_recent']:
+            watched = 'long'
+        elif title['date'] == today:
+            watched = 'today'
+        elif title['date'] == today - timedelta(days=1):
+            watched = 'yesterday'
+        else:
+            watched = 'date'
         metadata.update({
             'mode': 'show_slider',
             'grade_as_int': current_user.grade_as_int,
+            'watched': watched,
+            'today': today,
         })
         return render_template('movie.html', payload=title, metadata=metadata)
 

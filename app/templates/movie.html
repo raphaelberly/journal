@@ -5,13 +5,11 @@
     {% include 'base/head.html' %}
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='js/fullscreen.js') }}"></script>
-    <script type=text/javascript src="{{ url_for('static', filename='js/options.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/movie.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fullscreen.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css')}}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/checkbox.css')}}">
 </head>
 
 <body ontouchstart="">
@@ -51,7 +49,8 @@
             <br/>{{ title.duration }}
         {% endif %}
     </td></tr>
-    {% if intersect(title.providers, metadata.providers) %}
+    {% if metadata.mode == 'show_slider' %} <!-- No providers nor request on Plex while grading -->
+    {% elif intersect(title.providers, metadata.providers) %}
     <tr><td>
         <div class="providers">
         {% for provider in intersect(title.providers, metadata.providers) %}
@@ -86,13 +85,16 @@
         </div>
     </td></tr>
     <tr><td>
-        <div class="options-link"><a href="javascript:void(0)" onclick="switchOptionsSection(); return false;">options</a></div>
-        <div id="options-table">
-            <label class="container">I just watched this
-              <input id="include_in_recent" name="include_in_recent" type="checkbox" {% if title.include_in_recent %} checked{% endif %}>
-              <span class="checkmark"></span>
-            </label>
+        <div class="watched">Watched
+          <select name="watched" onchange="this.form.watched_date.disabled = this.value != 'date'">
+            {% for value, label in [('today', 'Today'), ('yesterday', 'Yesterday'), ('date', 'On a date…'), ('long', 'A long time ago')] %}
+            <option value="{{ value }}"{% if value == metadata.watched %} selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <input type="date" name="watched_date" value="{{ title.date if metadata.watched == 'date' else metadata.today }}" max="{{ metadata.today }}"{% if metadata.watched != 'date' %} disabled{% endif %}>
         </div>
+        <div class="watched-hint">Not shown in Recent, nor counted in this year's stats</div>
+        <div class="watched-hint future">This date is in the future</div>
         <input class="styled-button full" type="submit" value="{{ 'Update' if title.grade else 'Add' }}">
     </td></tr>
 
@@ -104,7 +106,7 @@
         {% if title.grade %}
         <div class="mentions">
             <img src="/static/images/icon_check.png">
-            <b>{{ [title.grade|int, title.grade]|max }}/10</b>, added {{ format_date(title.date)|lower }}
+            <b>{{ [title.grade|int, title.grade]|max }}/10</b>, {{ 'watched' if title.include_in_recent else 'added' }} {{ format_date(title.date)|lower }}
         </div>
         {% endif %}
     </td></tr>

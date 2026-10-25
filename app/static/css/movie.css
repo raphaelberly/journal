@@ -69,12 +69,48 @@
     text-decoration: none;
 }
 
-.options-link a {
-    display: inline-block;
+.watched {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding-bottom: 15px;
-    color: #cccccc;
 }
 
-#options-table {
+.watched select, .watched input {
+    font: 15px Trebuchet MS, sans-serif;
+    color: black;
+    background-color: #efefef;
+    border: none;
+    border-radius: 2px;
+    height: 34px;
+    padding: 0 8px;
+}
+
+/* Center the date vertically, as Safari iOS puts it at the top */
+.watched input::-webkit-date-and-time-value {
+    line-height: 34px;
+}
+
+/* Show the date picker only for "On a date…", which enables it */
+.watched input:disabled {
     display: none;
+}
+
+/* Show the hints only for a movie watched long ago, or a date past the input's max */
+.watched-hint {
+    display: none;
+    margin-top: -8px;
+    padding-bottom: 15px;
+    font-size: 12px;
+    color: #999999;
+}
+
+.watched:has(option[value="long"]:checked) + .watched-hint,
+.watched:has(input:out-of-range) ~ .watched-hint.future {
+    display: block;
+}
+
+.watched-hint.future {
+    color: #d24242cc;
 }
