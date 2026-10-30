@@ -1,0 +1,143 @@
+/* The story fills the screen below the navbar: the page never scrolls */
+html, body {
+    overflow: hidden;
+}
+
+.story {
+    position: fixed;
+    top: 65px;
+    top: calc(65px + constant(safe-area-inset-top));
+    top: calc(65px + env(safe-area-inset-top));
+    bottom: 0;
+    bottom: constant(safe-area-inset-bottom);
+    bottom: env(safe-area-inset-bottom);
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.progress {
+    display: flex;
+    gap: 3px;
+    padding: 10px 16px 0 16px;
+}
+
+.progress span {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background-color: #e3e3e3;
+}
+
+.progress span.done {
+    background-color: #6caee0;
+}
+
+/* One slide at a time, in a phone-wide column on larger screens */
+.slide {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 25px 20px 20px 20px;
+    box-sizing: border-box;
+}
+
+.slide.active {
+    display: flex;
+}
+
+.slide-header {
+    font-size: 22px;
+    color: #6caee0;
+}
+
+.slide-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.slide-body table {
+    border-collapse: collapse;
+    text-align: left;
+    line-height: 1.4;
+}
+
+.slide-body td {
+    padding-top: 15px;
+}
+
+/* The KPI on top, its chart filling the rest of the slide */
+.kpi {
+    margin-top: 20px;
+    line-height: 1.4;
+}
+
+.kpi-number {
+    font-size: 64px;
+    line-height: 1.2;
+}
+
+.slide-chart {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 15px;
+}
+
+.slide-chart img.chart {
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.intro {
+    font-size: 18px;
+    color: #6caee0;
+}
+
+.year {
+    font-size: 96px;
+    line-height: 1.1;
+}
+
+.hint {
+    color: #999999;
+}
+
+.outro {
+    font-size: 30px;
+}
+
+/* Super-thin chevrons on both sides, hidden at either end of the story */
+.chevron {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border: solid #c8c8c8;
+    border-width: 0 0 1px 1px;
+}
+
+.chevron.left {
+    left: 14px;
+    transform: rotate(45deg);
+}
+
+.chevron.right {
+    right: 14px;
+    transform: rotate(-135deg);
+}

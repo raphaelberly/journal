@@ -6,164 +6,151 @@
     <script type=text/javascript src="{{ url_for('static', filename='js/menu.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/statistics.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/story.css')}}">
+    <script type=text/javascript src="{{ url_for('static', filename='js/story.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 
 <!-- https://www.kirilv.com/canvas-confetti/ -->
-<body ontouchstart="" onload="javascript:confetti({origin: {y: -0.2}, particleCount: 150, spread: 180, startVelocity: -40})">
+<body ontouchstart="" {% if not payload.is_empty %}onload="javascript:confetti({origin: {y: -0.2}, particleCount: 150, spread: 180, startVelocity: -40})"{% endif %}>
 
 {% with page_title = [payload.year_applicable, 'Retrospective']|join(' ') %}
     {% include 'base/menu.html' %}
 {% endwith %}
-{% include 'base/alert.html' %}
 
-<div class="statistics">
+{% if payload.is_empty %}
+<div class="classic">Nothing logged in {{ payload.year_applicable }} yet.</div>
+{% else %}
 
-<center><table>
+{# Show how a KPI moved since the previous year: green when up, red when down, gray when unchanged #}
+{% macro evolution(key, precision, leading_zero=true) %}
+    {% set current, previous = payload.activity[key], payload.previous_activity[key] %}
+    {% if current is not none and previous is not none %}
+        {% set delta = (current - previous)|round(precision) %}
+        {% set delta_text = ('%+.' ~ precision ~ 'f')|format(delta) %}
+        <br/><span class="evolution {{ 'up' if delta > 0 else 'down' if delta < 0 else 'flat' }}">
+            {{ (delta_text if leading_zero else delta_text|replace('0.', '.', 1)) if delta else 'unchanged' }} vs previous year
+        </span>
+    {% endif %}
+{% endmacro %}
 
-    <tr class="top-type">
-        <td class="icon"><img src="/static/images/statistics/television.png"></td>
-        <td>Viewing activity</td>
-    </tr>
-    {# Show how a KPI moved since the previous year: green when up, red when down, gray when unchanged #}
-    {% macro evolution(key, precision, leading_zero=true) %}
-        {% set current, previous = payload.activity[key], payload.previous_activity[key] %}
-        {% if current is not none and previous is not none %}
-            {% set delta = (current - previous)|round(precision) %}
-            {% set delta_text = ('%+.' ~ precision ~ 'f')|format(delta) %}
-            <br/><span class="evolution {{ 'up' if delta > 0 else 'down' if delta < 0 else 'flat' }}">
-                {{ (delta_text if leading_zero else delta_text|replace('0.', '.', 1)) if delta else 'unchanged' }} vs previous year
-            </span>
-        {% endif %}
-    {% endmacro %}
-    <tr>
-        <td class="big-number">
-            {{ payload.activity['viewing activity']|round(1) }}
-        </td>
-        <td>
-            <b>movies watched in {{ payload.year_applicable }}</b><br/>
-            {% if payload.is_empty %}
-            nothing logged this year yet
-            {% else %}
-            {{ format_timespan(payload.activity['time spent']) }}
+{# A slide made of a big KPI and the chart illustrating it, the chart skipped when there is nothing to plot #}
+{% macro kpi_slide(title, chart) %}
+    <section class="slide">
+        <div class="slide-header">{{ title }}</div>
+        <div class="kpi">{{ caller() }}</div>
+        <div class="slide-chart">
+            {% if payload.dist_images[chart] %}
+            <img class="chart" src="{{ url_for('static', filename=payload.dist_images[chart]) }}">
             {% endif %}
-            {{ evolution('viewing activity', 0) }}
-        </td>
-    </tr>
-    {% if not payload.is_empty %}
-    <tr>
-        <td class="big-number">
-            {{ payload.activity['average grade']|round(1) }}
-        </td>
-        <td>
-            <b>average grade</b><br/>
-            out of 10
-            {{ evolution('average grade', 1) }}
-        </td>
-    </tr>
+        </div>
+    </section>
+{% endmacro %}
+
+<div class="story" id="story">
+
+    <div class="progress" id="progress"></div>
+
+    <section class="slide">
+        <div class="slide-body">
+            <span class="intro">Your year in movies</span>
+            <span class="year">{{ payload.year_applicable }}</span>
+            <span class="hint">Tap to start</span>
+        </div>
+    </section>
+
+    {% call kpi_slide('Your viewing activity', 'cumulative') %}
+        <span class="kpi-number" data-count="{{ payload.activity['viewing activity'] }}" data-decimals="0">
+            {{ payload.activity['viewing activity'] }}
+        </span>
+        <br/><b>movies watched in {{ payload.year_applicable }}</b>
+        <br/>{{ format_timespan(payload.activity['time spent']) }}
+        {{ evolution('viewing activity', 0) }}
+    {% endcall %}
+
+    {% call kpi_slide('Your grades', 'grade_dist') %}
+        <span class="kpi-number" data-count="{{ payload.activity['average grade'] }}" data-decimals="1">
+            {{ '%.1f'|format(payload.activity['average grade']) }}
+        </span>
+        <br/><b>average grade</b>
+        <br/>out of 10
+        {{ evolution('average grade', 1) }}
+    {% endcall %}
+
+    {% set month, count = payload.favourites.month %}
+    {% call kpi_slide('Your movie calendar', 'calendar') %}
+        <span class="kpi-number">{{ month }}</span>
+        <br/><b>your busiest month</b>
+        <br/>{{ count }} movie{{ 's' if count > 1 }}
+    {% endcall %}
+
     {% if payload.activity['imdb correlation'] is not none %}
-    <tr>
-        <td class="big-number">
-            {{ '%.2f'|format(payload.activity['imdb correlation'])|replace('0.', '.', 1) }}
-        </td>
-        <td>
-            <b>correlation with IMDb</b><br/>
-            1 if your grades follow IMDb's
-            {{ evolution('imdb correlation', 2, leading_zero=false) }}
-        </td>
-    </tr>
+    {% call kpi_slide('You and IMDb', 'scatter') %}
+        <span class="kpi-number" data-count="{{ payload.activity['imdb correlation'] }}" data-decimals="2"
+              data-trim-zero>{{ '%.2f'|format(payload.activity['imdb correlation'])|replace('0.', '.', 1) }}</span>
+        <br/><b>correlation with IMDb</b>
+        <br/>1 if your grades follow IMDb's
+        {{ evolution('imdb correlation', 2, leading_zero=false) }}
+    {% endcall %}
     {% endif %}
-    {% if payload.activity['imdb median'] is not none %}
-    <tr>
-        <td class="big-number">
-            {{ payload.activity['imdb median']|round(1) }}
-        </td>
-        <td>
-            <b>median IMDb rating</b><br/>
-            of the movies you watched
-            {{ evolution('imdb median', 1) }}
-        </td>
-    </tr>
+
+    {% if payload.favourites.country %}
+    {% set flag, count = payload.favourites.country %}
+    {% call kpi_slide('Your favourite countries', 'country_dist') %}
+        <span class="kpi-number">{{ flag }}</span>
+        <br/><b>your favourite country</b>
+        <br/>{{ count }} movie{{ 's' if count > 1 }}
+    {% endcall %}
     {% endif %}
-    <tr>
-        <td class="big-number">
-            {{ payload.activity['directors discovered'] }}
-        </td>
-        <td>
-            <b>directors discovered</b><br/>
-            whose movies you had never seen
-            {{ evolution('directors discovered', 0) }}
-        </td>
-    </tr>
-    <tr>
-        <td class="calendar" colspan="2">
-            <img class="chart" src="{{ url_for('static', filename=payload.dist_images.calendar) }}">
-        </td>
-    </tr>
+
+    {% if payload.favourites.decade %}
+    {% set decade, count = payload.favourites.decade %}
+    {% call kpi_slide('Your favourite decades', 'decade_dist') %}
+        <span class="kpi-number">{{ decade }}</span>
+        <br/><b>your favourite decade</b>
+        <br/>{{ count }} movie{{ 's' if count > 1 }}
+    {% endcall %}
     {% endif %}
 
     {% for element in payload.movies %}
-    <tr class="top-type">
-        <td class="icon"><img src="/static/images/statistics/{{ element['image'] }}"></td>
-        <td>{{ element['section'] }}</td>
-    </tr>
-        {% for item in element['movies'] %}
-        <tr>
-            <td class="big-number">
-                {{ item['rank'] }}<sup><span class="suffix">{{ item['suffix'] }}</span></sup>
-            </td>
-            <td>
-                <b><span class="top-name"><a href="{{ url_for('movie', tmdb_id=item['tmdb_id']) }}">{{ item['title'] }} ({{ item['year'] }})</a></span></b>
-                    <br/>{{ ', '.join(item['genres'][:3]) }}
-                    <br/>{{ [item['grade']|int, item['grade']]|max }}/10
-            </td>
-        </tr>
-        {% endfor %}
+    <section class="slide">
+        <div class="slide-header">{{ element['section'] }}</div>
+        <div class="slide-body">
+            <table>
+            {% for item in element['movies'] %}
+                <tr>
+                    <td class="big-number">
+                        {{ item['rank'] }}<sup><span class="suffix">{{ item['suffix'] }}</span></sup>
+                    </td>
+                    <td>
+                        <b>{{ item['title'] }} ({{ item['year'] }})</b>
+                        <br/>{{ ', '.join(item['genres'][:3]) }}
+                        <br/>{{ [item['grade']|int, item['grade']]|max }}/10
+                    </td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+    </section>
     {% endfor %}
 
-    {% if payload.dist_images %}
-    <tr class="top-type">
-        <td class="icon"><img src="/static/images/statistics/activity.png"></td>
-        <td>Volume analysis</td>
-    </tr>
-    {% endif %}
-</table>
-<table class="volume-analysis">
-    {% if payload.dist_images.cumulative %}
-    <tr><td>
-        <img class="chart" src="{{ url_for('static', filename=payload.dist_images.cumulative) }}">
-    </td></tr>
-    <tr><td>
-        Cumulative count
-    </td></tr>
-    {% endif %}
-    {% if payload.dist_images.grade_dist %}
-    <tr><td>
-        <img class="chart" src="{{ url_for('static', filename=payload.dist_images.grade_dist) }}">
-    </td></tr>
-    <tr><td>
-        Grade histogram
-    </td></tr>
-    {% endif %}
-    {% if payload.dist_images.country_dist %}
-    <tr><td>
-        <img class="chart" src="{{ url_for('static', filename=payload.dist_images.country_dist) }}">
-    </td></tr>
-    <tr><td>
-        Country histogram
-    </td></tr>
-    {% endif %}
-    {% if payload.dist_images.decade_dist %}
-    <tr><td>
-        <img class="chart" src="{{ url_for('static', filename=payload.dist_images.decade_dist) }}">
-    </td></tr>
-    <tr><td>
-        Decade histogram
-    </td></tr>
-    {% endif %}
-</table></center>
+    <section class="slide">
+        <div class="slide-body">
+            <span class="outro">That's a wrap</span>
+            {% set movies = payload.activity['viewing activity'] %}
+            <span>{{ movies }} movie{{ 's' if movies > 1 }} in {{ format_timespan(payload.activity['time spent']) }}</span>
+            <span class="hint">Tap to replay</span>
+        </div>
+    </section>
+
+    <div class="chevron left" id="chevron-left"></div>
+    <div class="chevron right" id="chevron-right"></div>
 
 </div>
+{% endif %}
+
+{# After the story, which would otherwise cover it #}
+{% include 'base/alert.html' %}
 
 </body>
 </html>

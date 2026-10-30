@@ -23,7 +23,8 @@ from app import db, login
 from app.converters import TitleConverter
 from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
-from app.graphutils import plot_distribution, plot_cumulative, plot_calendar, cleanup_distribution_plots
+from app.graphutils import plot_distribution, plot_cumulative, plot_calendar, plot_scatter, \
+    cleanup_distribution_plots
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem, DUMMY_PASSWORD_HASH
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
@@ -276,7 +277,8 @@ def add_rank_and_suffix(item, rank):
     return item
 
 def generate_dist_images(grade_dist: dict, decade_dist: dict, country_dist: Optional[dict] = None,
-                         daily_counts: Optional[dict] = None, year: Optional[int] = None) -> dict:
+                         daily_counts: Optional[dict] = None, year: Optional[int] = None,
+                         ratings: Optional[list] = None) -> dict:
     # Name the files after the user id, never the username, which is user input. The underscore keeps the cleanup
     # of user 1 off the files of user 12
     prefix = f'generated/{current_user.id}_'
@@ -316,6 +318,10 @@ def generate_dist_images(grade_dist: dict, decade_dist: dict, country_dist: Opti
         plot_cumulative(daily_counts, year, end, path.join(CURRENT_DIR, f'static/{images["cumulative"]}'))
         images['calendar'] = f'{prefix}{timestamp}_calendar.svg'
         plot_calendar(daily_counts, year, end, path.join(CURRENT_DIR, f'static/{images["calendar"]}'))
+    # Generate new scatter plot of the grades against the IMDb ratings
+    if ratings:
+        images['scatter'] = f'{prefix}{timestamp}_scatter.svg'
+        plot_scatter(ratings, path.join(CURRENT_DIR, f'static/{images["scatter"]}'))
     return images
 
 
@@ -427,11 +433,10 @@ def retrospective():
     year_applicable = (date.today() - timedelta(days=31)).year
     # Compute totals for the applicable year and the whole previous one
     previous_year = year_applicable - 1
-    activity_metrics = ['viewing activity', 'time spent', 'average grade', 'imdb correlation', 'imdb median']
+    activity_metrics = ['viewing activity', 'time spent', 'average grade', 'imdb correlation']
     year_expr = cast(db.extract('year', Record.date), Integer)
     totals = db.session.query(year_expr, func.count(Title.title), func.coalesce(func.sum(Title.runtime), 0),
-                              func.avg(Record.grade), func.corr(Record.grade, Title.imdb_rating),
-                              func.percentile_cont(0.5).within_group(Title.imdb_rating)) \
+                              func.avg(Record.grade), func.corr(Record.grade, Title.imdb_rating)) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
         .filter(year_expr.in_([previous_year, year_applicable])) \
@@ -439,15 +444,9 @@ def retrospective():
         .group_by(year_expr) \
         .all()
     totals = {year: dict(zip(activity_metrics, values)) for year, *values in totals}
-    empty_totals = dict(zip(activity_metrics, [0, 0, None, None, None]))
+    empty_totals = dict(zip(activity_metrics, [0, 0, None, None]))
     activity = {**empty_totals, **totals.get(year_applicable, {})}
     previous_activity = {**empty_totals, **totals.get(previous_year, {})}
-    # Count the directors discovered in each of the two years
-    with open(path.join(CURRENT_DIR, 'queries/directors_discovered.sql')) as f:
-        sql = f.read().format(user_id=current_user.id, year=year_applicable, previous_year=previous_year)
-    discovered = dict(execute_text(sql).fetchall())
-    activity['directors discovered'] = discovered.get(year_applicable, 0)
-    previous_activity['directors discovered'] = discovered.get(previous_year, 0)
     # Query best and worst movies from applicable year
     # Use original title for French movies if user preference is enabled
     title_expr = case(
@@ -501,19 +500,44 @@ def retrospective():
         .filter(year_expr.in_([previous_year, year_applicable])) \
         .group_by(Record.date) \
         .all()
+    # Pair each grade with the IMDb rating of its movie, for the scatter plot
+    ratings = db.session.query(Title.imdb_rating, Record.grade) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
+        .filter(Record.include_in_recent == True) \
+        .filter(db.extract('year', Record.date) == year_applicable) \
+        .filter(Title.imdb_rating != None) \
+        .all()
+    # Pick the month, country and decade with the most movies, shown above their charts
+    favourites = {}
+    month_counts = Counter()
+    for day, count in daily_counts:
+        if day.year == year_applicable:
+            month_counts[day.month] += count
+    if month_counts:
+        month, count = month_counts.most_common(1)[0]
+        favourites['month'] = (date(year_applicable, month, 1).strftime('%B'), count)
+    # Show the country as its flag, the emoji made of the two regional indicator letters of its code
+    if country_dist_dict:
+        country, count = next(iter(country_dist_dict.items()))
+        favourites['country'] = (''.join(chr(0x1F1E6 + ord(letter) - ord('A')) for letter in country), count)
+    if decade_dist_dict:
+        decade, count = max(decade_dist_dict.items(), key=lambda item: item[1])
+        favourites['decade'] = (f'{decade}s', count)
     # Create object to be used by Flask
     # Skip the best/worst sections when nothing was logged this year
     movies = [
-        {'section': f'Best of {year_applicable}', 'movies': best, 'image': 'best.png'},
-        {'section': f'Worst of {year_applicable}', 'movies': worst, 'image': 'worst.png'}
+        {'section': f'Best of {year_applicable}', 'movies': best},
+        {'section': f'Worst of {year_applicable}', 'movies': worst}
     ] if best else []
     payload = {
         'activity': activity,
         'previous_activity': previous_activity,
         'movies': movies,
         'year_applicable': year_applicable,
+        'favourites': favourites,
         'dist_images': generate_dist_images(grade_dist_dict, decade_dist_dict, country_dist_dict,
-                                            dict(daily_counts), year_applicable),
+                                            dict(daily_counts), year_applicable, [tuple(row) for row in ratings]),
         'is_empty': not activity['viewing activity'],
     }
     return render_template('retrospective.html', payload=payload, metadata={})

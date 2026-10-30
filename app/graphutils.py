@@ -1,3 +1,4 @@
+import math
 import os
 from contextlib import suppress
 from datetime import date, timedelta
@@ -156,6 +157,40 @@ def plot_calendar(daily_counts: Dict[date, int], year: int, end: date, path: str
         slot = day.day - 1 + day.replace(day=1).weekday()
         parts.append(f'<rect x="{left + slot % 7 * pitch}" y="{top + 34 + slot // 7 * pitch}" '
                      f'width="{side}" height="{side}" rx="3" fill="{fill}"{outline}/>')
+    parts += ['</g>', '</svg>']
+    with open(path, 'w') as f:
+        f.write(''.join(parts))
+
+
+def plot_scatter(ratings: List[tuple], path: str) -> None:
+    # Each movie is a dot: its IMDb rating across, spanning the ratings seen, and the user's grade up, from 0 to 10
+    left, right = 50, WIDTH - 20
+    lowest = math.floor(min(float(rating) for rating, _ in ratings))
+    highest = max(math.ceil(max(float(rating) for rating, _ in ratings)), lowest + 1)
+    def x(rating: float) -> float:
+        return left + (float(rating) - lowest) / (highest - lowest) * (right - left)
+    def y(grade: float) -> float:
+        return BASELINE_Y - float(grade) / 10 * (BASELINE_Y - TOP_PADDING)
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {HEIGHT}" '
+        f'width="{WIDTH}" height="{HEIGHT}">',
+        f'<rect width="{WIDTH}" height="{HEIGHT}" fill="white"/>',
+        f'<g font-family="{FONT_FAMILY}" font-size="{FONT_SIZE}" fill="{THEME_COLOUR}">',
+    ]
+    # Draw a light line every other grade, labelled on the left, and label each IMDb rating underneath
+    for grade in range(0, 11, 2):
+        parts.append(f'<line x1="{left}" y1="{y(grade):.1f}" x2="{right}" y2="{y(grade):.1f}" '
+                     f'stroke="{EMPTY_COLOUR}" stroke-width="2"/>')
+        parts.append(f'<text x="{left - 12}" y="{y(grade) + 8:.1f}" text-anchor="end">{grade}</text>')
+    for rating in range(lowest, highest + 1):
+        parts.append(f'<text x="{x(rating):.1f}" y="{HEIGHT - 6}" text-anchor="middle">{rating}</text>')
+    # Name the axes in the corners movies seldom reach: a low IMDb rating graded high, a high one graded low
+    parts.append(f'<text x="{left + 10}" y="{TOP_PADDING - 10}">your grade</text>')
+    parts.append(f'<text x="{right}" y="{BASELINE_Y - 14}" text-anchor="end">IMDb rating</text>')
+    # Draw the dots translucent, so that several movies at the same spot show darker
+    for rating, grade in ratings:
+        parts.append(f'<circle cx="{x(rating):.1f}" cy="{y(grade):.1f}" r="10" fill="{THEME_COLOUR}" '
+                     f'fill-opacity="0.45"/>')
     parts += ['</g>', '</svg>']
     with open(path, 'w') as f:
         f.write(''.join(parts))
