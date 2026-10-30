@@ -124,6 +124,20 @@
     {% endif %}
 </table>
 <table class="volume-analysis">
+    {% if payload.dist_images.cumulative %}
+    <tr><td>
+        <img class="chart" src="{{ url_for('static', filename=payload.dist_images.cumulative) }}">
+    </td></tr>
+    <tr><td>
+        Cumulative count
+    </td></tr>
+    <tr><td>
+        <img class="chart" src="{{ url_for('static', filename=payload.dist_images.calendar) }}">
+    </td></tr>
+    <tr><td>
+        Calendar heatmap
+    </td></tr>
+    {% endif %}
     {% if payload.dist_images.grade_dist %}
     <tr><td>
         <img class="chart" src="{{ url_for('static', filename=payload.dist_images.grade_dist) }}">

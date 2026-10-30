@@ -23,7 +23,7 @@ from app import db, login
 from app.converters import TitleConverter
 from app.dbutils import upsert_title_metadata, async_execute_text, execute_text
 from app.forms import RegistrationForm
-from app.graphutils import plot_distribution, cleanup_distribution_plots
+from app.graphutils import plot_distribution, plot_cumulative, plot_calendar, cleanup_distribution_plots
 from app.models import Record, Title, Top, WatchlistItem, User, Person, BlacklistItem, DUMMY_PASSWORD_HASH
 from app.titles import TitleCollector
 from lib.overseerr import Overseerr
@@ -275,7 +275,8 @@ def add_rank_and_suffix(item, rank):
     item['suffix'] = get_number_suffix(rank)
     return item
 
-def generate_dist_images(grade_dist: dict, decade_dist: dict, country_dist: Optional[dict] = None) -> dict:
+def generate_dist_images(grade_dist: dict, decade_dist: dict, country_dist: Optional[dict] = None,
+                         daily_counts: Optional[dict] = None, year: Optional[int] = None) -> dict:
     # Name the files after the user id, never the username, which is user input. The underscore keeps the cleanup
     # of user 1 off the files of user 12
     prefix = f'generated/{current_user.id}_'
@@ -308,6 +309,13 @@ def generate_dist_images(grade_dist: dict, decade_dist: dict, country_dist: Opti
             path=path.join(CURRENT_DIR, f'static/{images["country_dist"]}'),
             force_range=list(country_dist)
         )
+    # Generate new cumulative count and calendar plots of the year, drawn up to today while it is under way
+    if daily_counts:
+        end = min(date.today(), date(year, 12, 31))
+        images['cumulative'] = f'{prefix}{timestamp}_cumulative.svg'
+        plot_cumulative(daily_counts, year, end, path.join(CURRENT_DIR, f'static/{images["cumulative"]}'))
+        images['calendar'] = f'{prefix}{timestamp}_calendar.svg'
+        plot_calendar(daily_counts, year, end, path.join(CURRENT_DIR, f'static/{images["calendar"]}'))
     return images
 
 
@@ -485,6 +493,14 @@ def retrospective():
         .all()
     country_dist_dict = dict(Counter(country for countries, in origin_countries for country in countries or [])
                              .most_common(10))
+    # Count the movies watched each day of the applicable year and of the previous one, for the cumulative count
+    # and calendar plots
+    daily_counts = db.session.query(Record.date, func.count()) \
+        .filter(Record.user_id == current_user.id) \
+        .filter(Record.include_in_recent == True) \
+        .filter(year_expr.in_([previous_year, year_applicable])) \
+        .group_by(Record.date) \
+        .all()
     # Create object to be used by Flask
     # Skip the best/worst sections when nothing was logged this year
     movies = [
@@ -496,7 +512,8 @@ def retrospective():
         'previous_activity': previous_activity,
         'movies': movies,
         'year_applicable': year_applicable,
-        'dist_images': generate_dist_images(grade_dist_dict, decade_dist_dict, country_dist_dict),
+        'dist_images': generate_dist_images(grade_dist_dict, decade_dist_dict, country_dist_dict,
+                                            dict(daily_counts), year_applicable),
         'is_empty': not activity['viewing activity'],
     }
     return render_template('retrospective.html', payload=payload, metadata={})
