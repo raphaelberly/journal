@@ -359,6 +359,7 @@ def statistics():
     else:
         total_applicable = Record.query \
             .filter_by(user_id=current_user.id) \
+            .filter_by(include_in_recent=True) \
             .filter(db.extract('year', Record.date) == year_applicable) \
             .count()
     # Query best and worst movies from applicable year
@@ -479,6 +480,7 @@ def retrospective():
         .query(decade_expr, func.count()) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
+        .filter(Record.include_in_recent == True) \
         .filter(db.extract('year', Record.date) == year_applicable) \
         .group_by(decade_expr) \
         .all()
