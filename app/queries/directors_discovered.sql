@@ -15,7 +15,6 @@ SELECT
   date_part('year', f.date)::INT AS year,
   count(*) AS count
 FROM first_seen f
-WHERE date_part('year', f.date) = {year}
-   OR f.date BETWEEN '{previous_start}' AND '{previous_end}'
+WHERE date_part('year', f.date) IN ({previous_year}, {year})
 GROUP BY 1
 ;

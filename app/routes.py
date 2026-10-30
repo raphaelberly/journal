@@ -1,10 +1,12 @@
 import logging
 import re
 import traceback
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, UTC
 from os import makedirs, path
 from threading import Thread
+from typing import Optional
 from urllib.parse import urlsplit
 
 from flask import render_template, request, url_for, flash, send_from_directory
@@ -273,7 +275,7 @@ def add_rank_and_suffix(item, rank):
     item['suffix'] = get_number_suffix(rank)
     return item
 
-def generate_dist_images(grade_dist: dict, decade_dist: dict) -> dict:
+def generate_dist_images(grade_dist: dict, decade_dist: dict, country_dist: Optional[dict] = None) -> dict:
     # Name the files after the user id, never the username, which is user input. The underscore keeps the cleanup
     # of user 1 off the files of user 12
     prefix = f'generated/{current_user.id}_'
@@ -297,6 +299,14 @@ def generate_dist_images(grade_dist: dict, decade_dist: dict) -> dict:
             key_values=decade_dist,
             path=path.join(CURRENT_DIR, f'static/{images["decade_dist"]}'),
             force_range=list(range(min(decade_dist.keys()), max(decade_dist.keys()) + 10, 10))
+        )
+    # Generate new country distribution plot, keeping the countries in their given order
+    if country_dist:
+        images['country_dist'] = f'{prefix}{timestamp}_country_dist.svg'
+        plot_distribution(
+            key_values=country_dist,
+            path=path.join(CURRENT_DIR, f'static/{images["country_dist"]}'),
+            force_range=list(country_dist)
         )
     return images
 
@@ -407,10 +417,8 @@ def statistics():
 def retrospective():
     # Year applicable = this year if today > January 31st, else last year
     year_applicable = (date.today() - timedelta(days=31)).year
-    # Compare with the previous year up to the same date while the applicable year is still under way
+    # Compute totals for the applicable year and the whole previous one
     previous_year = year_applicable - 1
-    previous_end = min(date(previous_year, 12, 31), date.today() - timedelta(days=365))
-    # Compute totals for the applicable year and the previous one
     activity_metrics = ['viewing activity', 'time spent', 'average grade', 'imdb correlation', 'imdb median']
     year_expr = cast(db.extract('year', Record.date), Integer)
     totals = db.session.query(year_expr, func.count(Title.title), func.coalesce(func.sum(Title.runtime), 0),
@@ -418,7 +426,7 @@ def retrospective():
                               func.percentile_cont(0.5).within_group(Title.imdb_rating)) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
-        .filter(or_(year_expr == year_applicable, Record.date.between(date(previous_year, 1, 1), previous_end))) \
+        .filter(year_expr.in_([previous_year, year_applicable])) \
         .filter(Record.include_in_recent == True) \
         .group_by(year_expr) \
         .all()
@@ -428,8 +436,7 @@ def retrospective():
     previous_activity = {**empty_totals, **totals.get(previous_year, {})}
     # Count the directors discovered in each of the two years
     with open(path.join(CURRENT_DIR, 'queries/directors_discovered.sql')) as f:
-        sql = f.read().format(user_id=current_user.id, year=year_applicable,
-                              previous_start=date(previous_year, 1, 1), previous_end=previous_end)
+        sql = f.read().format(user_id=current_user.id, year=year_applicable, previous_year=previous_year)
     discovered = dict(execute_text(sql).fetchall())
     activity['directors discovered'] = discovered.get(year_applicable, 0)
     previous_activity['directors discovered'] = discovered.get(previous_year, 0)
@@ -469,6 +476,15 @@ def retrospective():
         .group_by(decade_expr) \
         .all()
     decade_dist_dict = {decade: count for decade, count in decade_dist if decade is not None}
+    # Generate a country distribution image of the 10 most frequent countries, a movie counting for each of its own
+    origin_countries = db.session.query(Title.origin_countries) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
+        .filter(Record.include_in_recent == True) \
+        .filter(db.extract('year', Record.date) == year_applicable) \
+        .all()
+    country_dist_dict = dict(Counter(country for countries, in origin_countries for country in countries or [])
+                             .most_common(10))
     # Create object to be used by Flask
     # Skip the best/worst sections when nothing was logged this year
     movies = [
@@ -478,11 +494,9 @@ def retrospective():
     payload = {
         'activity': activity,
         'previous_activity': previous_activity,
-        'previous_desc': f'vs {previous_year}' if previous_end == date(previous_year, 12, 31)
-                         else f'vs {previous_end.strftime("%b %-d, %Y")}',
         'movies': movies,
         'year_applicable': year_applicable,
-        'dist_images': generate_dist_images(grade_dist_dict, decade_dist_dict),
+        'dist_images': generate_dist_images(grade_dist_dict, decade_dist_dict, country_dist_dict),
         'is_empty': not activity['viewing activity'],
     }
     return render_template('retrospective.html', payload=payload, metadata={})

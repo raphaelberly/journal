@@ -26,12 +26,13 @@
         <td>Viewing activity</td>
     </tr>
     {# Show how a KPI moved since the previous year: green when up, red when down, gray when unchanged #}
-    {% macro evolution(key, precision) %}
+    {% macro evolution(key, precision, leading_zero=true) %}
         {% set current, previous = payload.activity[key], payload.previous_activity[key] %}
         {% if current is not none and previous is not none %}
             {% set delta = (current - previous)|round(precision) %}
+            {% set delta_text = ('%+.' ~ precision ~ 'f')|format(delta) %}
             <br/><span class="evolution {{ 'up' if delta > 0 else 'down' if delta < 0 else 'flat' }}">
-                {{ ('%+.' ~ precision ~ 'f')|format(delta) if delta else 'unchanged' }} {{ payload.previous_desc }}
+                {{ (delta_text if leading_zero else delta_text|replace('0.', '.', 1)) if delta else 'unchanged' }} vs previous year
             </span>
         {% endif %}
     {% endmacro %}
@@ -63,12 +64,12 @@
     {% if payload.activity['imdb correlation'] is not none %}
     <tr>
         <td class="big-number">
-            {{ '%.2f'|format(payload.activity['imdb correlation']) }}
+            {{ '%.2f'|format(payload.activity['imdb correlation'])|replace('0.', '.', 1) }}
         </td>
         <td>
             <b>correlation with IMDb</b><br/>
             1 if your grades follow IMDb's
-            {{ evolution('imdb correlation', 2) }}
+            {{ evolution('imdb correlation', 2, leading_zero=false) }}
         </td>
     </tr>
     {% endif %}
@@ -129,6 +130,14 @@
     </td></tr>
     <tr><td>
         Grade histogram
+    </td></tr>
+    {% endif %}
+    {% if payload.dist_images.country_dist %}
+    <tr><td>
+        <img class="chart" src="{{ url_for('static', filename=payload.dist_images.country_dist) }}">
+    </td></tr>
+    <tr><td>
+        Country histogram
     </td></tr>
     {% endif %}
     {% if payload.dist_images.decade_dist %}
