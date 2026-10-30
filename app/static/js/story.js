@@ -38,6 +38,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.slide').forEach(() => {
         document.getElementById('progress').appendChild(document.createElement('span'));
     });
+    // A tap on a progress segment jumps to its slide, and one between two segments does nothing
+    const progress = document.getElementById('progress');
+    progress.addEventListener('click', event => {
+        event.stopPropagation();
+        const index = [...progress.children].indexOf(event.target);
+        if (index >= 0) {
+            showSlide(index);
+        }
+    });
     story.addEventListener('click', event => {
         showSlide(event.clientX < window.innerWidth / 3 ? Math.max(currentSlide - 1, 0) : currentSlide + 1);
     });
