@@ -82,3 +82,19 @@ img.chart {
     width: 100%;
     max-width: 400px;
 }
+
+.evolution {
+    font-size: 14px;
+}
+
+.evolution.up {
+    color: #5f974f;
+}
+
+.evolution.down {
+    color: #BE6C6B;
+}
+
+.evolution.flat {
+    color: #999999;
+}

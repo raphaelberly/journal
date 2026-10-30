@@ -407,14 +407,32 @@ def statistics():
 def retrospective():
     # Year applicable = this year if today > January 31st, else last year
     year_applicable = (date.today() - timedelta(days=31)).year
-    # Compute totals for the applicable year
-    totals = db.session.query(func.coalesce(func.count(Title.title), 0), func.coalesce(func.sum(Title.runtime), 0), func.coalesce(func.avg(Record.grade), 0)) \
+    # Compare with the previous year up to the same date while the applicable year is still under way
+    previous_year = year_applicable - 1
+    previous_end = min(date(previous_year, 12, 31), date.today() - timedelta(days=365))
+    # Compute totals for the applicable year and the previous one
+    activity_metrics = ['viewing activity', 'time spent', 'average grade', 'imdb correlation', 'imdb median']
+    year_expr = cast(db.extract('year', Record.date), Integer)
+    totals = db.session.query(year_expr, func.count(Title.title), func.coalesce(func.sum(Title.runtime), 0),
+                              func.avg(Record.grade), func.corr(Record.grade, Title.imdb_rating),
+                              func.percentile_cont(0.5).within_group(Title.imdb_rating)) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
-        .filter(db.extract('year', Record.date) == year_applicable) \
+        .filter(or_(year_expr == year_applicable, Record.date.between(date(previous_year, 1, 1), previous_end))) \
         .filter(Record.include_in_recent == True) \
-        .first()
-    activity = dict(zip(['viewing activity', 'time spent', 'average grade'], totals))
+        .group_by(year_expr) \
+        .all()
+    totals = {year: dict(zip(activity_metrics, values)) for year, *values in totals}
+    empty_totals = dict(zip(activity_metrics, [0, 0, None, None, None]))
+    activity = {**empty_totals, **totals.get(year_applicable, {})}
+    previous_activity = {**empty_totals, **totals.get(previous_year, {})}
+    # Count the directors discovered in each of the two years
+    with open(path.join(CURRENT_DIR, 'queries/directors_discovered.sql')) as f:
+        sql = f.read().format(user_id=current_user.id, year=year_applicable,
+                              previous_start=date(previous_year, 1, 1), previous_end=previous_end)
+    discovered = dict(execute_text(sql).fetchall())
+    activity['directors discovered'] = discovered.get(year_applicable, 0)
+    previous_activity['directors discovered'] = discovered.get(previous_year, 0)
     # Query best and worst movies from applicable year
     # Use original title for French movies if user preference is enabled
     title_expr = case(
@@ -459,6 +477,9 @@ def retrospective():
     ] if best else []
     payload = {
         'activity': activity,
+        'previous_activity': previous_activity,
+        'previous_desc': f'vs {previous_year}' if previous_end == date(previous_year, 12, 31)
+                         else f'vs {previous_end.strftime("%b %-d, %Y")}',
         'movies': movies,
         'year_applicable': year_applicable,
         'dist_images': generate_dist_images(grade_dist_dict, decade_dist_dict),

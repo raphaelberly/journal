@@ -25,6 +25,16 @@
         <td class="icon"><img src="/static/images/statistics/television.png"></td>
         <td>Viewing activity</td>
     </tr>
+    {# Show how a KPI moved since the previous year: green when up, red when down, gray when unchanged #}
+    {% macro evolution(key, precision) %}
+        {% set current, previous = payload.activity[key], payload.previous_activity[key] %}
+        {% if current is not none and previous is not none %}
+            {% set delta = (current - previous)|round(precision) %}
+            <br/><span class="evolution {{ 'up' if delta > 0 else 'down' if delta < 0 else 'flat' }}">
+                {{ ('%+.' ~ precision ~ 'f')|format(delta) if delta else 'unchanged' }} {{ payload.previous_desc }}
+            </span>
+        {% endif %}
+    {% endmacro %}
     <tr>
         <td class="big-number">
             {{ payload.activity['viewing activity']|round(1) }}
@@ -36,6 +46,7 @@
             {% else %}
             {{ format_timespan(payload.activity['time spent']) }}
             {% endif %}
+            {{ evolution('viewing activity', 0) }}
         </td>
     </tr>
     {% if not payload.is_empty %}
@@ -46,6 +57,41 @@
         <td>
             <b>average grade</b><br/>
             out of 10
+            {{ evolution('average grade', 1) }}
+        </td>
+    </tr>
+    {% if payload.activity['imdb correlation'] is not none %}
+    <tr>
+        <td class="big-number">
+            {{ '%.2f'|format(payload.activity['imdb correlation']) }}
+        </td>
+        <td>
+            <b>correlation with IMDb</b><br/>
+            1 if your grades follow IMDb's
+            {{ evolution('imdb correlation', 2) }}
+        </td>
+    </tr>
+    {% endif %}
+    {% if payload.activity['imdb median'] is not none %}
+    <tr>
+        <td class="big-number">
+            {{ payload.activity['imdb median']|round(1) }}
+        </td>
+        <td>
+            <b>median IMDb rating</b><br/>
+            of the movies you watched
+            {{ evolution('imdb median', 1) }}
+        </td>
+    </tr>
+    {% endif %}
+    <tr>
+        <td class="big-number">
+            {{ payload.activity['directors discovered'] }}
+        </td>
+        <td>
+            <b>directors discovered</b><br/>
+            whose movies you had never seen
+            {{ evolution('directors discovered', 0) }}
         </td>
     </tr>
     {% endif %}
