@@ -75,6 +75,9 @@ class Overseerr(object):
     def request_status(self, tmdb_id: int) -> int:
         response = self._get(f'movie/{tmdb_id}')
         try:
+            # A movie on Plex in 4K only is available all the same
+            if response['mediaInfo']['status4k'] == 5:
+                return 5
             return response['mediaInfo']['status']
         except (KeyError, TypeError):
             return -1
@@ -95,22 +98,21 @@ class Overseerr(object):
                 output[item['media']['tmdbId']] = item['media']['status']
         return output
 
-    def available_movies(self) -> set:
+    def movie_statuses(self) -> dict:
         # List the whole library when the last list is a day old, in one page. TV shows are listed too, with ids of
         # their own that may match a movie's. Keep the last list if the call fails
         if self._library_read_at is None or monotonic() - self._library_read_at > self.LIBRARY_MAX_AGE_SECONDS:
-            response = self._get('media?filter=available&take=10000&skip=0')
+            # No filter=available: it only reads the status of the regular copy, and leaves out the movies on Plex in
+            # 4K only. Keep the movies available in either
+            response = self._get('media?take=10000&skip=0')
             if response is not None and 'results' in response:
-                self._library = {item['tmdbId'] for item in response['results'] if item['mediaType'] == 'movie'}
+                self._library = {
+                    item['tmdbId'] for item in response['results']
+                    if item['mediaType'] == 'movie' and 5 in (item['status'], item['status4k'])
+                }
                 self._library_read_at = monotonic()
         # The last requests of the account are fresher than the library: let their status win
-        available = set(self._library)
-        for tmdb_id, status in self.request_statuses(self.RECENT_REQUEST_NB).items():
-            if status == 5:
-                available.add(tmdb_id)
-            else:
-                available.discard(tmdb_id)
-        return available
+        return {**dict.fromkeys(self._library, 5), **self.request_statuses(self.RECENT_REQUEST_NB)}
 
     def request_title(self, tmdb_id: int) -> None:
         payload = {'mediaId': tmdb_id, 'mediaType': 'movie', 'is4k': False}

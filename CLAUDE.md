@@ -256,11 +256,16 @@ Other conventions worth keeping:
   again. Every call site must check `overseerr.is_available` first, and
   `current_user.plex_allowed`: go through `get_plex_status`, `start_plex_lookup` and
   `request_on_plex`, which do both. The server is actually Jellyseerr, whose API is
-  Overseerr's. `available_movies` (for the Search page) lists the whole library once a day
-  per worker (`media?filter=available`, ~1 MB, TV shows included and filtered out), then
-  lets the last 10 requests of the account override it, so that a request becoming
-  available shows at once; every journal request goes through that one account. The search
-  starts it on `plex_executor` before calling TMDb, and reads it once the titles are in.
+  Overseerr's. `movie_statuses` (for the Search page) lists the whole library once a day
+  per worker (`media`, ~1 MB, TV shows included and filtered out), then
+  lets the status of the last 10 requests of the account override it, so that a request
+  becoming available shows at once, and a pending one hides the "Request on Plex" button;
+  every journal request goes through that one account. The search starts it on
+  `plex_executor` before calling TMDb, and waits for it once the titles are in. Jellyseerr
+  keeps a separate `status4k`: a movie on Plex in 4K only counts as available, on every page.
+  Hence no `filter=available` on the library, which only reads `status`: the app keeps the
+  movies whose `status` or `status4k` is 5 itself, since the list also holds the requested,
+  downloading and deleted ones.
 - **Pushover** (`lib/push.py`) — alerts from the cron scripts on failure.
 - **IMDb datasets** — downloaded by `lib/etl.py`, which truncates the target `imdb.*` table
   and re-inserts in batches of 1000 with generated INSERT statements. It is written to run

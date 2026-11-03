@@ -589,22 +589,27 @@ def search():
             tmdb_id = int(get_post_result('move_to_top_of_watchlist'))
             move_to_top_of_watchlist(tmdb_id)
             flash('Moved to the top of the watchlist', category='success')
+        elif 'request_on_plex' in request.form:
+            request_on_plex(int(get_post_result('request_on_plex')))
 
     query = request.args['query']
     nb_results = int(request.args.get('nb_results', 10))
     plex_lookup = start_plex_lookup()
     result_ids = title_collector.tmdb.search(query)
     payload = enrich_results(title_collector.collect_bulk(result_ids[:nb_results]))
-    # Add Plex to the providers of the movies available there
-    available_on_plex = plex_lookup.result() if plex_lookup else set()
+    # Add Plex to the providers of the movies available there, and flag the ones with a pending request
+    plex_statuses = plex_lookup.result() if plex_lookup else {}
     for title in payload:
-        if title['id'] in available_on_plex:
+        plex_status = plex_statuses.get(title['id'], -1)
+        if plex_status == 5:
             title['providers'].append('plex')
+        title['plex_request_pending'] = 1 <= plex_status <= 4
     metadata = {
         'query': query,
         'scroll_to': int(float(request.args.get('scroll_to', 0))),
         'show_more_button': nb_results < len(result_ids),
         'providers': current_user.providers,
+        'overseerr_available': overseerr.is_available,
     }
     return render_template('search.html', payload=payload, metadata=metadata)
 
@@ -626,11 +631,11 @@ def get_plex_status(tmdb_id):
 
 
 def start_plex_lookup():
-    # Start listing the movies available on Plex in the background, so that it runs while the page waits for TMDb.
-    # Only for the accounts allowed on Plex that show it
+    # Start listing the status of the movies on Plex in the background, so that it runs while the page waits for
+    # TMDb. Only for the accounts allowed on Plex that show it
     if not current_user.plex_allowed or 'plex' not in current_user.providers or not overseerr.is_available:
         return None
-    return plex_executor.submit(overseerr.available_movies)
+    return plex_executor.submit(overseerr.movie_statuses)
 
 
 def request_on_plex(tmdb_id):

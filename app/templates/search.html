@@ -84,6 +84,20 @@
         {% endfor %}
         </div>
     </td></tr>
+    {% elif 'plex' in metadata.providers and metadata.overseerr_available %} <!-- When none of user's providers has the movie, but plex is one of them -->
+        {% if not item.plex_request_pending %} <!-- Then add a button to make a request -->
+    <tr><td>
+        <form onsubmit="this.action=add_scroll('{{ url_for('search', query=metadata.query, nb_results=payload|length) }}');" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="request_on_plex" value="{{ item.id }}">
+            <div class="request-on-plex"><input type="submit" value="Request on Plex" onclick="javascript:if (window.confirm('Request on Plex?')) {return true;} else {return false;}"></div>
+        </form>
+    </td></tr>
+        {% else %} <!-- Else confirm that a request exists -->
+    <tr><td>
+        <div class="pending-request-on-plex">Pending request on Plex</div>
+    </td></tr>
+        {% endif %}
     {% endif %}
     <tr><td>
         {% if not item.grade %}
