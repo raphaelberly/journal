@@ -64,7 +64,6 @@
             {{ payload.activity['viewing activity'] }}
         </span>
         <br/><b>movies watched in {{ payload.year_applicable }}</b>
-        <br/>{{ format_timespan(payload.activity['time spent']) }}
         {{ evolution('viewing activity', 0) }}
     {% endcall %}
 
@@ -73,7 +72,6 @@
             {{ '%.1f'|format(payload.activity['average grade']) }}
         </span>
         <br/><b>average grade</b>
-        <br/>out of 10
         {{ evolution('average grade', 1) }}
     {% endcall %}
 
@@ -89,7 +87,6 @@
         <span class="kpi-number" data-count="{{ payload.activity['imdb correlation'] }}" data-decimals="2"
               data-trim-zero>{{ '%.2f'|format(payload.activity['imdb correlation'])|replace('0.', '.', 1) }}</span>
         <br/><b>correlation with IMDb</b>
-        <br/>1 if your grades follow IMDb's
         {{ evolution('imdb correlation', 2, leading_zero=false) }}
     {% endcall %}
     {% endif %}
@@ -99,7 +96,7 @@
     {% call kpi_slide('Your favourite countries', 'country_dist') %}
         <span class="kpi-number">{{ flag }}</span>
         <br/><b>your favourite country</b>
-        <br/>{{ count }} movie{{ 's' if count > 1 }}
+        <br/>{{ count }} movie{{ 's' if count > 1 }} ({{ (100 * count / payload.activity['viewing activity'])|round|int }}%)
     {% endcall %}
     {% endif %}
 
@@ -108,7 +105,7 @@
     {% call kpi_slide('Your favourite decades', 'decade_dist') %}
         <span class="kpi-number">{{ decade }}</span>
         <br/><b>your favourite decade</b>
-        <br/>{{ count }} movie{{ 's' if count > 1 }}
+        <br/>{{ count }} movie{{ 's' if count > 1 }} ({{ (100 * count / payload.activity['viewing activity'])|round|int }}%)
     {% endcall %}
     {% endif %}
 
@@ -138,7 +135,7 @@
         <div class="slide-body">
             <span class="outro">That's a wrap</span>
             {% set movies = payload.activity['viewing activity'] %}
-            <span>{{ movies }} movie{{ 's' if movies > 1 }} in {{ format_timespan(payload.activity['time spent']) }}</span>
+            <span>{{ movies }} movie{{ 's' if movies > 1 }} in {{ payload.year_applicable }}</span>
             <span class="hint">Tap to replay</span>
         </div>
     </section>

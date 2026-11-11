@@ -434,10 +434,10 @@ def retrospective():
     year_applicable = (date.today() - timedelta(days=31)).year
     # Compute totals for the applicable year and the whole previous one
     previous_year = year_applicable - 1
-    activity_metrics = ['viewing activity', 'time spent', 'average grade', 'imdb correlation']
+    activity_metrics = ['viewing activity', 'average grade', 'imdb correlation']
     year_expr = cast(db.extract('year', Record.date), Integer)
-    totals = db.session.query(year_expr, func.count(Title.title), func.coalesce(func.sum(Title.runtime), 0),
-                              func.avg(Record.grade), func.corr(Record.grade, Title.imdb_rating)) \
+    totals = db.session.query(year_expr, func.count(Title.title), func.avg(Record.grade),
+                              func.corr(Record.grade, Title.imdb_rating)) \
         .select_from(Record).join(Title) \
         .filter(Record.user_id == current_user.id) \
         .filter(year_expr.in_([previous_year, year_applicable])) \
@@ -445,7 +445,7 @@ def retrospective():
         .group_by(year_expr) \
         .all()
     totals = {year: dict(zip(activity_metrics, values)) for year, *values in totals}
-    empty_totals = dict(zip(activity_metrics, [0, 0, None, None]))
+    empty_totals = dict(zip(activity_metrics, [0, None, None]))
     activity = {**empty_totals, **totals.get(year_applicable, {})}
     previous_activity = {**empty_totals, **totals.get(previous_year, {})}
     # Query best and worst movies from applicable year

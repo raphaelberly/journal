@@ -134,9 +134,9 @@ def plot_cumulative(daily_counts: Dict[date, int], year: int, end: date, path: s
 
 
 def plot_calendar(daily_counts: Dict[date, int], year: int, end: date, path: str) -> None:
-    # One block per month, four blocks a row, each a calendar of square days starting on Monday
-    block_width, block_height, pitch, side = 175, 190, 23, 19
-    height = 3 * block_height
+    # One block per month, three blocks a row, each a calendar of square days starting on Monday
+    block_width, block_height, pitch, side = 233, 238, 31, 26
+    height = 4 * block_height
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {height}" '
         f'width="{WIDTH}" height="{height}">',
@@ -144,8 +144,8 @@ def plot_calendar(daily_counts: Dict[date, int], year: int, end: date, path: str
         f'<g font-family="{FONT_FAMILY}" font-size="{FONT_SIZE}" fill="{THEME_COLOUR}">',
     ]
     for day in _days(year):
-        left = (day.month - 1) % 4 * block_width + 7
-        top = (day.month - 1) // 4 * block_height
+        left = (day.month - 1) % 3 * block_width + 7
+        top = (day.month - 1) // 3 * block_height
         if day.day == 1:
             parts.append(f'<text x="{left}" y="{top + 24}">{day.strftime("%b")}</text>')
         # Colour each day by its number of movies, and only outline the days to come
