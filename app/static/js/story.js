@@ -10,6 +10,10 @@ function showSlide(index) {
     document.getElementById('chevron-left').style.visibility = currentSlide > 0 ? 'visible' : 'hidden';
     document.getElementById('chevron-right').style.visibility = currentSlide < slides.length - 1 ? 'visible' : 'hidden';
     slides[currentSlide].querySelectorAll('[data-count]').forEach(countUp);
+    // Celebrate the end of the story as its start, with confetti
+    if (currentSlide === slides.length - 1) {
+        confetti({origin: {y: -0.2}, particleCount: 150, spread: 180, startVelocity: -40});
+    }
 }
 
 // Count a number up from 0 to its value, slowing down towards the end
