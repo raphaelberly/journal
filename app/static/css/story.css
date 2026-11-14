@@ -7,7 +7,7 @@ html, body {
     position: fixed;
     top: 65px;
     top: calc(65px + constant(safe-area-inset-top));
-    top: calc(65px + env(safe-area-inset-top));
+    top: calc(65px + env(safe-area-inset-top) + var(--install-height, 0px));
     bottom: 0;
     bottom: constant(safe-area-inset-bottom);
     bottom: env(safe-area-inset-bottom);

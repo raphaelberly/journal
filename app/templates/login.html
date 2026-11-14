@@ -11,6 +11,7 @@
 <body ontouchstart="">
 
 {% include 'base/alert.html' %}
+{% include 'base/install.html' %}
 
 <form class="auth" method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

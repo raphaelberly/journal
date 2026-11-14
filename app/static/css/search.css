@@ -2,7 +2,7 @@
 .form-search {
 
     position: fixed;
-    top: 0px;
+    top: var(--install-height, 0px);
     width: 100%;
     z-index: 1;
 

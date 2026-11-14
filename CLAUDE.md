@@ -231,6 +231,14 @@ Other conventions worth keeping:
   tap does nothing. Swiping the image down also closes it, as in iOS apps: that is the one
   piece of JS, `static/js/fullscreen.js`, linked by the same pages as `fullscreen.css`; it
   cancels the click a swipe ends with, so that the background button only sees real taps.
+- Phones browsing the site in a tab get a banner suggesting the Home Screen web app
+  (`base/install.html`, included by `menu.html` and `login.html`; `install.css` and
+  `install.js` linked from `head.html`). On iPhone Safari, "How?" opens the steps for its
+  version (Safari 26 moved Share into a menu); on Android, Chrome's `beforeinstallprompt`
+  turns the button into "Install", which needs the 192 and 512 px icons of `manifest.json`.
+  Closing it hides it for 30 days (`localStorage`). The banner pushes the page down through
+  `--install-height`, set on `<html>`: a new bar fixed at the top must add it to its `top`,
+  as `.form-search` and `.story` do.
 
 ## External services
 
