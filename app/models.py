@@ -49,6 +49,8 @@ class User(UserMixin, db.Model):
         self.set_password(password)
         self.email = email
         self.grade_as_int = grade_as_int
+        # Set it explicitly: SQLAlchemy would insert a NULL rather than leave the column to its default
+        self.absolute_dates = False
         self.language = language
         self.providers = providers
         # Plex is the household's: the right to use it is only ever granted by hand, in the database
