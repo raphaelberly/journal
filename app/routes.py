@@ -679,7 +679,7 @@ def remove_from_watchlist(tmdb_id):
 def move_to_top_of_watchlist(tmdb_id):
     items = WatchlistItem.query.filter_by(tmdb_id=tmdb_id, user_id=current_user.id).all()
     for item in items:
-        item.insert_datetime_utc = utcnow()  # We simulate a re-insert in the watchlist
+        item.moved_to_top_datetime_utc = utcnow()
         item.update_datetime_utc = utcnow()
     db.session.commit()
 
@@ -705,7 +705,7 @@ def watchlist():
         .query(WatchlistItem, Title) \
         .select_from(WatchlistItem).join(Title) \
         .filter(WatchlistItem.user_id == current_user.id) \
-        .order_by(WatchlistItem.insert_datetime_utc.desc())
+        .order_by(func.coalesce(WatchlistItem.moved_to_top_datetime_utc, WatchlistItem.insert_datetime_utc).desc())
 
     request_statuses = overseerr.request_statuses() if current_user.plex_allowed and overseerr.is_available else {}
     payload = [(watchlist_item.export(), title.export(current_user.language)) for watchlist_item, title in query.all()]
@@ -797,8 +797,10 @@ def movie(tmdb_id):
                 action = 'added'
                 # Add the movie to the titles table
                 upsert_title_metadata(_title)
-                # Add the movie to the records table
-                record = Record(current_user.id, tmdb_id, grade, date=watched_date, include_in_recent=include_in_recent)
+                # Add the movie to the records table, with when it was added to the watchlist (if in it)
+                item = db.session.get(WatchlistItem, (current_user.id, tmdb_id))
+                record = Record(current_user.id, tmdb_id, grade, date=watched_date, include_in_recent=include_in_recent,
+                                watchlisted_datetime_utc=item.insert_datetime_utc if item else None)
                 db.session.add(record)
                 # Remove from watchlist (if in it)
                 remove_from_watchlist(tmdb_id)

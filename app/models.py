@@ -158,6 +158,7 @@ class WatchlistItem(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     tmdb_id = db.Column(db.Integer, db.ForeignKey(Title.id), primary_key=True)
     providers = db.Column(db.ARRAY(db.String(64)))
+    moved_to_top_datetime_utc = db.Column(db.DateTime)
     insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=utcnow)
 
@@ -203,19 +204,22 @@ class Record(db.Model):
     date = db.Column(db.Date)
     include_in_recent = db.Column(db.Boolean)
     include_in_top_persons = db.Column(db.Boolean)
+    watchlisted_datetime_utc = db.Column(db.DateTime)
     insert_datetime_utc = db.Column(db.DateTime, default=utcnow)
     update_datetime_utc = db.Column(db.DateTime, default=utcnow)
 
     __table_args__ = {"schema": "journal"}
     __tablename__ = "records"
 
-    def __init__(self, user_id, tmdb_id, grade, date=None, include_in_recent=True, include_in_top_persons=True):
+    def __init__(self, user_id, tmdb_id, grade, date=None, include_in_recent=True, include_in_top_persons=True,
+                 watchlisted_datetime_utc=None):
         self.user_id = user_id
         self.tmdb_id = tmdb_id
         self.grade = grade
         self.date = date or datetime.now().date()
         self.include_in_recent = include_in_recent
         self.include_in_top_persons = include_in_top_persons
+        self.watchlisted_datetime_utc = watchlisted_datetime_utc
 
     def __repr__(self):
         return f'<Record: user {self.user_id} watched movie {self.tmdb_id}>'
