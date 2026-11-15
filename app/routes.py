@@ -4,6 +4,7 @@ import traceback
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, UTC
+from math import ceil
 from os import makedirs, path
 from threading import Thread
 from typing import Optional
@@ -42,6 +43,8 @@ MAX_RECOS = 50
 # Invitation links are signed rather than stored, so one may serve several friends until it expires, a week later
 # (in seconds: itsdangerous takes no timedelta)
 INVITE_MAX_AGE = 7 * 24 * 60 * 60
+# Fewest posters the Retrospective shows as a grid: below that, a few big posters do not make a mosaic
+MIN_POSTERS = 12
 invite_serializer = URLSafeTimedSerializer(app.secret_key, salt='invite')
 
 title_collector = TitleCollector()
@@ -534,6 +537,18 @@ def retrospective():
     if decade_dist_dict:
         decade, count = max(decade_dist_dict.items(), key=lambda item: item[1])
         favourites['decade'] = (f'{decade}s', count)
+    # List the posters of the year in watch order, skipping the movies without one
+    posters = db.session.query(Title.id, Title.poster_path) \
+        .select_from(Record).join(Title) \
+        .filter(Record.user_id == current_user.id) \
+        .filter(Record.include_in_recent == True) \
+        .filter(db.extract('year', Record.date) == year_applicable) \
+        .filter(Title.poster_path != None) \
+        .order_by(Record.date, Record.insert_datetime_utc) \
+        .all()
+    # Lay them out in the number of columns making them biggest, on a slide about 0.6 times as wide as high
+    poster_columns = max(range(1, len(posters) + 1), default=1,
+                         key=lambda columns: min(0.6 / columns, 1 / 1.5 / ceil(len(posters) / columns)))
     # Create object to be used by Flask
     # Skip the best/worst sections when nothing was logged this year
     movies = [
@@ -546,6 +561,8 @@ def retrospective():
         'movies': movies,
         'year_applicable': year_applicable,
         'favourites': favourites,
+        'posters': posters if len(posters) >= MIN_POSTERS else [],
+        'poster_columns': poster_columns,
         'dist_images': generate_dist_images(grade_dist_dict, decade_dist_dict, country_dist_dict,
                                             dict(daily_counts), year_applicable, [tuple(row) for row in ratings]),
         'is_empty': not activity['viewing activity'],

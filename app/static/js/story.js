@@ -52,6 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     story.addEventListener('click', event => {
+        // A tap on a poster opens it full screen, and one on a full screen poster closes it
+        if (event.target.closest('.thumbnail, .fullscreen-image')) {
+            return;
+        }
         showSlide(event.clientX < window.innerWidth / 3 ? Math.max(currentSlide - 1, 0) : currentSlide + 1);
     });
     document.addEventListener('keydown', event => {
@@ -62,4 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     showSlide(0);
+});
+
+// Load the posters of the grid once the page is loaded, so that they show at once on their slide, hidden until then,
+// without holding up the page and its confetti
+window.addEventListener('load', () => {
+    document.querySelectorAll('.grid-poster img').forEach(image => image.loading = 'eager');
 });

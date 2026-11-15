@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/statistics.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/story.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fullscreen.css')}}">
     <script type=text/javascript src="{{ url_for('static', filename='js/story.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/fullscreen.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 
@@ -18,6 +20,7 @@
     {% include 'base/menu.html' %}
 {% endwith %}
 
+{% from 'base/fullscreen_image.html' import fullscreen_image %}
 {% if payload.is_empty %}
 <div class="classic">Nothing logged in {{ payload.year_applicable }} yet.</div>
 {% else %}
@@ -130,6 +133,21 @@
         </div>
     </section>
     {% endfor %}
+
+    {% if payload.posters %}
+    {% set rows = (payload.posters|length / payload.poster_columns)|round(0, 'ceil')|int %}
+    <section class="slide">
+        <div class="slide-header">A year in posters.</div>
+        <div class="poster-grid" style="--columns: {{ payload.poster_columns }}; --rows: {{ rows }}">
+            <div>
+            {% for id, poster_path in payload.posters %}
+                {{ fullscreen_image('year-poster-' ~ id, 'https://image.tmdb.org/t/p/w154' ~ poster_path,
+                                    'https://image.tmdb.org/t/p/w780' ~ poster_path, 'grid-poster') }}
+            {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     <section class="slide">
         <div class="slide-body">
