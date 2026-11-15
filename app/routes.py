@@ -537,8 +537,8 @@ def retrospective():
     # Create object to be used by Flask
     # Skip the best/worst sections when nothing was logged this year
     movies = [
-        {'section': f'Best of {year_applicable}', 'movies': best},
-        {'section': f'Worst of {year_applicable}', 'movies': worst}
+        {'section': 'The ones that stayed with you.', 'movies': best},
+        {'section': "The ones you'd rather forget.", 'movies': worst}
     ] if best else []
     payload = {
         'activity': activity,

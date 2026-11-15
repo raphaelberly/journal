@@ -59,15 +59,15 @@
         </div>
     </section>
 
-    {% call kpi_slide('Your viewing activity', 'cumulative') %}
+    {% call kpi_slide('So many movies, so little time.', 'cumulative') %}
         <span class="kpi-number" data-count="{{ payload.activity['viewing activity'] }}" data-decimals="0">
             {{ payload.activity['viewing activity'] }}
         </span>
-        <br/><b>movies watched in {{ payload.year_applicable }}</b>
+        <br/><b>movies watched</b>
         {{ evolution('viewing activity', 0) }}
     {% endcall %}
 
-    {% call kpi_slide('Your grades', 'grade_dist') %}
+    {% call kpi_slide("Everyone's a critic.", 'grade_dist') %}
         <span class="kpi-number" data-count="{{ payload.activity['average grade'] }}" data-decimals="1">
             {{ '%.1f'|format(payload.activity['average grade']) }}
         </span>
@@ -76,35 +76,35 @@
     {% endcall %}
 
     {% set month, count = payload.favourites.month %}
-    {% call kpi_slide('Your movie calendar', 'calendar') %}
+    {% call kpi_slide('Some months were made for movies.', 'calendar') %}
         <span class="kpi-number">{{ month }}</span>
-        <br/><b>your busiest month</b>
+        <br/><b>busiest month</b>
         <br/>{{ count }} movie{{ 's' if count > 1 }}
     {% endcall %}
 
     {% if payload.activity['imdb correlation'] is not none %}
-    {% call kpi_slide('You and IMDb', 'scatter') %}
+    {% call kpi_slide('Great minds think alike.', 'scatter') %}
         <span class="kpi-number" data-count="{{ payload.activity['imdb correlation'] }}" data-decimals="2"
               data-trim-zero>{{ '%.2f'|format(payload.activity['imdb correlation'])|replace('0.', '.', 1) }}</span>
-        <br/><b>correlation with IMDb</b>
+        <br/><b>correlation with IMDb ratings</b>
         {{ evolution('imdb correlation', 2, leading_zero=false) }}
     {% endcall %}
     {% endif %}
 
     {% if payload.favourites.country %}
     {% set flag, count = payload.favourites.country %}
-    {% call kpi_slide('Your favourite countries', 'country_dist') %}
+    {% call kpi_slide('Cinema has no borders.', 'country_dist') %}
         <span class="kpi-number">{{ flag }}</span>
-        <br/><b>your favourite country</b>
+        <br/><b>top country</b>
         <br/>{{ count }} movie{{ 's' if count > 1 }} ({{ (100 * count / payload.activity['viewing activity'])|round|int }}%)
     {% endcall %}
     {% endif %}
 
     {% if payload.favourites.decade %}
     {% set decade, count = payload.favourites.decade %}
-    {% call kpi_slide('Your favourite decades', 'decade_dist') %}
+    {% call kpi_slide('Good movies never get old.', 'decade_dist') %}
         <span class="kpi-number">{{ decade }}</span>
-        <br/><b>your favourite decade</b>
+        <br/><b>top decade</b>
         <br/>{{ count }} movie{{ 's' if count > 1 }} ({{ (100 * count / payload.activity['viewing activity'])|round|int }}%)
     {% endcall %}
     {% endif %}
