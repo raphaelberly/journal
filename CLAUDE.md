@@ -180,7 +180,7 @@ Other conventions worth keeping:
   in the background (Safari even preloads the assets a page used on its previous visit,
   URLs gone since included), so a flash would only show up, unexplained, on the next page.
 - Per-user display preferences live on `User`: `language` (titles are shown in the original
-  language when it matches the user's), `grade_as_int` (slider precision),
+  language when it matches the user's), `grade_as_int` (slider precision), `absolute_dates`,
   `providers` (which streaming services to show). Plex is the household's: only accounts
   with `plex_allowed` (set by hand in the database, false for new accounts) see it, look it
   up or request on it. The `users_plex_only_if_allowed` constraint keeps `plex` out of the
@@ -202,6 +202,10 @@ Other conventions worth keeping:
   each one on every page load (a body-less `304` when unchanged), so an edited asset shows up
   at once without versioned URLs. Setting a `max-age` would need versioned URLs back, and
   they would have to keep serving old versions, which Safari's preloads still request.
+- Dates go through `format_date` (`inline=True` within a sentence), which renders both the
+  relative and the absolute form: a tap on one switches them all (`static/js/dates.js`, the
+  only `fetch` POST, its CSRF token read from a `<meta>` of `head.html`) and saves the choice
+  in `User.absolute_dates`. Never put a date inside a link or a button.
 - The theme colour is `#6caee0`; it appears in `manifest.json`, `base/head.html` and
   `graphutils.py`. Change all three together.
 - `static/js/shunt.js` must stay the first script in `<head>`: it keeps links inside the

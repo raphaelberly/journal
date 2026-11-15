@@ -40,7 +40,7 @@
         <br/>
         {{ ', '.join(title.genres) }}
         <br/>
-        <b>{{ [record.grade|int, record.grade]|max }}/10</b>, added {{ format_date(record.date) | lower }}
+        <b>{{ [record.grade|int, record.grade]|max }}/10</b>, added {{ format_date(record.date, inline=True) }}
     </td>
 </tr>
 {% endfor %}

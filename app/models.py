@@ -28,6 +28,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256))
     email = db.Column(db.String(256))
     grade_as_int = db.Column(db.Boolean)
+    absolute_dates = db.Column(db.Boolean)
     language = db.Column(db.String(4))
     providers = db.Column(db.ARRAY(db.String(128)))
     plex_allowed = db.Column(db.Boolean)

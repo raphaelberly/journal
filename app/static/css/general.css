@@ -54,6 +54,11 @@ td {
     margin-bottom: 5px;
 }
 
+/* Safari iOS only fires the clicks dates.js listens to on elements it sees as clickable */
+.date {
+    cursor: pointer;
+}
+
 .mentions img {
     width: 20px !important;
     margin-right: 3px;

@@ -55,6 +55,7 @@ CREATE TABLE journal.users (
   password_hash         VARCHAR(256)    NOT NULL,
   email                 VARCHAR(256)    NOT NULL,
   grade_as_int          BOOLEAN         NOT NULL DEFAULT TRUE,
+  absolute_dates        BOOLEAN         NOT NULL DEFAULT FALSE,
   language              VARCHAR(4)      NOT NULL DEFAULT 'fr',
   providers             VARCHAR(128)[]  NOT NULL DEFAULT '{netflix,amazonprimevideo}'::character varying[],
   plex_allowed          BOOLEAN         NOT NULL DEFAULT FALSE,

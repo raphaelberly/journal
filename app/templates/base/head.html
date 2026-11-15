@@ -40,3 +40,5 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/alert.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/install.css') }}">
 <script type=text/javascript src="{{ url_for('static', filename='js/install.js') }}" defer></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script type=text/javascript src="{{ url_for('static', filename='js/dates.js') }}" defer></script>

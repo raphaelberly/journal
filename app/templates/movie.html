@@ -106,7 +106,7 @@
         {% if title.grade %}
         <div class="mentions">
             <img src="/static/images/icon_check.png">
-            <b>{{ [title.grade|int, title.grade]|max }}/10</b>, {{ 'watched' if title.include_in_recent else 'added' }} {{ format_date(title.date)|lower }}
+            <b>{{ [title.grade|int, title.grade]|max }}/10</b>, {{ 'watched' if title.include_in_recent else 'added' }} {{ format_date(title.date, inline=True) }}
         </div>
         {% endif %}
     </td></tr>

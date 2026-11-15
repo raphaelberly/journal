@@ -13,6 +13,7 @@ from flask import render_template, request, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFError
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
+from markupsafe import Markup
 from sqlalchemy import func, cast, Integer, case, and_, or_
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import check_password_hash
@@ -134,8 +135,15 @@ def error():
 @app.context_processor
 def utility_processor():
 
-    def format_date(dt):
-        return get_time_ago_string(dt)
+    # Show the date as the user last chose, relative or absolute, keeping the other form for dates.js to swap on tap.
+    # Inline, it reads in a sentence ("watched 2 days ago", "watched on Feb 2, 2026"). Never put it in a link
+    def format_date(dt, inline=False):
+        relative, absolute = get_time_ago_string(dt), f'{dt:%b} {dt.day}, {dt.year}'
+        if inline:
+            relative, absolute = relative.lower(), f'on {absolute}'
+        if current_user.absolute_dates:
+            return Markup(f'<span class="date absolute" data-alt="{relative}">{absolute}</span>')
+        return Markup(f'<span class="date" data-alt="{absolute}">{relative}</span>')
 
     def format_timespan(minutes):
         return get_time_spent_string(minutes)
@@ -960,6 +968,16 @@ def settings():
     }
 
     return render_template('settings.html', payload=payload, metadata={})
+
+
+# Keep the form of dates the user last tapped to, posted by dates.js
+@app.route('/settings/dates', methods=['POST'])
+@login_required
+def settings_dates():
+    current_user.absolute_dates = request.form['absolute_dates'] == 'true'
+    current_user.update_datetime_utc = utcnow()
+    db.session.commit()
+    return '', 204
 
 
 def enrich_titles(title_ids):

@@ -137,8 +137,8 @@
         {% else %}
         <div class="mentions"><a href="javascript:add_scroll_and_load('{{ movie_url }}')">
             <img src="/static/images/icon_check.png">
-            <b>{{ [item.grade|int, item.grade]|max }}/10</b>, rated {{ format_date(item.date)|lower }}
-        </a></div>
+            <b>{{ [item.grade|int, item.grade]|max }}/10</b></a>, rated {{ format_date(item.date, inline=True) }}
+        </div>
         {% endif %}
     </td></tr>
 </table>

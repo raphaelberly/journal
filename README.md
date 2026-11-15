@@ -58,7 +58,8 @@ right opens the menu, which is how you reach every other page.
 
 ### Recent
 
-The last movies you watched, as a timeline.
+The last movies you watched, as a timeline. Tapping a date, here or on any page, switches every
+date between "2 days ago" and "Feb 2, 2026", and the app remembers the choice.
 
 <div align="center"><img src="img/recent_page.png" width="225px"/></div>
 
