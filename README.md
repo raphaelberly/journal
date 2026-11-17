@@ -20,6 +20,9 @@ without writing a single SQL query.
 - **A watchlist**, showing where each movie can be streamed, filterable by service.
 - **Statistics**: viewing activity, best and worst of the year, favourite directors, actors,
   actresses and genres, grade and decade distributions.
+- **A yearly retrospective**, told one slide at a time: how much you watched and how you
+  graded, your favourite countries and decades, the best and worst of the year, and every
+  poster of the year.
 - **Recommendations**, based on what other users of the app rated highly.
 - **A people view**: every movie you rated for a given actor, director or composer.
 - **Preferences**: decimal grades, original titles for French movies, streaming services.
@@ -92,6 +95,20 @@ movies of the year, and the directors, actors, actresses and genres you rate hig
 last one being genuinely useful, since it surfaces people you like without knowing it.
 
 <div align="center"><img src="img/statistics_page.png" width="225px"/></div>
+
+### Retrospective
+
+Your year in movies, as a story: one slide at a time, a tap on the right to move on, one on
+the left to go back, and a tap on the progress bar to jump to any slide. Until the end of
+January, it covers the previous year.
+
+Each slide puts one number forward, with the chart behind it: movies watched, average grade,
+busiest month, correlation with IMDb ratings, top country and top decade. The number of
+movies, the average grade and the correlation are compared with the previous year. Then come
+the best and worst movies of the year, and a grid of every poster of the year, from 12 movies
+on; tapping a poster shows it full screen.
+
+<div align="center"><img src="img/retrospective_page.png" width="225px"/></div>
 
 ### Recos
 
