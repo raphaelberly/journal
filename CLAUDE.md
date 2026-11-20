@@ -243,6 +243,11 @@ Other conventions worth keeping:
   Closing it hides it for 30 days (`localStorage`). The banner pushes the page down through
   `--install-height`, set on `<html>`: a new bar fixed at the top must add it to its `top`,
   as `.form-search` and `.story` do.
+- While the retrospective is open (`retrospective_year()`, December and January, which also
+  shows its menu link), the Search page announces it with a banner of the same look
+  (`#retro` in `search.html`, same `install.css` and `install.js`). A tap opens it, closing
+  it hides it for 7 days. One banner at a time: until it is closed, the install banner stays
+  hidden on every page (`data-retro` on `#install`).
 
 ## External services
 

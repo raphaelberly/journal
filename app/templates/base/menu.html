@@ -26,8 +26,7 @@
         <a href="{{ url_for('watchlist') }}">Watchlist</a>
         <a href="{{ url_for('statistics') }}">Statistics</a>
         <a href="{{ url_for('recos') }}">Recos</a>
-        {% set current_date = now().strftime("%m-%d") %}
-        {% if '12-01' <= current_date <= '12-31' or '01-01' <= current_date <= '01-31' %}
+        {% if retrospective_year() %}
         <a href="{{ url_for('retrospective') }}">Retrospective</a>
         {% endif %}
     </td></tr>

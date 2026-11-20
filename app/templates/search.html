@@ -21,6 +21,19 @@
 {% endwith %}
 {% include 'base/alert.html' %}
 
+{% set year = retrospective_year() %}
+{% if year %}
+<!-- Advertise the retrospective while it is open: install.js shows it until it is closed, and the app banner after -->
+<div id="retro" class="install" data-href="{{ url_for('retrospective') }}" hidden>
+    <div class="install-header">
+        <button class="install-close" type="button">&#x2715;</button>
+        <div class="retro-year">{{ year }}</div>
+        <div class="install-text"><b>Your {{ year }} retrospective is out</b><span>Your year in movies, in a few taps</span></div>
+        <button class="install-how" type="button">See it</button>
+    </div>
+</div>
+{% endif %}
+
 <div class="form-search">
 
 <form method="get" action="{{ url_for('search') }}">

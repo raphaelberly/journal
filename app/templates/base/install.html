@@ -1,5 +1,6 @@
-<!-- Suggest adding Journal to the Home Screen: install.js shows it to phones browsing it in a tab -->
-<div id="install" class="install" hidden>
+<!-- Suggest adding Journal to the Home Screen: install.js shows it to phones browsing it in a tab, once the
+     retrospective banner of the Search page is closed while it is open -->
+<div id="install" class="install" hidden{% if retrospective_year() %} data-retro{% endif %}>
     <svg>
         <symbol id="install-share" viewBox="0 0 24 24"><path d="M12 2.5v12.5M8 6.5l4-4 4 4M8.5 9.5H7a1.5 1.5 0 0 0-1.5 1.5v8.5A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V11A1.5 1.5 0 0 0 17 9.5h-1.5"/></symbol>
         <symbol id="install-add" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/></symbol>

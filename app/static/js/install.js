@@ -1,12 +1,43 @@
 // Suggest adding Journal to the Home Screen, to phones browsing it in a tab, until the banner is closed
 const INSTALL_SNOOZE = 30 * 24 * 3600 * 1000;  // ms
+const RETRO_SNOOZE = 7 * 24 * 3600 * 1000;  // ms
+
+// Tell whether a banner was closed less than snooze ago
+function closedWithin(key, snooze) {
+    try {
+        return Date.now() - localStorage.getItem(key) < snooze;
+    } catch (e) {
+        return false;
+    }
+}
+
+// Advertise the retrospective on the Search page while it is open, until the banner is closed
+(function () {
+    const banner = document.getElementById('retro');
+    if (!banner || closedWithin('retroClosed', RETRO_SNOOZE)) return;
+    banner.hidden = false;
+    document.documentElement.style.setProperty('--install-height', `${banner.offsetHeight}px`);
+
+    banner.addEventListener('click', function () {
+        location.href = banner.dataset.href;
+    });
+
+    banner.querySelector('.install-close').addEventListener('click', function (event) {
+        event.stopPropagation();
+        banner.hidden = true;
+        document.documentElement.style.setProperty('--install-height', '0px');
+        try {
+            localStorage.setItem('retroClosed', Date.now());
+        } catch (e) {}
+    });
+})();
 
 (function () {
     const banner = document.getElementById('install');
     if (!banner || navigator.standalone || matchMedia('(display-mode: standalone)').matches) return;
-    try {
-        if (Date.now() - localStorage.getItem('installClosed') < INSTALL_SNOOZE) return;
-    } catch (e) {}
+    if (closedWithin('installClosed', INSTALL_SNOOZE)) return;
+    // Show one banner at a time: the retrospective one first, while it is open
+    if ('retro' in banner.dataset && !closedWithin('retroClosed', RETRO_SNOOZE)) return;
     const button = banner.querySelector('.install-how');
 
     // Push the page down by the height of the banner, or put it back

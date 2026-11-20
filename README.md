@@ -99,8 +99,9 @@ last one being genuinely useful, since it surfaces people you like without knowi
 ### Retrospective
 
 Your year in movies, as a story: one slide at a time, a tap on the right to move on, one on
-the left to go back, and a tap on the progress bar to jump to any slide. Until the end of
-January, it covers the previous year.
+the left to go back, and a tap on the progress bar to jump to any slide. It opens in
+December, with a banner on the Search page announcing it, and until the end of January it
+covers the previous year.
 
 Each slide puts one number forward, with the chart behind it: movies watched, average grade,
 busiest month, correlation with IMDb ratings, top country and top decade. The number of

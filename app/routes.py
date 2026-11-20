@@ -151,10 +151,12 @@ def utility_processor():
     def format_timespan(minutes):
         return get_time_spent_string(minutes)
 
-    def now():
-        return datetime.now()
+    # The retrospective of a year opens in December and stays until the end of January, else None
+    def retrospective_year():
+        if date.today().month in (12, 1):
+            return (date.today() - timedelta(days=31)).year
 
-    return dict(format_date=format_date, format_timespan=format_timespan, now=now)
+    return dict(format_date=format_date, format_timespan=format_timespan, retrospective_year=retrospective_year)
 
 
 # Redirect all auth failures to login page
